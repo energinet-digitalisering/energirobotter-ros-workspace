@@ -1,0 +1,1 @@
+-r mock_camera/requirements.txt
