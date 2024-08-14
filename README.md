@@ -1,2 +1,2 @@
-# energirobotter_vision
-Vision cababilities and camera handling for the Humanoid Robot project "Energirobotter". 
+# Energirobotter Vision
+Vision capabilities and camera handling for the Humanoid Robot project "Energirobotter". 
