@@ -21,6 +21,6 @@ setup(
     license="Energinet",
     tests_require=["pytest"],
     entry_points={
-        "console_scripts": ["mock_camera = mock_camera.mock_camera:main"],
+        "console_scripts": ["mock_camera_node = mock_camera.mock_camera_node:main"],
     },
 )

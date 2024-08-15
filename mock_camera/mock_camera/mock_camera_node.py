@@ -1,5 +1,3 @@
-import os
-
 import cv2
 from cv_bridge import CvBridge
 
@@ -8,10 +6,10 @@ from rclpy.node import Node
 from sensor_msgs.msg import Image
 
 
-class MockCamera(Node):
+class MockCameraNode(Node):
 
     def __init__(self):
-        super().__init__("mock_camera")
+        super().__init__("mock_camera_node")
 
         self.declare_parameter("timer_period", 0.5)
         timer_period = (
@@ -41,10 +39,10 @@ class MockCamera(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    mock_camera = MockCamera()
+    mock_camera_node = MockCameraNode()
 
-    rclpy.spin(mock_camera)
-    mock_camera.destroy_node()
+    rclpy.spin(mock_camera_node)
+    mock_camera_node.destroy_node()
     rclpy.shutdown()
 
 
