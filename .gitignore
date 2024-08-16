@@ -1,0 +1,5 @@
+# YOLO models
+*.pt
+
+# Python
+__pycache__/
