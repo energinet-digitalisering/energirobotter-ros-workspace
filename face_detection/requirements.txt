@@ -1,3 +1,0 @@
-opencv-python
-numpy
-ultralytics==v8.2.77
