@@ -20,6 +20,7 @@ package_name = "vision_bringup"
 def launch_setup(context, *args, **kwargs):
     start_rviz = LaunchConfiguration("rviz")
     use_mock_camera = LaunchConfiguration("use_mock_camera")
+    use_compressed = LaunchConfiguration("use_compressed")
 
     rviz_config_file = PathJoinSubstitution(
         [
@@ -29,11 +30,19 @@ def launch_setup(context, *args, **kwargs):
         ]
     )
 
+    if use_compressed.perform(context) == "true":
+        image_topic = "/camera/camera/color/image_raw/compressed"
+    else:
+        image_topic = "/camera/camera/color/image_raw"
+
     mock_camera_node = Node(
         package="mock_camera",
         executable="mock_camera_node",
         output="screen",
         condition=IfCondition(use_mock_camera),
+        remappings=[
+            ("/camera", "/camera/camera/color/image_raw"),
+        ],
     )
 
     real_camera_launch = IncludeLaunchDescription(
@@ -51,6 +60,10 @@ def launch_setup(context, *args, **kwargs):
         package="face_detection",
         executable="face_detection_node",
         output="screen",
+        remappings=[
+            ("/camera", image_topic),
+        ],
+        parameters=[{"use_compressed": use_compressed}],
     )
 
     rviz_node = Node(
@@ -78,6 +91,12 @@ def generate_launch_description():
                 "use_mock_camera",
                 default_value="false",
                 description="Start a mock-node instead of camera, that publishes single image with faces.",
+                choices=["true", "false"],
+            ),
+            DeclareLaunchArgument(
+                "use_compressed",
+                default_value="false",
+                description="Use compressed camera stream for faster performance. OBS: should be False when using mock camera.",
                 choices=["true", "false"],
             ),
             DeclareLaunchArgument(
