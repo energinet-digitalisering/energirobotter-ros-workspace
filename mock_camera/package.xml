@@ -7,10 +7,11 @@
   <maintainer email="xnlth@energinet.dk">Nicoline</maintainer>
   <license>Energinet</license>
 
-  <depend>python-opencv</depend>
-
   <exec_depend>rclpy</exec_depend>
-  <exec_depend>sensor_msgs</exec_depend>
+  
+  <depend>sensor_msgs</depend>
+
+  <depend>python-opencv</depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
