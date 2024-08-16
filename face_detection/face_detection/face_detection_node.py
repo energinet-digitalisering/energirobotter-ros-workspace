@@ -4,6 +4,7 @@ from ultralytics import YOLO
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image, CompressedImage
+from vision_msgs.msg import BoundingBox2D, Pose2D, Point2D
 
 
 class FaceDetectionNode(Node):
@@ -28,7 +29,11 @@ class FaceDetectionNode(Node):
             )
 
         # Publishers
-        self.publisher = self.create_publisher(Image, "/camera_annotated", 1)
+        self.publisher_annotation = self.create_publisher(Image, "/camera_annotated", 1)
+
+        self.publisher_bounding_box = self.create_publisher(
+            BoundingBox2D, "/face_bounding_box", 1
+        )
 
         # Node variables
         model_path = "models/yolov8n-face.pt"
@@ -48,7 +53,36 @@ class FaceDetectionNode(Node):
         results = self.model.predict(source=image, show=False)
         annotated = results[0].plot(show=False)
 
-        self.publisher.publish(self.cv_bridge.cv2_to_imgmsg(annotated, encoding="rgb8"))
+        if len(results[0].boxes.xywh.tolist()) != 0:  # Ensure detection
+
+            # Get largest detection (closest face)
+            largest_size = 0
+            box = None
+            for result in results:
+                _, _, w, h = result.boxes.xywh.tolist()[0]
+                size = w * h
+
+                if size > largest_size:
+                    largest_size = size
+                    box = result.boxes.xywh.tolist()[0]
+
+            # Create bounding box message
+            box_msg = BoundingBox2D(
+                center=Pose2D(
+                    position=Point2D(x=box[0], y=box[1]),
+                    theta=0.0,
+                ),
+                size_x=box[2],
+                size_y=box[3],
+            )
+
+            # Publish bounding box
+            self.publisher_bounding_box.publish(box_msg)
+
+        # Publish annotated image
+        self.publisher_annotation.publish(
+            self.cv_bridge.cv2_to_imgmsg(annotated, encoding="rgb8")
+        )
 
 
 def main(args=None):
