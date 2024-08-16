@@ -1,6 +1,8 @@
+import os
+from glob import glob
 from setuptools import find_packages, setup
 
-package_name = "face_recognition"
+package_name = "face_detection"
 
 setup(
     name=package_name,
@@ -9,6 +11,7 @@ setup(
     data_files=[
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
         ("share/" + package_name, ["package.xml"]),
+        (os.path.join("share", package_name, "models"), glob("models/*.pt")),
     ],
     install_requires=["setuptools"],
     zip_safe=True,
@@ -19,7 +22,7 @@ setup(
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [
-            "face_recognition_node = face_recognition.face_recognition_node:main"
+            "face_detection_node = face_detection.face_detection_node:main"
         ],
     },
 )

@@ -1,11 +1,14 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>face_recognition</name>
+  <name>face_detection</name>
   <version>0.0.0</version>
-  <description>Face recognition with YOLOv8 from camera topic.</description>
+  <description>Face detection with YOLOv8 from camera topic.</description>
   <maintainer email="xnlth@energinet.dk">Nicoline</maintainer>
   <license>Energinet</license>
+
+  <depend>python3-ultralytics-pip</depend>
+  <depend>python-opencv</depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
