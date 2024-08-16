@@ -17,7 +17,7 @@ class MockCameraNode(Node):
         )
 
         # Publishers
-        self.publisher_ = self.create_publisher(Image, "camera", 10)
+        self.publisher = self.create_publisher(Image, "/camera", 1)
 
         # Timers
         self.timer = self.create_timer(timer_period, self.timer_callback)
@@ -26,13 +26,13 @@ class MockCameraNode(Node):
         img_path = "install/mock_camera/share/mock_camera/images/faces.jpg"
 
         self.cv_bridge = CvBridge()
-        self.image = cv2.imread(img_path)
+        self.image = cv2.cvtColor(cv2.imread(img_path), cv2.COLOR_BGR2RGB)
 
         self.get_logger().info("Starting image publishing...")
 
     def timer_callback(self):
-        self.publisher_.publish(
-            self.cv_bridge.cv2_to_imgmsg(self.image, encoding="bgr8")
+        self.publisher.publish(
+            self.cv_bridge.cv2_to_imgmsg(self.image, encoding="rgb8")
         )
 
 
