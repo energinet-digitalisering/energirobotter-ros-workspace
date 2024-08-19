@@ -60,10 +60,20 @@ def launch_setup(context, *args, **kwargs):
         package="face_detection",
         executable="face_detection_node",
         output="screen",
-        remappings=[
-            ("/camera", image_topic),
-        ],
+        remappings=[("/camera", image_topic)],
         parameters=[{"use_compressed": use_compressed}],
+    )
+
+    face_following_node = Node(
+        package="face_following",
+        executable="face_following_node",
+        output="screen",
+        parameters=[  # Intel Realsense Depth Camera D435i specs (lower resolution images)
+            {"image_w": 640},
+            {"image_h": 384},
+            {"fov_w": 69},
+            {"fov_h": 42},
+        ],
     )
 
     rviz_node = Node(
@@ -79,6 +89,7 @@ def launch_setup(context, *args, **kwargs):
         mock_camera_node,
         real_camera_launch,
         face_detection_node,
+        face_following_node,
         rviz_node,
     ]
 
