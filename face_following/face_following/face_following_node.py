@@ -11,7 +11,7 @@ class FaceFollowingNode(Node):
         super().__init__("face_following_node")
 
         # Parameters
-        self.declare_parameter("timer_period", 0.5)
+        self.declare_parameter("timer_period", 0.1)
         self.timer_period = (
             self.get_parameter("timer_period").get_parameter_value().double_value
         )
@@ -43,13 +43,18 @@ class FaceFollowingNode(Node):
         self.target_y = self.center_y
 
         # Servo config
-        self.servo_speed_min = -1.0
-        self.servo_speed_max = 1.0
+        self.servo_pos_min = 0  # PWM
+        self.servo_pos_max = 1000  # PWM
+        self.servo_speed_min = -10.0  # PWM/s
+        self.servo_speed_max = 10.0  # PWM/s
         self.servo_p_gain = 1.0
 
-        self.servo_pan_dir = 1  # Direction config for upside-down placement
+        # Direction config for upside-down placement (-1 or 1)
+        self.servo_pan_dir = 1
+        self.servo_tilt_dir = 1
 
-        self.servo_tilt_dir = 1  # Direction config for upside-down placement
+        self.servo_pan_pos = np.round(self.servo_pos_max / 2)
+        self.servo_tilt_pos = np.round(self.servo_pos_max / 2)
 
     def bounding_box_callback(self, msg):
 
