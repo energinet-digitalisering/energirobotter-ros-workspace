@@ -63,12 +63,18 @@ class FaceFollowingNode(Node):
 
     def timer_callback(self):
         # Compute control
-        pan_control = self.servo_p_gain * (self.center_x - self.target_x)
-        tilt_control = self.servo_p_gain * (self.center_y - self.target_y)
+        pan_vel_control = (
+            self.servo_p_gain * (self.center_x - self.target_x) * self.timer_period
+        )
+        tilt_vel_control = (
+            self.servo_p_gain * (self.center_y - self.target_y) * self.timer_period
+        )
 
         # Clamp values between min and max speed
-        pan_control, tilt_control = np.clip(
-            [pan_control, tilt_control], self.servo_speed_min, self.servo_speed_max
+        pan_vel_control, tilt_vel_control = np.clip(
+            [pan_vel_control, tilt_vel_control],
+            self.servo_speed_min * self.timer_period,
+            self.servo_speed_max * self.timer_period,
         )
 
         # TODO: Add control to current position of servos - how to get that - encoders or dead reckoning?
