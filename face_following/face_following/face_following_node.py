@@ -56,6 +56,8 @@ class FaceFollowingNode(Node):
         self.servo_pan_pos = np.round(self.servo_pos_max / 2)
         self.servo_tilt_pos = np.round(self.servo_pos_max / 2)
 
+        # TODO: Send initial pos to servos
+
     def bounding_box_callback(self, msg):
 
         self.target_x = msg.center.position.x
@@ -77,7 +79,17 @@ class FaceFollowingNode(Node):
             self.servo_speed_max * self.timer_period,
         )
 
-        # TODO: Add control to current position of servos - how to get that - encoders or dead reckoning?
+        self.servo_pan_pos += self.servo_pan_dir * pan_vel_control
+        self.servo_tilt_pos += self.servo_tilt_dir * tilt_vel_control
+
+        # Clamp values between min and max position
+        self.servo_pan_pos, self.servo_tilt_pos = np.clip(
+            [self.servo_pan_pos, self.servo_tilt_pos],
+            self.servo_pos_min,
+            self.servo_pos_max,
+        )
+
+        # TODO: Send pos to servos
 
 
 def main(args=None):
