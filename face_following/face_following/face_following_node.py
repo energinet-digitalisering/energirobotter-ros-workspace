@@ -4,6 +4,8 @@ import rclpy
 from rclpy.node import Node
 import vision_msgs.msg
 
+from .servo_control import ServoControl
+
 
 class FaceFollowingNode(Node):
 
@@ -81,20 +83,23 @@ class FaceFollowingNode(Node):
         self.target_y = self.center_y
 
         # Servo config
-        self.servo_pos_min = 0  # PWM
-        self.servo_pos_max = 1000  # PWM
-        self.servo_speed_min = -10.0  # PWM/s
-        self.servo_speed_max = 10.0  # PWM/s
-        self.servo_p_gain = 1.0
+        self.servo_pan = ServoControl(
+            servo_pos_min,
+            servo_pos_max,
+            servo_speed_min,
+            servo_speed_max,
+            servo_pan_dir,
+            servo_p_gain,
+        )
 
-        # Direction config for upside-down placement (-1 or 1)
-        self.servo_pan_dir = 1
-        self.servo_tilt_dir = 1
-
-        self.servo_pan_pos = np.round(self.servo_pos_max / 2)
-        self.servo_tilt_pos = np.round(self.servo_pos_max / 2)
-
-        # TODO: Send initial pos to servos
+        # self.servo_tilt = ServoControl(
+        #     servo_pos_min,
+        #     servo_pos_max,
+        #     servo_speed_min,
+        #     servo_speed_max,
+        #     servo_tilt_dir,
+        #     servo_p_gain,
+        # )
 
     def bounding_box_callback(self, msg):
 
@@ -102,32 +107,12 @@ class FaceFollowingNode(Node):
         self.target_y = msg.center.position.y
 
     def timer_callback(self):
-        # Compute control
-        pan_vel_control = (
-            self.servo_p_gain * (self.center_x - self.target_x) * self.timer_period
-        )
-        tilt_vel_control = (
-            self.servo_p_gain * (self.center_y - self.target_y) * self.timer_period
-        )
 
-        # Clamp values between min and max speed
-        pan_vel_control, tilt_vel_control = np.clip(
-            [pan_vel_control, tilt_vel_control],
-            self.servo_speed_min * self.timer_period,
-            self.servo_speed_max * self.timer_period,
-        )
+        error_pan = self.center_x - self.target_x
+        # error_tilt = self.center_y - self.target_y
 
-        self.servo_pan_pos += self.servo_pan_dir * pan_vel_control
-        self.servo_tilt_pos += self.servo_tilt_dir * tilt_vel_control
-
-        # Clamp values between min and max position
-        self.servo_pan_pos, self.servo_tilt_pos = np.clip(
-            [self.servo_pan_pos, self.servo_tilt_pos],
-            self.servo_pos_min,
-            self.servo_pos_max,
-        )
-
-        # TODO: Send pos to servos
+        self.servo_pan.compute_control(error_pan, self.timer_period)
+        # self.servo_tilt.compute_control(error_tilt, self.timer_period)
 
 
 def main(args=None):
