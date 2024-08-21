@@ -69,8 +69,8 @@ def launch_setup(context, *args, **kwargs):
         executable="face_following_node",
         output="screen",
         parameters=[  # Intel Realsense Depth Camera D435i specs (lower resolution images)
-            {"image_w": 640},
-            {"image_h": 384},
+            {"image_w": 1280},
+            {"image_h": 720},
             {"fov_w": 69},
             {"fov_h": 42},
         ],
