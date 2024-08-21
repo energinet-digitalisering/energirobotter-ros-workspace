@@ -15,14 +15,52 @@ class FaceFollowingNode(Node):
         self.timer_period = (
             self.get_parameter("timer_period").get_parameter_value().double_value
         )
+
         self.declare_parameter("image_w", 1280)
         self.image_w = self.get_parameter("image_w").get_parameter_value().integer_value
+
         self.declare_parameter("image_h", 720)
         self.image_h = self.get_parameter("image_h").get_parameter_value().integer_value
+
         self.declare_parameter("fov_w", 70)
         self.fov_w = self.get_parameter("fov_w").get_parameter_value().integer_value
+
         self.declare_parameter("fov_h", 50)
         self.fov_h = self.get_parameter("fov_h").get_parameter_value().integer_value
+
+        self.declare_parameter("servo_pos_min", 0)
+        servo_pos_min = (
+            self.get_parameter("servo_pos_min").get_parameter_value().integer_value
+        )
+        self.declare_parameter("servo_pos_max", 180)
+        servo_pos_max = (
+            self.get_parameter("servo_pos_max").get_parameter_value().integer_value
+        )
+
+        self.declare_parameter("servo_speed_min", -100.0)
+        servo_speed_min = (
+            self.get_parameter("servo_speed_min").get_parameter_value().double_value
+        )
+
+        self.declare_parameter("servo_speed_max", 100.0)
+        servo_speed_max = (
+            self.get_parameter("servo_speed_max").get_parameter_value().double_value
+        )
+
+        self.declare_parameter("servo_pan_dir", 1)
+        servo_pan_dir = (
+            self.get_parameter("servo_pan_dir").get_parameter_value().integer_value
+        )
+
+        self.declare_parameter("servo_tilt_dir", 1)
+        servo_tilt_dir = (
+            self.get_parameter("servo_tilt_dir").get_parameter_value().integer_value
+        )
+
+        self.declare_parameter("servo_p_gain", 1.0)
+        servo_p_gain = (
+            self.get_parameter("servo_p_gain").get_parameter_value().double_value
+        )
 
         # Subscriptions
         self.subscription = self.create_subscription(
