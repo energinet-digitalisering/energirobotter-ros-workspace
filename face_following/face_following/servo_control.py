@@ -21,7 +21,7 @@ class ServoControl:
         self.dir = dir
         self.p_gain = p_gain
 
-        self.pos = np.round(self.pos_max / 2)
+        self.pos = self.pos_max / 2
 
         self.serial = serial.Serial(port="/dev/ttyACM0", baudrate=115200, timeout=1.0)
 
@@ -32,9 +32,10 @@ class ServoControl:
         self.serial.close()
 
     def serial_write_angle(self, value):
-        self.serial.write(
-            bytes(str(int(value)), "utf-8")
-        )  # write position to serial port
+        value = int(np.round(value))
+
+        # write packet to serial
+        self.serial.write(bytes(str(int(value)), "utf-8"))
         self.serial.write(bytes("\n", "utf-8"))
 
     def compute_control(self, error, t_d):
@@ -56,7 +57,5 @@ class ServoControl:
             self.pos_min,
             self.pos_max,
         )
-
-        self.pos = int(np.round(self.pos))
 
         self.serial_write_angle(self.pos)
