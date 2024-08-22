@@ -23,20 +23,33 @@ class ServoControl:
 
         self.pos = self.pos_max / 2
 
-        self.serial = serial.Serial(port="/dev/ttyACM0", baudrate=115200, timeout=1.0)
+        self.serial_available = False
+
+        try:
+            self.serial = serial.Serial(
+                port="/dev/ttyACM0", baudrate=115200, timeout=1.0
+            )
+            self.serial_available = True
+        except:
+            self.serial_available = False
 
         self.serial_write_angle(self.pos)
 
     def __del__(self):
-        print("Closing serial connection")
-        self.serial.close()
+        if self.serial_available:
+            print("Closing serial connection")
+            self.serial.close()
 
     def serial_write_angle(self, value):
-        value = int(np.round(value))
 
-        # write packet to serial
-        self.serial.write(bytes(str(int(value)), "utf-8"))
-        self.serial.write(bytes("\n", "utf-8"))
+        if self.serial_available:
+            value = int(np.round(value))
+
+            # write packet to serial
+            self.serial.write(bytes(str(int(value)), "utf-8"))
+            self.serial.write(bytes("\n", "utf-8"))
+        else:
+            print("No serial available")
 
     def compute_control(self, error, t_d):
         # Compute control
