@@ -1,5 +1,6 @@
 from cv_bridge import CvBridge
 from ultralytics import YOLO
+import cv2
 
 import rclpy
 from rclpy.node import Node
@@ -78,6 +79,9 @@ class FaceDetectionNode(Node):
 
             # Publish bounding box
             self.publisher_bounding_box.publish(box_msg)
+
+            # Add circle to targeted bounding box
+            cv2.circle(annotated, (int(box[0]), int(box[1])), 10, (0, 255, 0), -1)
 
         # Publish annotated image
         self.publisher_annotation.publish(
