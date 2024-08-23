@@ -51,6 +51,7 @@ class FaceDetectionNode(Node):
         else:
             image = self.cv_bridge.imgmsg_to_cv2(msg, desired_encoding="rgb8")
 
+        # Run face detection model
         results = self.model.predict(source=image, show=False)
         annotated = results[0].plot(show=False)
 
@@ -80,7 +81,7 @@ class FaceDetectionNode(Node):
             # Publish bounding box
             self.publisher_bounding_box.publish(box_msg)
 
-            # Add circle to targeted bounding box
+            # Add circle to targeted bounding box on annotated image
             cv2.circle(annotated, (int(box[0]), int(box[1])), 10, (0, 255, 0), -1)
 
         # Publish annotated image
