@@ -60,12 +60,12 @@ class FaceDetectionNode(Node):
             largest_size = 0
             box = None
             for result in results:
-                _, _, w, h = result.boxes.xywh.tolist()[0]
-                size = w * h
+                for x, y, w, h in result.boxes.xywh.tolist():
+                    size = w * h
 
-                if size > largest_size:
-                    largest_size = size
-                    box = result.boxes.xywh.tolist()[0]
+                    if size > largest_size:
+                        largest_size = size
+                        box = [x, y, w, h]
 
             # Create bounding box message
             box_msg = BoundingBox2D(
