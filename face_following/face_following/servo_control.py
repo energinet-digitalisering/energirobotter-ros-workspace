@@ -21,7 +21,8 @@ class ServoControl:
         self.dir = dir
         self.p_gain = p_gain
 
-        self.pos = self.pos_max / 2
+        self.pos_init = (self.pos_max / 2) + self.pos_min
+        self.pos = self.pos_init
 
         self.serial_available = False
 
@@ -51,6 +52,9 @@ class ServoControl:
         else:
             print("No serial available")
 
+    def reset_position(self):
+        self.serial_write_angle(self.pos_init)
+
     def compute_control(self, error, t_d):
         # Compute control
         vel_control = self.p_gain * error
@@ -62,6 +66,7 @@ class ServoControl:
             self.speed_max,
         )
 
+        # Apply control to position
         self.pos += self.dir * vel_control * t_d
 
         # Clamp values between min and max position
