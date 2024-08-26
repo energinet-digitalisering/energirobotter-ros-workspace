@@ -50,9 +50,7 @@ class ServoControl:
         else:
             print("No serial available")
 
-    def reset_position(self):
-        self.serial_write_angle(self.pos_init)
-
+    # TODO: Be able to set desired speed
     def compute_control(self, error, t_d):
         # Compute control
         vel_control = self.p_gain * error
@@ -75,3 +73,11 @@ class ServoControl:
         )
 
         self.serial_write_angle(self.pos)
+
+    def reach_position(self, pos, t_d):
+        pos_gain_p = 10.0
+        error = (pos - self.pos) * pos_gain_p
+        self.compute_control(error, t_d)
+
+    def reset_position(self, t_d):
+        self.reach_position(self.pos_init, t_d)

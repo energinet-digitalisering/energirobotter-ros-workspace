@@ -114,8 +114,8 @@ class FaceFollowingNode(Node):
 
         # Stop following if detection is gone for too long
         if time_diff > self.detection_time_stop_follow:
-            self.servo_pan.reset_position()
-            # self.servo_tilt.reset_position()
+            self.servo_pan.reset_position(self.timer_period)
+            # self.servo_tilt.reset_position(self.timer_period)
             return
 
         # Reset error if detection is gone for too long
