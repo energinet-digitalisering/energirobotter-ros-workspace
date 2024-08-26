@@ -50,16 +50,18 @@ class ServoControl:
         else:
             print("No serial available")
 
-    # TODO: Be able to set desired speed
-    def compute_control(self, error, t_d):
+    def compute_control(self, error, t_d, speed_desired=(-1)):
         # Compute control
         vel_control = self.p_gain * error
+
+        speed_desired = self.speed_max if speed_desired == (-1) else speed_desired
+        speed_max = speed_desired if speed_desired < self.speed_max else self.speed_max
 
         # Clamp values between min and max speed
         vel_control = np.clip(
             vel_control,
-            self.speed_max * (-1),
-            self.speed_max,
+            speed_max * (-1),
+            speed_max,
         )
 
         # Apply control to position
