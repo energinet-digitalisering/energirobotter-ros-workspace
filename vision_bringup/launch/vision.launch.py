@@ -62,6 +62,11 @@ def launch_setup(context, *args, **kwargs):
         output="screen",
         remappings=[("/camera", image_topic)],
         parameters=[{"use_compressed": use_compressed}],
+        parameters=[
+            {"image_w": 1280},
+            {"image_h": 720},
+            {"use_compressed": use_compressed},
+        ],
     )
 
     face_following_node = Node(

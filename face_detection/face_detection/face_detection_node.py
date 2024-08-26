@@ -25,6 +25,12 @@ class FaceDetectionNode(Node):
         super().__init__("face_detection_node")
 
         # Parameters
+        self.declare_parameter("image_w", 1280)
+        self.image_w = self.get_parameter("image_w").get_parameter_value().integer_value
+
+        self.declare_parameter("image_h", 720)
+        self.image_h = self.get_parameter("image_h").get_parameter_value().integer_value
+
         self.declare_parameter("use_compressed", False)
         self.use_compressed = (
             self.get_parameter("use_compressed").get_parameter_value().bool_value
