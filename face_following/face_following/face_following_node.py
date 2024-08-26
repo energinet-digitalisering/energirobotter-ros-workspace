@@ -39,11 +39,6 @@ class FaceFollowingNode(Node):
             self.get_parameter("servo_pos_max").get_parameter_value().integer_value
         )
 
-        self.declare_parameter("servo_speed_min", -100.0)
-        servo_speed_min = (
-            self.get_parameter("servo_speed_min").get_parameter_value().double_value
-        )
-
         self.declare_parameter("servo_speed_max", 100.0)
         servo_speed_max = (
             self.get_parameter("servo_speed_max").get_parameter_value().double_value
@@ -90,7 +85,6 @@ class FaceFollowingNode(Node):
         self.servo_pan = ServoControl(
             servo_pos_min,
             servo_pos_max,
-            servo_speed_min,
             servo_speed_max,
             servo_pan_dir,
             servo_p_gain,
@@ -99,7 +93,6 @@ class FaceFollowingNode(Node):
         # self.servo_tilt = ServoControl(
         #     servo_pos_min,
         #     servo_pos_max,
-        #     servo_speed_min,
         #     servo_speed_max,
         #     servo_tilt_dir,
         #     servo_p_gain,

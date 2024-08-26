@@ -8,7 +8,6 @@ class ServoControl:
         self,
         pos_min,  # PWM
         pos_max,  # PWM
-        speed_min,  # PWM/s
         speed_max,  # PWM/s
         dir=1,  # Direction config for upside-down placement (-1 or 1)
         p_gain=1.0,
@@ -16,7 +15,6 @@ class ServoControl:
 
         self.pos_min = pos_min
         self.pos_max = pos_max
-        self.speed_min = speed_min
         self.speed_max = speed_max
         self.dir = dir
         self.p_gain = p_gain
@@ -62,7 +60,7 @@ class ServoControl:
         # Clamp values between min and max speed
         vel_control = np.clip(
             vel_control,
-            self.speed_min,
+            self.speed_max * (-1),
             self.speed_max,
         )
 
