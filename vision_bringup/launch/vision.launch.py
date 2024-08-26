@@ -61,11 +61,11 @@ def launch_setup(context, *args, **kwargs):
         executable="face_detection_node",
         output="screen",
         remappings=[("/camera", image_topic)],
-        parameters=[{"use_compressed": use_compressed}],
         parameters=[
             {"image_w": 1280},
             {"image_h": 720},
             {"use_compressed": use_compressed},
+            {"box_size_multiplier": 0.5},
         ],
     )
 

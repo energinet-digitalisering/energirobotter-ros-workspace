@@ -36,6 +36,11 @@ class FaceDetectionNode(Node):
             self.get_parameter("use_compressed").get_parameter_value().bool_value
         )
 
+        self.declare_parameter("box_size_multiplier", 0.0)
+        self.box_size_multiplier = (
+            self.get_parameter("box_size_multiplier").get_parameter_value().double_value
+        )
+
         # Subscriptions
         if self.use_compressed:
             self.subscription = self.create_subscription(
