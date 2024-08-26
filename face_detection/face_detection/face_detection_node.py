@@ -8,6 +8,17 @@ from sensor_msgs.msg import Image, CompressedImage
 from vision_msgs.msg import BoundingBox2D, Pose2D, Point2D
 
 
+class Box:
+    def __init__(self, x, y, w, h):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+
+    def size(self):
+        return self.w * self.h
+
+
 class FaceDetectionNode(Node):
 
     def __init__(self):
