@@ -52,7 +52,7 @@ class FaceDetectionNode(Node):
             image = self.cv_bridge.imgmsg_to_cv2(msg, desired_encoding="rgb8")
 
         # Run face detection model
-        results = self.model.predict(source=image, show=False)
+        results = self.model.predict(source=image, show=False, verbose=False)
         annotated = results[0].plot(show=False)
 
         if len(results[0].boxes.xywh.tolist()) != 0:  # Ensure detection
