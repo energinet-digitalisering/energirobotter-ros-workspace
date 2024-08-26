@@ -13,7 +13,7 @@ class FaceFollowingNode(Node):
         super().__init__("face_following_node")
 
         # Parameters
-        self.declare_parameter("timer_period", 0.1)
+        self.declare_parameter("timer_period", 0.05)
         self.timer_period = (
             self.get_parameter("timer_period").get_parameter_value().double_value
         )
