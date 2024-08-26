@@ -1,6 +1,7 @@
 from cv_bridge import CvBridge
-from ultralytics import YOLO
 import cv2
+import numpy as np
+from ultralytics import YOLO
 
 import rclpy
 from rclpy.node import Node
@@ -61,8 +62,35 @@ class FaceDetectionNode(Node):
         # Node variables
         model_path = "models/yolov8n-face.pt"
         self.model = YOLO(model_path)
+        self.box_prev = Box(self.image_w / 2, self.image_h / 2, 0, 0)
 
         self.cv_bridge = CvBridge()
+
+    def box_closest(self, target, boxes):
+
+        distance_min = 2 * self.image_w
+        box = None
+        for x, y, w, h in boxes:
+            distance = np.linalg.norm([target[0] - x, target[1] - y])
+
+            if distance < distance_min:
+                distance_min = distance
+                box = Box(x, y, w, h)
+
+        return box
+
+    def box_largest(self, boxes):
+
+        largest_size = 0
+        box = None
+        for x, y, w, h in boxes:
+            size = w * h
+
+            if size > (largest_size):
+                largest_size = size
+                box = Box(x, y, w, h)
+
+        return box
 
     def camera_callback(self, msg):
 
@@ -77,34 +105,44 @@ class FaceDetectionNode(Node):
         results = self.model.predict(source=image, show=False, verbose=False)
         annotated = results[0].plot(show=False)
 
-        if len(results[0].boxes.xywh.tolist()) != 0:  # Ensure detection
+        # Convert results to list of boxes
+        boxes = []
+        for result in results:
+            for box in result.boxes.xywh.tolist():
+                boxes.append(box)
 
-            # Get largest detection (closest face)
-            largest_size = 0
-            box = None
-            for result in results:
-                for x, y, w, h in result.boxes.xywh.tolist():
-                    size = w * h
+        if len(boxes) != 0:  # Ensure detection
 
-                    if size > largest_size:
-                        largest_size = size
-                        box = [x, y, w, h]
+            box_closest = self.box_closest((self.box_prev.x, self.box_prev.y), boxes)
+            box_largest = self.box_largest(boxes)
+
+            box_size_buffer = box_closest.size() * self.box_size_multiplier
+
+            box_target = (
+                box_largest
+                if (box_largest.size() > (box_closest.size() + box_size_buffer))
+                else box_closest
+            )
+
+            self.box_prev = box_target
 
             # Create bounding box message
             box_msg = BoundingBox2D(
                 center=Pose2D(
-                    position=Point2D(x=box[0], y=box[1]),
+                    position=Point2D(x=box_target.x, y=box_target.y),
                     theta=0.0,
                 ),
-                size_x=box[2],
-                size_y=box[3],
+                size_x=box_target.w,
+                size_y=box_target.h,
             )
 
             # Publish bounding box
             self.publisher_bounding_box.publish(box_msg)
 
             # Add circle to targeted bounding box on annotated image
-            cv2.circle(annotated, (int(box[0]), int(box[1])), 10, (0, 255, 0), -1)
+            cv2.circle(
+                annotated, (int(box_target.x), int(box_target.y)), 10, (0, 255, 0), -1
+            )
 
         # Publish annotated image
         self.publisher_annotation.publish(
