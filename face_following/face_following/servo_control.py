@@ -11,6 +11,8 @@ class ServoControl:
         speed_max,  # PWM/s
         dir=1,  # Direction config for upside-down placement (-1 or 1)
         gain_P=1.0,
+        gain_I=0.0,
+        gain_D=0.0,
     ):
 
         self.pos_min = pos_min
@@ -18,9 +20,14 @@ class ServoControl:
         self.speed_max = speed_max
         self.dir = dir
         self.gain_P = gain_P
+        self.gain_I = gain_I
+        self.gain_D = gain_D
 
         self.pos_init = (self.pos_max / 2) + self.pos_min
         self.pos = self.pos_init
+
+        self.error_acc = 0.0
+        self.error_prev = 0.0
 
         self.serial_available = False
 
@@ -50,10 +57,31 @@ class ServoControl:
         else:
             print("No serial available")
 
-    def compute_control(self, error, t_d, speed_desired=(-1)):
-        # Compute control
-        vel_control = self.gain_P * error
+    def controller_PID(self, error, error_acc, error_prev, gain_P, gain_I, gain_D):
 
+        kP = gain_P * error
+        kI = gain_I * (error_acc)
+        kD = gain_D * (error - error_prev)
+
+        return kP + kI + kD
+
+    def compute_control(self, error, t_d, speed_desired=(-1)):
+
+        # Compute PID control
+        self.error_acc += error
+        self.error_acc = np.clip(self.error_acc, -1000, 1000)  # Anti-windup
+
+        vel_control = self.controller_PID(
+            error,
+            self.error_acc,
+            self.error_prev,
+            self.gain_P,
+            self.gain_I,
+            self.gain_D,
+        )
+        self.error_prev = error
+
+        # Process desired speed
         speed_desired = self.speed_max if speed_desired == (-1) else speed_desired
         speed_max = speed_desired if speed_desired < self.speed_max else self.speed_max
 
