@@ -54,9 +54,9 @@ class FaceFollowingNode(Node):
             self.get_parameter("servo_tilt_dir").get_parameter_value().integer_value
         )
 
-        self.declare_parameter("servo_p_gain", 1.0)
-        servo_p_gain = (
-            self.get_parameter("servo_p_gain").get_parameter_value().double_value
+        self.declare_parameter("servo_gain_p", 1.0)
+        servo_gain_p = (
+            self.get_parameter("servo_gain_p").get_parameter_value().double_value
         )
 
         # Subscriptions
@@ -87,7 +87,7 @@ class FaceFollowingNode(Node):
             servo_pos_max,
             servo_speed_max,
             servo_pan_dir,
-            servo_p_gain,
+            servo_gain_p,
         )
 
         # self.servo_tilt = ServoControl(
@@ -95,7 +95,7 @@ class FaceFollowingNode(Node):
         #     servo_pos_max,
         #     servo_speed_max,
         #     servo_tilt_dir,
-        #     servo_p_gain,
+        #     servo_gain_p,
         # )
 
     def bounding_box_callback(self, msg):

@@ -10,14 +10,14 @@ class ServoControl:
         pos_max,  # PWM
         speed_max,  # PWM/s
         dir=1,  # Direction config for upside-down placement (-1 or 1)
-        p_gain=1.0,
+        gain_P=1.0,
     ):
 
         self.pos_min = pos_min
         self.pos_max = pos_max
         self.speed_max = speed_max
         self.dir = dir
-        self.p_gain = p_gain
+        self.gain_P = gain_P
 
         self.pos_init = (self.pos_max / 2) + self.pos_min
         self.pos = self.pos_init
@@ -52,7 +52,7 @@ class ServoControl:
 
     def compute_control(self, error, t_d, speed_desired=(-1)):
         # Compute control
-        vel_control = self.p_gain * error
+        vel_control = self.gain_P * error
 
         speed_desired = self.speed_max if speed_desired == (-1) else speed_desired
         speed_max = speed_desired if speed_desired < self.speed_max else self.speed_max
