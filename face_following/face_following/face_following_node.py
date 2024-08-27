@@ -59,12 +59,12 @@ class FaceFollowingNode(Node):
             self.get_parameter("servo_gain_P").get_parameter_value().double_value
         )
 
-        self.declare_parameter("servo_gain_I", 1.0)
+        self.declare_parameter("servo_gain_I", 0.0)
         servo_gain_I = (
             self.get_parameter("servo_gain_I").get_parameter_value().double_value
         )
 
-        self.declare_parameter("servo_gain_D", 1.0)
+        self.declare_parameter("servo_gain_D", 0.0)
         servo_gain_D = (
             self.get_parameter("servo_gain_D").get_parameter_value().double_value
         )
