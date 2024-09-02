@@ -21,11 +21,14 @@ class ServoComs:
             self.serial.close()
 
     def init_serial(self, port="/dev/ttyACM0", baudrate=115200, timeout=1.0):
+        print("Initializing serial communication...")
         try:
             self.serial = serial.Serial(port=port, baudrate=baudrate, timeout=timeout)
             self.protocol = Protocol.SERIAL
+            print("Serial communication succesful")
         except:
             self.protocol = Protocol.UNINITIALIZED
+            print("Serial not available")
 
     def init_i2c(self, port="/dev/ttyACM0", baudrate=115200, timeout=1.0):
         print("I2C protocol unimplemented")

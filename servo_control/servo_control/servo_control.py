@@ -32,6 +32,7 @@ class ServoControl:
         self.error_acc = 0.0
         self.error_prev = 0.0
 
+        print("Protocol: ", protocol)
         self.servo_coms = ServoComs()
 
         match protocol:
