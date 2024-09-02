@@ -2,6 +2,8 @@
 
 Package implementing PID control and communication of/with servo motors, with Serial or I2C protocol.
 
+See `servo_control_example.ipynb` for usage example.
+
 
 ## `ServoControl`
 
