@@ -1,13 +1,11 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>face_following</name>
+  <name>servo_control</name>
   <version>0.0.0</version>
-  <description>Given a bounding box of a detected face, this package will create movement commands for servos in a pan-til configuration, to move the camera to look at the face.</description>
+  <description>TODO: Package description</description>
   <maintainer email="xnlth@energinet.dk">Nicoline</maintainer>
   <license>Energinet</license>
-
-  <exec_depend>servo_control</exec_depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

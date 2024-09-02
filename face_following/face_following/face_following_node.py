@@ -1,10 +1,9 @@
-import numpy as np
-
 import rclpy
 from rclpy.node import Node
 import vision_msgs.msg
 
-from .servo_control import ServoControl
+
+from servo_control import servo_control
 
 
 class FaceFollowingNode(Node):
@@ -92,7 +91,7 @@ class FaceFollowingNode(Node):
         self.target_y = self.center_y
 
         # Servo config
-        self.servo_pan = ServoControl(
+        self.servo_pan = servo_control.ServoControl(
             servo_pos_min,
             servo_pos_max,
             servo_speed_max,
@@ -102,7 +101,7 @@ class FaceFollowingNode(Node):
             servo_gain_D,
         )
 
-        # self.servo_tilt = ServoControl(
+        # self.servo_tilt = servo_control.ServoControl(
         #     servo_pos_min,
         #     servo_pos_max,
         #     servo_speed_max,

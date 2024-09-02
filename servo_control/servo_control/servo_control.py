@@ -1,5 +1,6 @@
 import numpy as np
-import serial
+
+from .servo_coms import ServoComs
 
 
 class ServoControl:
@@ -29,33 +30,10 @@ class ServoControl:
         self.error_acc = 0.0
         self.error_prev = 0.0
 
-        self.serial_available = False
+        self.servo_coms = ServoComs()
+        self.servo_coms.init_serial(port="/dev/ttyACM0", baudrate=115200, timeout=1.0)
 
-        try:
-            self.serial = serial.Serial(
-                port="/dev/ttyACM0", baudrate=115200, timeout=1.0
-            )
-            self.serial_available = True
-        except:
-            self.serial_available = False
-
-        self.serial_write_angle(self.pos)
-
-    def __del__(self):
-        if self.serial_available:
-            print("Closing serial connection")
-            self.serial.close()
-
-    def serial_write_angle(self, value):
-
-        if self.serial_available:
-            value = int(np.round(value))
-
-            # write packet to serial
-            self.serial.write(bytes(str(int(value)), "utf-8"))
-            self.serial.write(bytes("\n", "utf-8"))
-        else:
-            print("No serial available")
+        self.servo_coms.write_angle(self.pos)
 
     def controller_PID(self, error, error_acc, error_prev, gain_P, gain_I, gain_D):
 
@@ -102,7 +80,7 @@ class ServoControl:
             self.pos_max,
         )
 
-        self.serial_write_angle(self.pos)
+        self.servo_coms.write_angle(self.pos)
 
     def reach_position(self, pos, t_d):
         pos_gain_p = 10.0
