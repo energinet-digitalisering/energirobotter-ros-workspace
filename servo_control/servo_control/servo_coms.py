@@ -22,7 +22,7 @@ class ServoComs:
 
     def init_serial(self, port="/dev/ttyACM0", baudrate=115200, timeout=1.0):
         try:
-            self.serial = serial.Serial(port, baudrate, timeout)
+            self.serial = serial.Serial(port=port, baudrate=baudrate, timeout=timeout)
             self.protocol = Protocol.SERIAL
         except:
             self.protocol = Protocol.UNINITIALIZED

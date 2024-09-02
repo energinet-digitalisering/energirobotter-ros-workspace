@@ -36,7 +36,7 @@ class ServoControl:
 
         match protocol:
             case "serial":
-                self.servo_coms.init_serial(port, baudrate=115200, timeout=1.0)
+                self.servo_coms.init_serial(port=port, baudrate=115200, timeout=1.0)
 
             case "i2c":
                 self.servo_coms.init_i2c(port)
@@ -93,10 +93,10 @@ class ServoControl:
 
         self.servo_coms.write_angle(self.pos)
 
-    def reach_position(self, t_d, pos):
+    def reach_position(self, t_d, pos, speed_desired=(-1)):
         pos_gain_p = 10.0
         error = (pos - self.pos) * pos_gain_p
-        self.compute_control(error, t_d)
+        self.compute_control(t_d, error, speed_desired)
 
     def reset_position(self, t_d):
-        self.reach_position(self.pos_init, t_d)
+        self.reach_position(t_d, self.pos_init)
