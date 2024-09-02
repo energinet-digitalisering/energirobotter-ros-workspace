@@ -16,7 +16,7 @@ class ServoComs:
         self.protocol = Protocol.UNINITIALIZED
 
     def __del__(self):
-        if self.serial_available:
+        if self.protocol == Protocol.SERIAL:
             print("Closing serial connection")
             self.serial.close()
 
