@@ -27,6 +27,10 @@ class ServoComs:
         except:
             self.protocol = Protocol.UNINITIALIZED
 
+    def init_i2c(self, port="/dev/ttyACM0", baudrate=115200, timeout=1.0):
+        print("I2C protocol unimplemented")
+        self.protocol = Protocol.I2C
+
     def write_angle(self, value):
         match self.protocol:
             case Protocol.UNINITIALIZED:

@@ -2,7 +2,6 @@ import rclpy
 from rclpy.node import Node
 import vision_msgs.msg
 
-
 from servo_control import servo_control
 
 
