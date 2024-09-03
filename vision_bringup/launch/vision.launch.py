@@ -79,6 +79,8 @@ def launch_setup(context, *args, **kwargs):
             {"image_h": 720},
             {"fov_w": 69},
             {"fov_h": 42},
+            {"servo_pwm_min": 150},
+            {"servo_pwm_max": 600},
             {"servo_pos_min": 0},
             {"servo_pos_max": 180},
             {"servo_speed_max": 200.0},
