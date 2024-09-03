@@ -2,7 +2,11 @@
 
 Package implementing PID control and communication of/with servo motors, with Serial or I2C protocol.
 
-See `servo_control_example.ipynb` for usage example.
+See `examples/` for usage examples. Run examples from root through the terminal:
+```
+python3 src/energirobotter-vision/servo_control/examples/serial_single_servo_example.py
+```
+
 
 
 ## `ServoControl`
