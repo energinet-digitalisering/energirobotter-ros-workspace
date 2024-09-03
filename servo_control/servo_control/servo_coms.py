@@ -42,13 +42,18 @@ class ServoComs:
             print("Serial not available")
 
     def init_i2c(self):
-        print("I2C protocol unimplemented")
-
-        i2c = board.I2C()
-        self.pca = PCA9685(i2c)
-        self.pca.frequency = 50
-
-        self.protocol = Protocol.I2C
+        print("Initializing I2C communication...")
+        try:
+            i2c = board.I2C()
+            self.pca = PCA9685(i2c)
+            self.pca.frequency = 50
+            self.protocol = Protocol.I2C
+            print("I2C communication succesful")
+            return True
+        except:
+            self.protocol = Protocol.UNINITIALIZED
+            print("I2C not available")
+            return False
 
     def write_angle(self, value):
         match self.protocol:
@@ -59,7 +64,7 @@ class ServoComs:
                 self.write_angle_serial(value)
 
             case Protocol.I2C:
-                print("I2C protocol unimplemented")
+                self.write_angle_i2c(value)
 
             case _:
                 print("Invalid protocol")
