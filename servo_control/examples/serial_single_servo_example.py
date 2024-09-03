@@ -22,7 +22,6 @@ while True:
     t = time.time()
 
     angle_desired = np.sin(2 * (t)) * 90 + 90
-    print(angle_desired)
 
     servo.reach_angle(t - t_prev, angle_desired)
     t_prev = t
