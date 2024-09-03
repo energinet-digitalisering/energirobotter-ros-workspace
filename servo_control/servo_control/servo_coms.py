@@ -23,6 +23,10 @@ class ServoComs:
 
         self.protocol = Protocol.UNINITIALIZED
 
+        self.mute_spam_print = False
+
+        print("Created servo with id: ", servo_id)
+
     def __del__(self):
         if self.protocol == Protocol.SERIAL:
             print("Closing serial connection")
@@ -37,9 +41,11 @@ class ServoComs:
             self.serial = serial.Serial(port=port, baudrate=baudrate, timeout=timeout)
             self.protocol = Protocol.SERIAL
             print("Serial communication succesful")
+            return True
         except:
             self.protocol = Protocol.UNINITIALIZED
             print("Serial not available")
+            return False
 
     def init_i2c(self):
         print("Initializing I2C communication...")
@@ -58,7 +64,9 @@ class ServoComs:
     def write_angle(self, value):
         match self.protocol:
             case Protocol.UNINITIALIZED:
-                print("No protocol initialized")
+                if not self.mute_spam_print:
+                    print("Cannot write angle to servo, no protocol initialized")
+                self.mute_spam_print = True
 
             case Protocol.SERIAL:
                 self.write_angle_serial(value)
