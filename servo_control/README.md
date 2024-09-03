@@ -9,17 +9,17 @@ See `servo_control_example.ipynb` for usage example.
 
 Class representing a single servo, containing hardware configurations and functionality to move the servo. 
 
-| Name      | Type     | Description                                           | Default          |
-| --------- | -------- | ----------------------------------------------------- | ---------------- |
-| pos_min   | `float`  | Servo minimum position in angles.                     | -                |
-| pos_max   | `float`  | Servo maximum position in angles.                     | -                |
-| speed_max | `float`  | Servo maximum speed in angles/second.                 | -                |
-| dir       | `int`    | Direction config for upside-down placement (-1 or 1). | `1`              |
-| gain_P    | `float`  | p-gain og PID controller.                             | `1.0`            |
-| gain_I    | `float`  | i-gain og PID controller.                             | `0.0`            |
-| gain_D    | `float`  | d-gain og PID controller.                             | `0.0`            |
-| protocol  | `string` | Communications protocol.                              | `"serial"`       |
-| port      | `string` | Port name.                                            | `"/dev/ttyACM0"` |
+| Name      | Type     | Description                                                          | Default          |
+| --------- | -------- | -------------------------------------------------------------------- | ---------------- |
+| angle_min | `float`  | Servo minimum position in angles.                                    | -                |
+| angle_max | `float`  | Servo maximum position in angles.                                    | -                |
+| speed_max | `float`  | Servo maximum speed in angles/second.                                | -                |
+| dir       | `int`    | Direction config for upside-down placement (-1 or 1).                | `1`              |
+| gain_P    | `float`  | p-gain og PID controller.                                            | `1.0`            |
+| gain_I    | `float`  | i-gain og PID controller.                                            | `0.0`            |
+| gain_D    | `float`  | d-gain og PID controller.                                            | `0.0`            |
+| protocol  | `string` | Communications protocol. Supported protocols are `serial` and `i2c`. | `"serial"`       |
+| port      | `string` | Port name.                                                           | `"/dev/ttyACM0"` |
 
 The `ServoControl` class is implemented in `servo_control.py`, and depends on `servo_coms.py` in the same directory, that handles the communication layer.
 
@@ -42,15 +42,15 @@ The error does not need to be in angles, and is used by face_following where the
 | speed_desired | `float` | Desired speed in angles pr. second, value of `-1` indicates top speed. | `-1`    |
 
 
-### `reach_position`
+### `reach_angle`
 
 Reach desirered angle position, speed will be top speed.
 
 #### Parameters
-| Name | Type    | Description                       | Default |
-| ---- | ------- | --------------------------------- | ------- |
-| t_d  | `float` | Delta time from last loop.        | -       |
-| pos  | `float` | Desired angle position (degrees). | -       |
+| Name  | Type    | Description                       | Default |
+| ----- | ------- | --------------------------------- | ------- |
+| t_d   | `float` | Delta time from last loop.        | -       |
+| angle | `float` | Desired angle position (degrees). | -       |
 
 
 ### `reset_position`

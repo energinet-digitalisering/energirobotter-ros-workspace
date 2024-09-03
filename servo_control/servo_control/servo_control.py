@@ -7,8 +7,8 @@ class ServoControl:
 
     def __init__(
         self,
-        pos_min,  # angle
-        pos_max,  # angle
+        angle_min,
+        angle_max,
         speed_max,  # angles/scond
         dir=1,  # Direction config for upside-down placement (-1 or 1)
         gain_P=1.0,
@@ -18,16 +18,16 @@ class ServoControl:
         port="/dev/ttyACM0",
     ):
 
-        self.pos_min = pos_min
-        self.pos_max = pos_max
+        self.angle_min = angle_min
+        self.angle_max = angle_max
         self.speed_max = speed_max
         self.dir = dir
         self.gain_P = gain_P
         self.gain_I = gain_I
         self.gain_D = gain_D
 
-        self.pos_init = (self.pos_max / 2) + self.pos_min
-        self.pos = self.pos_init
+        self.angle_init = (self.angle_max / 2) + self.angle_min
+        self.angle = self.angle_init
 
         self.error_acc = 0.0
         self.error_prev = 0.0
@@ -45,7 +45,7 @@ class ServoControl:
             case _:
                 print("Invalid protocol")
 
-        self.servo_coms.write_angle(self.pos)
+        self.servo_coms.write_angle(self.angle)
 
     def controller_PID(self, error, error_acc, error_prev, gain_P, gain_I, gain_D):
 
@@ -82,22 +82,22 @@ class ServoControl:
             speed_max,
         )
 
-        # Apply control to position
-        self.pos += self.dir * vel_control * t_d
+        # Apply control to angle position
+        self.angle += self.dir * vel_control * t_d
 
-        # Clamp values between min and max position
-        self.pos = np.clip(
-            self.pos,
-            self.pos_min,
-            self.pos_max,
+        # Clamp values between min and max angle
+        self.angle = np.clip(
+            self.angle,
+            self.angle_min,
+            self.angle_max,
         )
 
-        self.servo_coms.write_angle(self.pos)
+        self.servo_coms.write_angle(self.angle)
 
-    def reach_position(self, t_d, pos, speed_desired=(-1)):
-        pos_gain_p = 10.0
-        error = (pos - self.pos) * pos_gain_p
+    def reach_angle(self, t_d, angle, speed_desired=(-1)):
+        angle_gain_p = 10.0
+        error = (angle - self.angle) * angle_gain_p
         self.compute_control(t_d, error, speed_desired)
 
     def reset_position(self, t_d):
-        self.reach_position(t_d, self.pos_init)
+        self.reach_angle(t_d, self.angle_init)

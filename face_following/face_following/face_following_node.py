@@ -28,13 +28,13 @@ class FaceFollowingNode(Node):
         self.declare_parameter("fov_h", 50)
         self.fov_h = self.get_parameter("fov_h").get_parameter_value().integer_value
 
-        self.declare_parameter("servo_pos_min", 0)
-        servo_pos_min = (
-            self.get_parameter("servo_pos_min").get_parameter_value().integer_value
+        self.declare_parameter("servo_angle_min", 0)
+        servo_angle_min = (
+            self.get_parameter("servo_angle_min").get_parameter_value().integer_value
         )
-        self.declare_parameter("servo_pos_max", 180)
-        servo_pos_max = (
-            self.get_parameter("servo_pos_max").get_parameter_value().integer_value
+        self.declare_parameter("servo_angle_max", 180)
+        servo_angle_max = (
+            self.get_parameter("servo_angle_max").get_parameter_value().integer_value
         )
 
         self.declare_parameter("servo_speed_max", 100.0)
@@ -91,8 +91,8 @@ class FaceFollowingNode(Node):
 
         # Servo config
         self.servo_pan = servo_control.ServoControl(
-            servo_pos_min,
-            servo_pos_max,
+            servo_angle_min,
+            servo_angle_max,
             servo_speed_max,
             servo_pan_dir,
             servo_gain_P,
@@ -101,8 +101,8 @@ class FaceFollowingNode(Node):
         )
 
         # self.servo_tilt = servo_control.ServoControl(
-        #     servo_pos_min,
-        #     servo_pos_max,
+        #     servo_angle_min,
+        #     servo_angle_max,
         #     servo_speed_max,
         #     servo_tilt_dir,
         #     servo_gain_P,
