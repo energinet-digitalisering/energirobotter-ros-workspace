@@ -91,6 +91,7 @@ class FaceFollowingNode(Node):
 
         # Servo config
         self.servo_pan = servo_control.ServoControl(
+            0,
             servo_angle_min,
             servo_angle_max,
             servo_speed_max,
@@ -101,6 +102,7 @@ class FaceFollowingNode(Node):
         )
 
         # self.servo_tilt = servo_control.ServoControl(
+        #     0,
         #     servo_angle_min,
         #     servo_angle_max,
         #     servo_speed_max,

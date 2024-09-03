@@ -7,6 +7,9 @@ class ServoControl:
 
     def __init__(
         self,
+        servo_id,
+        pwm_min,
+        pwm_max,
         angle_min,
         angle_max,
         speed_max,  # angles/scond
@@ -33,14 +36,14 @@ class ServoControl:
         self.error_prev = 0.0
 
         print("Protocol: ", protocol)
-        self.servo_coms = ServoComs()
+        self.servo_coms = ServoComs(servo_id, pwm_min, pwm_max, angle_min, angle_max)
 
         match protocol:
             case "serial":
                 self.servo_coms.init_serial(port=port, baudrate=115200, timeout=1.0)
 
             case "i2c":
-                self.servo_coms.init_i2c(port)
+                self.servo_coms.init_i2c()
 
             case _:
                 print("Invalid protocol")

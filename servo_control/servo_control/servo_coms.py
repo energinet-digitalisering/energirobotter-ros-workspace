@@ -1,4 +1,6 @@
+from adafruit_pca9685 import PCA9685
 import numpy as np
+import board
 from enum import Enum
 import serial
 
@@ -11,7 +13,13 @@ class Protocol(Enum):
 
 class ServoComs:
 
-    def __init__(self):
+    def __init__(self, servo_id, pwm_min, pwm_max, angle_min, angle_max):
+
+        self.servo_id = servo_id
+        self.pwm_min = pwm_min
+        self.pwm_max = pwm_max
+        self.angle_min = angle_min
+        self.angle_max = angle_max
 
         self.protocol = Protocol.UNINITIALIZED
 
@@ -30,8 +38,13 @@ class ServoComs:
             self.protocol = Protocol.UNINITIALIZED
             print("Serial not available")
 
-    def init_i2c(self, port="/dev/ttyACM0", baudrate=115200, timeout=1.0):
+    def init_i2c(self):
         print("I2C protocol unimplemented")
+
+        i2c = board.I2C()
+        pca = PCA9685(i2c)
+        pca.frequency = 60
+
         self.protocol = Protocol.I2C
 
     def write_angle(self, value):
@@ -48,13 +61,35 @@ class ServoComs:
             case _:
                 print("Invalid protocol")
 
-    def write_angle_serial(self, value):
+    def write_angle_serial(self, angle):
 
         if self.protocol == Protocol.SERIAL:
-            value = int(np.round(value))
+            angle = int(np.round(angle))
 
             # write packet to serial
-            self.serial.write(bytes(str(int(value)), "utf-8"))
+            self.serial.write(bytes(str(int(angle)), "utf-8"))
             self.serial.write(bytes("\n", "utf-8"))  # End character
         else:
-            print("No serial available")
+            print("Serial not available")
+
+    def write_angle_i2c(self, angle):
+
+        if self.protocol == Protocol.I2C:
+            angle = int(np.round(angle))
+            pwm = self.interval_map(
+                angle, self.angle_min, self.angle_max, self.pwm_min, self.pwm_max
+            )
+
+            pwm_hex = hex(pwm) + "f"  # 12-bit to 16-bit
+            self.pca.channels[self.servo_id].duty_cycle = pwm_hex
+
+        else:
+            print("I2C not available")
+
+    def interval_map(self, x, x0, x1, y0, y1):
+
+        # x: value
+        # [x0, x1]: original interval
+        # [y0, y1]: target interval
+
+        return ((y0 * (x1 - x)) + (y1 * (x - x0))) / (x1 - x0)
