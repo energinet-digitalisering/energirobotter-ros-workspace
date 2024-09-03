@@ -28,6 +28,9 @@ class ServoComs:
             print("Closing serial connection")
             self.serial.close()
 
+        if self.protocol == Protocol.I2C:
+            self.pca.deinit()
+
     def init_serial(self, port="/dev/ttyACM0", baudrate=115200, timeout=1.0):
         print("Initializing serial communication...")
         try:
@@ -42,8 +45,8 @@ class ServoComs:
         print("I2C protocol unimplemented")
 
         i2c = board.I2C()
-        pca = PCA9685(i2c)
-        pca.frequency = 60
+        self.pca = PCA9685(i2c)
+        self.pca.frequency = 50
 
         self.protocol = Protocol.I2C
 
