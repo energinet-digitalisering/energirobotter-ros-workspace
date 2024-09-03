@@ -9,14 +9,16 @@ See `servo_control_example.ipynb` for usage example.
 
 Class representing a single servo, containing hardware configurations and functionality to move the servo. 
 
+The `ServoControl` class is implemented in `servo_control.py`, and depends on `servo_coms.py` in the same directory, that handles the communication layer.
+
 | Name      | Type     | Description                                                               | Default          |
 | --------- | -------- | ------------------------------------------------------------------------- | ---------------- |
-| servo_id  | `int`    | Servo id/channel on the PCA9685 board (only applicable for I2C protocol). | -                |
 | pwm_min   | `float`  | Servo minimum pwm.                                                        | -                |
 | pwm_max   | `float`  | Servo maximum pwm.                                                        | -                |
 | angle_min | `float`  | Servo minimum position in angles.                                         | -                |
 | angle_max | `float`  | Servo maximum position in angles.                                         | -                |
 | speed_max | `float`  | Servo maximum speed in angles/second.                                     | -                |
+| servo_id  | `int`    | Servo id/channel on the PCA9685 board (only applicable for I2C protocol). | `0`              |
 | dir       | `int`    | Direction config for upside-down placement (-1 or 1).                     | `1`              |
 | gain_P    | `float`  | p-gain og PID controller.                                                 | `1.0`            |
 | gain_I    | `float`  | i-gain og PID controller.                                                 | `0.0`            |
@@ -24,7 +26,8 @@ Class representing a single servo, containing hardware configurations and functi
 | protocol  | `string` | Communications protocol. Supported protocols are `serial` and `i2c`.      | `"serial"`       |
 | port      | `string` | Port name.                                                                | `"/dev/ttyACM0"` |
 
-The `ServoControl` class is implemented in `servo_control.py`, and depends on `servo_coms.py` in the same directory, that handles the communication layer.
+> To use I2C protocol, the code must be run on a board with I2C pins.
+
 
 
 ## Member Funcitons

@@ -7,12 +7,12 @@ class ServoControl:
 
     def __init__(
         self,
-        servo_id,
         pwm_min,
         pwm_max,
         angle_min,
         angle_max,
         speed_max,  # angles/scond
+        servo_id=0,
         dir=1,  # Direction config for upside-down placement (-1 or 1)
         gain_P=1.0,
         gain_I=0.0,
@@ -36,7 +36,7 @@ class ServoControl:
         self.error_prev = 0.0
 
         print("Protocol: ", protocol)
-        self.servo_coms = ServoComs(servo_id, pwm_min, pwm_max, angle_min, angle_max)
+        self.servo_coms = ServoComs(pwm_min, pwm_max, angle_min, angle_max, servo_id)
 
         match protocol:
             case "serial":

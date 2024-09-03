@@ -13,13 +13,13 @@ class Protocol(Enum):
 
 class ServoComs:
 
-    def __init__(self, servo_id, pwm_min, pwm_max, angle_min, angle_max):
+    def __init__(self, pwm_min, pwm_max, angle_min, angle_max, servo_id=0):
 
-        self.servo_id = servo_id
         self.pwm_min = pwm_min
         self.pwm_max = pwm_max
         self.angle_min = angle_min
         self.angle_max = angle_max
+        self.servo_id = servo_id
 
         self.protocol = Protocol.UNINITIALIZED
 

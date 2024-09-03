@@ -101,29 +101,27 @@ class FaceFollowingNode(Node):
 
         # Servo config
         self.servo_pan = servo_control.ServoControl(
-            0,
             servo_pwm_min,
             servo_pwm_max,
             servo_angle_min,
             servo_angle_max,
             servo_speed_max,
-            servo_pan_dir,
-            servo_gain_P,
-            servo_gain_I,
-            servo_gain_D,
+            dir=servo_pan_dir,
+            gain_P=servo_gain_P,
+            gain_I=servo_gain_I,
+            gain_D=servo_gain_D,
         )
 
         # self.servo_tilt = servo_control.ServoControl(
-        #     0,
         #     servo_pwm_min,
         #     servo_pwm_max,
         #     servo_angle_min,
         #     servo_angle_max,
         #     servo_speed_max,
-        #     servo_tilt_dir,
-        #     servo_gain_P,
-        #     servo_gain_I,
-        #     servo_gain_D,
+        #     dir=servo_pan_dir,
+        #     gain_P=servo_gain_P,
+        #     gain_I=servo_gain_I,
+        #     gain_D=servo_gain_D,
         # )
 
     def bounding_box_callback(self, msg):
