@@ -17,11 +17,14 @@ servo = servo_control.ServoControl(
 
 
 # Set desired position in a continous loop
+
+amp = 180
 t_prev = time.time()
+
 while True:
     t = time.time()
 
-    angle_desired = np.sin(2 * (t)) * 90 + 90
+    angle_desired = np.sin(2 * (t)) * (amp / 2) + (amp / 2)
 
     servo.reach_angle(t - t_prev, angle_desired)
     t_prev = t
