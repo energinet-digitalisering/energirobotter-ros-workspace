@@ -14,10 +14,12 @@ setup(
     zip_safe=True,
     maintainer="Nicoline",
     maintainer_email="xnlth@energinet.dk",
-    description="TODO: Package description",
+    description="Package implementing PID control and communication of/with servo motors, with Serial or I2C protocol.",
     license="Energinet",
     tests_require=["pytest"],
     entry_points={
-        "console_scripts": [],
+        "console_scripts": [
+            "servo_control_node = servo_control.servo_control_node:main"
+        ],
     },
 )

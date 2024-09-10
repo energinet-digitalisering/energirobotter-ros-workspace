@@ -3,7 +3,7 @@
 <package format="3">
   <name>servo_control</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <description>Package implementing PID control and communication of/with servo motors, with Serial or I2C protocol.</description>
   <maintainer email="xnlth@energinet.dk">Nicoline</maintainer>
   <license>Energinet</license>
 
