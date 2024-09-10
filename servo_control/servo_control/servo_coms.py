@@ -92,12 +92,13 @@ class ServoComs:
 
         if self.protocol == Protocol.I2C:
             angle = int(np.round(angle))
-            pwm = self.interval_map(
-                angle, self.angle_min, self.angle_max, self.pwm_min, self.pwm_max
+            pwm = int(
+                self.interval_map(
+                    angle, self.angle_min, self.angle_max, self.pwm_min, self.pwm_max
+                )
             )
 
-            pwm_hex = hex(pwm) + "f"  # 12-bit to 16-bit
-            self.pca.channels[self.servo_id].duty_cycle = pwm_hex
+            self.pca.channels[self.servo_id].duty_cycle = pwm
 
         else:
             print("I2C not available")
