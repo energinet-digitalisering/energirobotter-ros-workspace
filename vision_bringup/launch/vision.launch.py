@@ -22,6 +22,9 @@ def launch_setup(context, *args, **kwargs):
     use_mock_camera = LaunchConfiguration("use_mock_camera")
     use_compressed = LaunchConfiguration("use_compressed")
 
+    image_w = 1280
+    image_h = 720
+
     rviz_config_file = PathJoinSubstitution(
         [
             FindPackageShare(package_name),
@@ -37,13 +40,26 @@ def launch_setup(context, *args, **kwargs):
 
     mock_camera_node = Node(
         package="mock_camera",
-        executable="mock_camera_node",
+        executable="photo_pub_node",
         output="screen",
         condition=IfCondition(use_mock_camera),
         remappings=[
             ("/camera", "/camera/camera/color/image_raw"),
         ],
     )
+    if use_mock_camera.perform(context) == "webcam":
+        # Overwrite node to webcam
+        mock_camera_node = Node(
+            package="mock_camera",
+            executable="webcam_pub_node",
+            output="screen",
+            remappings=[
+                ("/camera", "/camera/camera/color/image_raw"),
+            ],
+        )
+
+        image_w = 640
+        image_h = 480
 
     real_camera_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -62,8 +78,8 @@ def launch_setup(context, *args, **kwargs):
         output="screen",
         remappings=[("/camera", image_topic)],
         parameters=[
-            {"image_w": 1280},
-            {"image_h": 720},
+            {"image_w": image_w},
+            {"image_h": image_h},
             {"use_compressed": use_compressed},
             {"box_size_multiplier": 0.5},
         ],
@@ -75,8 +91,8 @@ def launch_setup(context, *args, **kwargs):
         output="screen",
         parameters=[  # Intel Realsense Depth Camera D435i specs
             {"timer_period": 0.05},
-            {"image_w": 1280},
-            {"image_h": 720},
+            {"image_w": image_w},
+            {"image_h": image_h},
             {"fov_w": 69},
             {"fov_h": 42},
             {"servo_pwm_min": 150},
@@ -116,7 +132,7 @@ def generate_launch_description():
                 "use_mock_camera",
                 default_value="false",
                 description="Start a mock-node instead of camera, that publishes single image with faces.",
-                choices=["true", "false"],
+                choices=["true", "false", "webcam"],
             ),
             DeclareLaunchArgument(
                 "use_compressed",
