@@ -95,14 +95,28 @@ def launch_setup(context, *args, **kwargs):
             {"image_h": image_h},
             {"fov_w": 69},
             {"fov_h": 42},
-            {"servo_pwm_min": 150},
-            {"servo_pwm_max": 600},
-            {"servo_pos_min": 0},
-            {"servo_pos_max": 180},
-            {"servo_speed_max": 200.0},
-            {"servo_pan_dir": 1},
-            {"servo_tilt_dir": 1},
-            {"servo_p_gain": 1.0},
+        ],
+    )
+
+    servo_pan_node = Node(
+        package="servo_control",
+        executable="servo_control_node",
+        name="servo_pan",
+        namespace="servo_pan",
+        output="screen",
+        parameters=[
+            {"servo_name": "pan"},
+            {"servo_id": 0},
+            {"operation_mode": "control"},
+            {"com_protocol": "serial"},
+            {"control_frequency": 0.05},
+            {"pwm_min": 150},
+            {"pwm_max": 600},
+            {"pos_min": 0},
+            {"pos_max": 180},
+            {"speed_max": 200.0},
+            {"dir": 1},
+            {"gain_P": 1.0},
         ],
     )
 
@@ -120,6 +134,7 @@ def launch_setup(context, *args, **kwargs):
         real_camera_launch,
         face_detection_node,
         face_following_node,
+        servo_pan_node,
         rviz_node,
     ]
 

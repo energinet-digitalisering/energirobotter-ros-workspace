@@ -7,6 +7,27 @@ See `examples/` for usage examples. Run examples from root through the terminal:
 python3 src/energirobotter-vision/servo_control/examples/serial_single_servo_example.py
 ```
 
+## ServoControlNode
+
+Node representing a single servo, using the ServoControl class to contain hardware configurations and functionality to move the servo. 
+
+| Name              | Type     | Description                                                                                                                                                                                  | Default          |
+| ----------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| servo_id          | `int`    | Servo id/channel on the PCA9685 board (only applicable for I2C protocol).                                                                                                                    | `0`              |
+| operation_mode    | `string` | Operation mode, similar to PPM and CSP EtherCAT operation modes. Requesting a position/angle, or sending error commands in a fixed time-loop. Supported protocols are `angle` and `control`. | `"angle"`        |
+| com_protocol      | `string` | Communications protocol. Supported protocols are `serial` and `i2c`.                                                                                                                         | `"i2c"`          |
+| com_port          | `string` | Port name.                                                                                                                                                                                   | `"/dev/ttyACM0"` |
+| control_frequency | `float`  | Control loop frequency                                                                                                                                                                       | `0.05`           |
+| pwm_min           | `float`  | Servo minimum pwm.                                                                                                                                                                           | -                |
+| pwm_max           | `float`  | Servo maximum pwm.                                                                                                                                                                           | -                |
+| angle_min         | `float`  | Servo minimum position in angles.                                                                                                                                                            | -                |
+| angle_max         | `float`  | Servo maximum position in angles.                                                                                                                                                            | -                |
+| speed_max         | `float`  | Servo maximum speed in angles/second.                                                                                                                                                        | -                |
+| dir               | `int`    | Direction config for upside-down placement (-1 or 1).                                                                                                                                        | `1`              |
+| gain_P            | `float`  | p-gain og PID controller.                                                                                                                                                                    | `1.0`            |
+| gain_I            | `float`  | i-gain og PID controller.                                                                                                                                                                    | `0.0`            |
+| gain_D            | `float`  | d-gain og PID controller.                                                                                                                                                                    | `0.0`            |
+
 
 
 ## `ServoControl`
