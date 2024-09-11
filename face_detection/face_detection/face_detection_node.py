@@ -60,7 +60,9 @@ class FaceDetectionNode(Node):
         )
 
         # Node variables
-        model_path = "models/yolov8n-face.pt"
+        model_path = (
+            "install/face_detection/share/face_detection/models/yolov8n-face.pt"
+        )
         self.model = YOLO(model_path)
         self.box_prev = Box(self.image_w / 2, self.image_h / 2, 0, 0)
 
