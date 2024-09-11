@@ -1,6 +1,5 @@
 import rclpy
 from rclpy.node import Node
-import std_msgs
 import std_msgs.msg
 
 from servo_control.src import servo_control
