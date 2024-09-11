@@ -4,8 +4,6 @@ import std_msgs
 import std_msgs.msg
 import vision_msgs.msg
 
-from servo_control import servo_control
-
 
 class FaceFollowingNode(Node):
 

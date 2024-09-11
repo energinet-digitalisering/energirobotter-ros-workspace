@@ -3,7 +3,7 @@ from rclpy.node import Node
 import std_msgs
 import std_msgs.msg
 
-from servo_control import servo_control
+from servo_control.src import servo_control
 
 
 class ServoControlNode(Node):
@@ -85,8 +85,6 @@ class ServoControlNode(Node):
                 1,
             )
 
-        # Node variables
-
         # Servo config
         self.servo = servo_control.ServoControl(
             pwm_min,
@@ -109,6 +107,7 @@ class ServoControlNode(Node):
             )
             self.destroy_node()
 
+        # Node variables
         self.desired_angle = self.servo.angle_init
 
     def callback_set_angle(self, msg):
