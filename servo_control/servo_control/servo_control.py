@@ -37,17 +37,24 @@ class ServoControl:
 
         self.servo_coms = ServoComs(pwm_min, pwm_max, angle_min, angle_max, servo_id)
 
+        self.coms_successful = False
+
         match protocol:
             case "serial":
-                self.servo_coms.init_serial(port=port, baudrate=115200, timeout=1.0)
+                self.coms_successful = self.servo_coms.init_serial(
+                    port=port, baudrate=115200, timeout=1.0
+                )
 
             case "i2c":
-                self.servo_coms.init_i2c()
+                self.coms_successful = self.servo_coms.init_i2c()
 
             case _:
                 print("Invalid protocol")
 
         self.servo_coms.write_angle(self.angle)
+
+    def ready(self):
+        return self.coms_successful
 
     def controller_PID(self, error, error_acc, error_prev, gain_P, gain_I, gain_D):
 
