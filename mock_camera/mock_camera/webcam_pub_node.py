@@ -33,9 +33,6 @@ class MockCameraNode(Node):
         _, frame = self.capture.read()
         self.image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-        print(self.image.size)
-        print(self.image.shape)
-
         self.publisher.publish(
             self.cv_bridge.cv2_to_imgmsg(self.image, encoding="rgb8")
         )
