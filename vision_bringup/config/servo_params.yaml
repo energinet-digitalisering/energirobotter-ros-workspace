@@ -1,0 +1,17 @@
+/servo_pan/servo_pan:
+  ros__parameters:
+    servo_name: "pan"
+    servo_id: 0
+    dir: 1
+    gain_P: 1.0
+
+/**:
+  ros__parameters:
+    operation_mode: "control"
+    com_protocol: "serial"
+    control_frequency: 0.05
+    pwm_min: 150
+    pwm_max: 600
+    pos_min: 0
+    pos_max: 180
+    speed_max: 200.0

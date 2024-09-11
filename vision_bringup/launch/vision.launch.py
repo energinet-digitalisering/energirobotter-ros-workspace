@@ -33,6 +33,14 @@ def launch_setup(context, *args, **kwargs):
         ]
     )
 
+    servo_params = PathJoinSubstitution(
+        [
+            FindPackageShare(package_name),
+            "config",
+            "servo_params.yaml",
+        ]
+    )
+
     if use_compressed.perform(context) == "true":
         image_topic = "/camera/camera/color/image_raw/compressed"
     else:
@@ -104,20 +112,7 @@ def launch_setup(context, *args, **kwargs):
         name="servo_pan",
         namespace="servo_pan",
         output="screen",
-        parameters=[
-            {"servo_name": "pan"},
-            {"servo_id": 0},
-            {"operation_mode": "control"},
-            {"com_protocol": "serial"},
-            {"control_frequency": 0.05},
-            {"pwm_min": 150},
-            {"pwm_max": 600},
-            {"pos_min": 0},
-            {"pos_max": 180},
-            {"speed_max": 200.0},
-            {"dir": 1},
-            {"gain_P": 1.0},
-        ],
+        parameters=[servo_params],
     )
 
     rviz_node = Node(
