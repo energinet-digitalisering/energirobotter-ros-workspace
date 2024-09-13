@@ -7,7 +7,7 @@ See `examples/` for usage examples. Run examples from root through the terminal:
 python3 src/energirobotter-vision/servo_control/examples/serial_single_servo_example.py
 ```
 
-## ServoControlNode
+## `ServoControlNode`
 
 Node representing a single servo, using the ServoControl class to contain hardware configurations and functionality to move the servo. 
 
@@ -18,8 +18,8 @@ Node representing a single servo, using the ServoControl class to contain hardwa
 | com_protocol      | `string` | Communications protocol. Supported protocols are `serial` and `i2c`.                                                                                                                         | `"i2c"`          |
 | com_port          | `string` | Port name.                                                                                                                                                                                   | `"/dev/ttyACM0"` |
 | control_frequency | `float`  | Control loop frequency                                                                                                                                                                       | `0.05`           |
-| pwm_min           | `float`  | Servo minimum pwm.                                                                                                                                                                           | -                |
-| pwm_max           | `float`  | Servo maximum pwm.                                                                                                                                                                           | -                |
+| pwm_min           | `float`  | Servo minimum pwm (16-bit).                                                                                                                                                                  | -                |
+| pwm_max           | `float`  | Servo maximum pwm (16-bit).                                                                                                                                                                  | -                |
 | angle_min         | `float`  | Servo minimum position in angles.                                                                                                                                                            | -                |
 | angle_max         | `float`  | Servo maximum position in angles.                                                                                                                                                            | -                |
 | speed_max         | `float`  | Servo maximum speed in angles/second.                                                                                                                                                        | -                |
@@ -28,6 +28,11 @@ Node representing a single servo, using the ServoControl class to contain hardwa
 | gain_I            | `float`  | i-gain og PID controller.                                                                                                                                                                    | `0.0`            |
 | gain_D            | `float`  | d-gain og PID controller.                                                                                                                                                                    | `0.0`            |
 
+### PWM Calculation Example
+
+The [Tower Pro SG90 servo](http://www.ee.ic.ac.uk/pcheung/teaching/DE1_EE/stores/sg90_datasheet.pdf) runs at `50Hz` (PWM period of `20ms`). The minimum angle position is `1ms`, and the maximum angle is `2ms`, translating to a PWM percent between `5%` and `10%` for min and max position/angle. 
+
+A 16-bit number has a maximum decimal value of 65535, so the min and max 16-bit PWM values for this servo is `3276.75` and `6553.5`.
 
 
 ## `ServoControl`
@@ -38,8 +43,8 @@ The `ServoControl` class is implemented in `servo_control.py`, and depends on `s
 
 | Name      | Type     | Description                                                               | Default          |
 | --------- | -------- | ------------------------------------------------------------------------- | ---------------- |
-| pwm_min   | `float`  | Servo minimum pwm.                                                        | -                |
-| pwm_max   | `float`  | Servo maximum pwm.                                                        | -                |
+| pwm_min   | `float`  | Servo minimum pwm (16-bit).                                               | -                |
+| pwm_max   | `float`  | Servo maximum pwm (16-bit).                                               | -                |
 | angle_min | `float`  | Servo minimum position in angles.                                         | -                |
 | angle_max | `float`  | Servo maximum position in angles.                                         | -                |
 | speed_max | `float`  | Servo maximum speed in angles/second.                                     | -                |
