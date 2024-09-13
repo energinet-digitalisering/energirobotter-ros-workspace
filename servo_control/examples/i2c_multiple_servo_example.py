@@ -1,7 +1,7 @@
 import numpy as np
 import time
 
-from servo_control import servo_control
+from servo_control.src import servo_control
 
 servo_0 = servo_control.ServoControl(
     pwm_min=280,
