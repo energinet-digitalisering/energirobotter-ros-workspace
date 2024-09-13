@@ -41,8 +41,19 @@ class ServoControlNode(Node):
 
         self.declare_parameter("angle_min", 0)
         angle_min = self.get_parameter("angle_min").get_parameter_value().integer_value
+
+        self.declare_parameter("angle_software_min", 0)
+        angle_software_min = (
+            self.get_parameter("angle_software_min").get_parameter_value().integer_value
+        )
+
         self.declare_parameter("angle_max", 180)
         angle_max = self.get_parameter("angle_max").get_parameter_value().integer_value
+
+        self.declare_parameter("angle_software_max", 180)
+        angle_software_max = (
+            self.get_parameter("angle_software_max").get_parameter_value().integer_value
+        )
 
         self.declare_parameter("speed_max", 200.0)
         speed_max = self.get_parameter("speed_max").get_parameter_value().double_value
@@ -84,12 +95,16 @@ class ServoControlNode(Node):
                 1,
             )
 
+        self.get_logger().info(f"Initialising servo with id {servo_id}...")
+
         # Servo config
         self.servo = servo_control.ServoControl(
             pwm_min,
             pwm_max,
             angle_min,
+            angle_software_min,
             angle_max,
+            angle_software_max,
             speed_max,
             servo_id=servo_id,
             dir=dir,

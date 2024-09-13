@@ -10,7 +10,9 @@ class ServoControl:
         pwm_min,
         pwm_max,
         angle_min,
+        angle_software_min,
         angle_max,
+        angle_software_max,
         speed_max,  # angles/scond
         servo_id=0,
         dir=1,  # Direction config for upside-down placement (-1 or 1)
@@ -22,7 +24,9 @@ class ServoControl:
     ):
 
         self.angle_min = angle_min
+        self.angle_software_min = angle_software_min
         self.angle_max = angle_max
+        self.angle_software_max = angle_software_max
         self.speed_max = speed_max
         self.dir = dir
         self.gain_P = gain_P
@@ -97,8 +101,8 @@ class ServoControl:
         # Clamp values between min and max angle
         self.angle = np.clip(
             self.angle,
-            self.angle_min,
-            self.angle_max,
+            self.angle_software_min,
+            self.angle_software_max,
         )
 
         self.servo_coms.write_angle(self.angle)
