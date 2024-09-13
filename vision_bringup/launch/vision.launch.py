@@ -55,6 +55,7 @@ def launch_setup(context, *args, **kwargs):
             ("/camera", "/camera/camera/color/image_raw"),
         ],
     )
+
     if use_mock_camera.perform(context) == "webcam":
         # Overwrite node to webcam
         mock_camera_node = Node(
