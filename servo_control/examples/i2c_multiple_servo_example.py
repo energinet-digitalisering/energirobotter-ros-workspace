@@ -4,8 +4,8 @@ import time
 from servo_control.src import servo_control
 
 servo_0 = servo_control.ServoControl(
-    pwm_min=280,
-    pwm_max=440,
+    pwm_min=2400,
+    pwm_max=9600,
     angle_min=0,
     angle_max=180,
     speed_max=200,
@@ -15,8 +15,8 @@ servo_0 = servo_control.ServoControl(
 )
 
 servo_1 = servo_control.ServoControl(
-    pwm_min=380,
-    pwm_max=480,
+    pwm_min=2400,
+    pwm_max=9600,
     angle_min=0,
     angle_max=180,
     speed_max=200,
@@ -26,8 +26,8 @@ servo_1 = servo_control.ServoControl(
 )
 
 servo_2 = servo_control.ServoControl(
-    pwm_min=390,
-    pwm_max=500,
+    pwm_min=2400,
+    pwm_max=9600,
     angle_min=0,
     angle_max=180,
     speed_max=200,
@@ -37,8 +37,8 @@ servo_2 = servo_control.ServoControl(
 )
 
 servo_3 = servo_control.ServoControl(
-    pwm_min=400,
-    pwm_max=500,
+    pwm_min=2400,
+    pwm_max=9600,
     angle_min=0,
     angle_max=180,
     speed_max=200,
