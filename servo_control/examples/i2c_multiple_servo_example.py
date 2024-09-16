@@ -50,17 +50,18 @@ servo_3 = servo_control.ServoControl(
 
 # Set desired position in a continous loop
 
-amp = 180
+amp = 90
+offset = 90
 t_prev = time.time()
 
 while True:
     t = time.time()
     t_d = t - t_prev
 
-    angle_0 = np.sin(2 * t) * (amp / 2) + (amp / 2)
-    angle_1 = np.sin(2 * (t + t / 4)) * (amp / 2) + (amp / 2)
-    angle_2 = np.sin(2 * (t + 2 * t / 4)) * (amp / 2) + (amp / 2)
-    angle_3 = np.sin(2 * (t + 3 * t / 4)) * (amp / 2) + (amp / 2)
+    angle_0 = np.sin(2 * (t + 0 * t / 4)) * amp + offset
+    angle_1 = np.sin(2 * (t + 1 * t / 4)) * amp + offset
+    angle_2 = np.sin(2 * (t + 2 * t / 4)) * amp + offset
+    angle_3 = np.sin(2 * (t + 3 * t / 4)) * amp + offset
 
     servo_0.reach_angle(t_d, angle_0)
     servo_1.reach_angle(t_d, angle_1)
