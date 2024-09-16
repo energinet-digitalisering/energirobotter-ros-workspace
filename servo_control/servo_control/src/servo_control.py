@@ -107,7 +107,7 @@ class ServoControl:
         )
 
         # Flip angle if direction is flipped
-        if self.dir > 0:
+        if self.dir >= 0:
             angle = self.angle
         elif self.dir < 0:
             angle = interval_map(
