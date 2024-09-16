@@ -20,7 +20,7 @@ class ServoControlNode(Node):
             self.get_parameter("operation_mode").get_parameter_value().string_value
         )
 
-        self.declare_parameter("com_protocol", "serial")
+        self.declare_parameter("com_protocol", "i2c")
         com_protocol = (
             self.get_parameter("com_protocol").get_parameter_value().string_value
         )

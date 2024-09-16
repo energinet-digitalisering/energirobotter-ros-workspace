@@ -11,22 +11,24 @@ python3 src/energirobotter-vision/servo_control/examples/serial_single_servo_exa
 
 Node representing a single servo, using the ServoControl class to contain hardware configurations and functionality to move the servo. 
 
-| Name              | Type     | Description                                                                                                                                                                                  | Default          |
-| ----------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
-| servo_id          | `int`    | Servo id/channel on the PCA9685 board (only applicable for I2C protocol).                                                                                                                    | `0`              |
-| operation_mode    | `string` | Operation mode, similar to PPM and CSP EtherCAT operation modes. Requesting a position/angle, or sending error commands in a fixed time-loop. Supported protocols are `angle` and `control`. | `"angle"`        |
-| com_protocol      | `string` | Communications protocol. Supported protocols are `serial` and `i2c`.                                                                                                                         | `"i2c"`          |
-| com_port          | `string` | Port name.                                                                                                                                                                                   | `"/dev/ttyACM0"` |
-| control_frequency | `float`  | Control loop frequency                                                                                                                                                                       | `0.05`           |
-| pwm_min           | `float`  | Servo minimum pwm (16-bit).                                                                                                                                                                  | -                |
-| pwm_max           | `float`  | Servo maximum pwm (16-bit).                                                                                                                                                                  | -                |
-| angle_min         | `float`  | Servo minimum position in angles.                                                                                                                                                            | -                |
-| angle_max         | `float`  | Servo maximum position in angles.                                                                                                                                                            | -                |
-| speed_max         | `float`  | Servo maximum speed in angles/second.                                                                                                                                                        | -                |
-| dir               | `int`    | Direction config for upside-down placement (-1 or 1).                                                                                                                                        | `1`              |
-| gain_P            | `float`  | p-gain og PID controller.                                                                                                                                                                    | `1.0`            |
-| gain_I            | `float`  | i-gain og PID controller.                                                                                                                                                                    | `0.0`            |
-| gain_D            | `float`  | d-gain og PID controller.                                                                                                                                                                    | `0.0`            |
+| Name               | Type     | Description                                                                                                                                                                                  | Default          |
+| ------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| servo_id           | `int`    | Servo id/channel on the PCA9685 board (only applicable for I2C protocol).                                                                                                                    | `0`              |
+| operation_mode     | `string` | Operation mode, similar to PPM and CSP EtherCAT operation modes. Requesting a position/angle, or sending error commands in a fixed time-loop. Supported protocols are `angle` and `control`. | `"angle"`        |
+| com_protocol       | `string` | Communications protocol. Supported protocols are `serial` and `i2c`.                                                                                                                         | `"i2c"`          |
+| com_port           | `string` | Port name.                                                                                                                                                                                   | `"/dev/ttyACM0"` |
+| control_frequency  | `float`  | Control loop frequency                                                                                                                                                                       | `0.05`           |
+| pwm_min            | `float`  | Servo minimum pwm (16-bit).                                                                                                                                                                  | `0`              |
+| pwm_max            | `float`  | Servo maximum pwm (16-bit).                                                                                                                                                                  | `4095`           |
+| angle_min          | `float`  | Servo minimum position in angles.                                                                                                                                                            | `0`              |
+| angle_software_min | `float`  | Servo minimum dedesired position in angles, caued by physical configuration limits.                                                                                                          | `0`              |
+| angle_max          | `float`  | Servo maximum position in angles.                                                                                                                                                            | `180`            |
+| angle_software_max | `float`  | Servo maximum dedesired position in angles, caued by physical configuration limits.                                                                                                          | `180`            |
+| speed_max          | `float`  | Servo maximum speed in angles/second.                                                                                                                                                        | `200.0`          |
+| dir                | `int`    | Direction config for upside-down placement (-1 or 1).                                                                                                                                        | `1`              |
+| gain_P             | `float`  | p-gain og PID controller.                                                                                                                                                                    | `1.0`            |
+| gain_I             | `float`  | i-gain og PID controller.                                                                                                                                                                    | `0.0`            |
+| gain_D             | `float`  | d-gain og PID controller.                                                                                                                                                                    | `0.0`            |
 
 ### PWM Calculation Example
 
@@ -41,20 +43,22 @@ Class representing a single servo, containing hardware configurations and functi
 
 The `ServoControl` class is implemented in `servo_control.py`, and depends on `servo_coms.py` in the same directory, that handles the communication layer.
 
-| Name      | Type     | Description                                                               | Default          |
-| --------- | -------- | ------------------------------------------------------------------------- | ---------------- |
-| pwm_min   | `float`  | Servo minimum pwm (16-bit).                                               | -                |
-| pwm_max   | `float`  | Servo maximum pwm (16-bit).                                               | -                |
-| angle_min | `float`  | Servo minimum position in angles.                                         | -                |
-| angle_max | `float`  | Servo maximum position in angles.                                         | -                |
-| speed_max | `float`  | Servo maximum speed in angles/second.                                     | -                |
-| servo_id  | `int`    | Servo id/channel on the PCA9685 board (only applicable for I2C protocol). | `0`              |
-| dir       | `int`    | Direction config for upside-down placement (-1 or 1).                     | `1`              |
-| gain_P    | `float`  | p-gain og PID controller.                                                 | `1.0`            |
-| gain_I    | `float`  | i-gain og PID controller.                                                 | `0.0`            |
-| gain_D    | `float`  | d-gain og PID controller.                                                 | `0.0`            |
-| protocol  | `string` | Communications protocol. Supported protocols are `serial` and `i2c`.      | `"serial"`       |
-| port      | `string` | Port name.                                                                | `"/dev/ttyACM0"` |
+| Name               | Type     | Description                                                                         | Default          |
+| ------------------ | -------- | ----------------------------------------------------------------------------------- | ---------------- |
+| pwm_min            | `float`  | Servo minimum pwm (16-bit).                                                         | -                |
+| pwm_max            | `float`  | Servo maximum pwm (16-bit).                                                         | -                |
+| angle_min          | `float`  | Servo minimum position in angles.                                                   | -                |
+| angle_software_min | `float`  | Servo minimum dedesired position in angles, caued by physical configuration limits. | -                |
+| angle_max          | `float`  | Servo maximum position in angles.                                                   | -                |
+| angle_software_max | `float`  | Servo maximum dedesired position in angles, caued by physical configuration limits. | -                |
+| speed_max          | `float`  | Servo maximum speed in angles/second.                                               | -                |
+| servo_id           | `int`    | Servo id/channel on the PCA9685 board (only applicable for I2C protocol).           | `0`              |
+| dir                | `int`    | Direction config for upside-down placement (-1 or 1).                               | `1`              |
+| gain_P             | `float`  | p-gain og PID controller.                                                           | `1.0`            |
+| gain_I             | `float`  | i-gain og PID controller.                                                           | `0.0`            |
+| gain_D             | `float`  | d-gain og PID controller.                                                           | `0.0`            |
+| protocol           | `string` | Communications protocol. Supported protocols are `serial` and `i2c`.                | `"serial"`       |
+| port               | `string` | Port name.                                                                          | `"/dev/ttyACM0"` |
 
 > To use I2C protocol, the code must be run on a board with I2C pins.
 
