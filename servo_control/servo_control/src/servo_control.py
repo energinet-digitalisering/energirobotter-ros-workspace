@@ -97,7 +97,7 @@ class ServoControl:
         )
 
         # Apply control to angle position
-        self.angle += self.dir * vel_control * t_d
+        self.angle += vel_control * t_d
 
         # Clamp values between min and max angle
         self.angle = np.clip(
@@ -106,7 +106,19 @@ class ServoControl:
             self.angle_software_max,
         )
 
-        self.servo_coms.write_angle(self.angle)
+        # Flip angle if direction is flipped
+        if self.dir > 0:
+            angle = self.angle
+        elif self.dir < 0:
+            angle = interval_map(
+                self.angle,
+                self.angle_min,
+                self.angle_max,
+                self.angle_max,
+                self.angle_min,
+            )
+
+        self.servo_coms.write_angle(angle)
 
     def reach_angle(self, t_d, angle, speed_desired=(-1)):
         angle_gain_p = 10.0
