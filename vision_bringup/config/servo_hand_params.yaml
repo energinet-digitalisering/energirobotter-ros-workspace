@@ -19,10 +19,10 @@
 
 /hand_left/ring/servo:
   ros__parameters:
-    servo_id: -1
+    servo_id: 1
     angle_software_min: 68
     angle_software_max: 116
-    dir: 1
+    dir: -1
 
 /hand_left/middle/servo:
   ros__parameters:
@@ -57,7 +57,7 @@
     servo_id: 9
     angle_software_min: 68
     angle_software_max: 116
-    dir: 1
+    dir: -1
 
 /hand_right/middle/servo:
   ros__parameters:
