@@ -1,6 +1,7 @@
 import numpy as np
 
 from .servo_coms import ServoComs
+from .utils import interval_map
 
 
 class ServoControl:

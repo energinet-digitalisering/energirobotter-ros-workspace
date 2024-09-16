@@ -4,6 +4,8 @@ import board
 from enum import Enum
 import serial
 
+from .utils import interval_map
+
 
 class Protocol(Enum):
     UNINITIALIZED = 0
@@ -93,7 +95,7 @@ class ServoComs:
         if self.protocol == Protocol.I2C:
             angle = int(np.round(angle))
             pwm = int(
-                self.interval_map(
+                interval_map(
                     angle, self.angle_min, self.angle_max, self.pwm_min, self.pwm_max
                 )
             )
@@ -102,11 +104,3 @@ class ServoComs:
 
         else:
             print("I2C not available")
-
-    def interval_map(self, x, x0, x1, y0, y1):
-
-        # x: value
-        # [x0, x1]: original interval
-        # [y0, y1]: target interval
-
-        return ((y0 * (x1 - x)) + (y1 * (x - x0))) / (x1 - x0)
