@@ -7,8 +7,8 @@ Vision capabilities and camera handling for the Humanoid Robot project "Energiro
 Clone this repository into a `workspace/src/` folder, along with [realsense-ros](https://github.com/IntelRealSense/realsense-ros/tree/ros2-master) (run commands from root of `workspace`):
 
 ```
-git clone git@github.com:energinet-digitalisering/energirobotter-vision.git src/
-git clone https://github.com/IntelRealSense/realsense-ros.git src/
+git clone git@github.com:energinet-digitalisering/energirobotter-vision.git src/energirobotter-vision/
+git clone https://github.com/IntelRealSense/realsense-ros.git src/realsense-ros/
 ```
 
 Setup RealSense SDK:
@@ -17,6 +17,7 @@ sudo apt install ros-humble-librealsense2*
 ```
 
 ### Dependencies
+
 In `worspace` root, source ROS and install ROS dependencies with rosdep:
 ```
 source /opt/ros/humble/setup.bash
@@ -52,4 +53,6 @@ If no camera is available, run example with:
 ```
 ros2 launch vision_bringup vision.launch.py use_mock_camera:=true
 ```
+
+> Note: The first time `face_detection` is run `ultralytics` will install som extra packages, and require a restart of the node.
 
