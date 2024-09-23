@@ -11,6 +11,9 @@ set(CMAKE_CXX_STANDARD 20)
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_lifecycle REQUIRED)
+find_package(lifecycle_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
 
 
 ############################################################################
@@ -21,8 +24,12 @@ find_package(rclcpp REQUIRED)
 add_executable(behaviour_manager nodes/behaviour_manager.cpp)
 ament_target_dependencies(behaviour_manager rclcpp)
 
+add_executable(lifecycle_talker nodes/lifecycle_talker.cpp)
+ament_target_dependencies(lifecycle_talker rclcpp rclcpp_lifecycle lifecycle_msgs std_msgs)
+
 install(TARGETS
   behaviour_manager
+  lifecycle_talker
 DESTINATION lib/${PROJECT_NAME})
 
 ############################################################################
