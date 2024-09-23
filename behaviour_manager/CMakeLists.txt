@@ -22,7 +22,7 @@ find_package(std_msgs REQUIRED)
 
 # behaviour_manager
 add_executable(behaviour_manager nodes/behaviour_manager.cpp)
-ament_target_dependencies(behaviour_manager rclcpp)
+ament_target_dependencies(behaviour_manager rclcpp lifecycle_msgs)
 
 add_executable(lifecycle_talker nodes/lifecycle_talker.cpp)
 ament_target_dependencies(lifecycle_talker rclcpp rclcpp_lifecycle lifecycle_msgs std_msgs)
