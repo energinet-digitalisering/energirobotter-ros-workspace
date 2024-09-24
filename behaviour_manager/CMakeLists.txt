@@ -15,6 +15,28 @@ find_package(rclcpp_lifecycle REQUIRED)
 find_package(lifecycle_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 
+############################################################################
+
+# Libraries
+
+include_directories(include)
+
+install(
+  DIRECTORY include/${PROJECT_NAME}
+  DESTINATION include)
+
+## lifecycle_service_client
+add_library(lifecycle_service_client src/lifecycle_service_client.cpp)
+ament_target_dependencies(lifecycle_service_client rclcpp lifecycle_msgs)
+ament_export_targets(lifecycle_service_client HAS_LIBRARY_TARGET)
+
+install(
+  TARGETS lifecycle_service_client
+  EXPORT lifecycle_service_client
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include)
 
 ############################################################################
 
@@ -23,6 +45,7 @@ find_package(std_msgs REQUIRED)
 # behaviour_manager
 add_executable(behaviour_manager nodes/behaviour_manager.cpp)
 ament_target_dependencies(behaviour_manager rclcpp lifecycle_msgs)
+target_link_libraries(behaviour_manager lifecycle_service_client)
 
 add_executable(lifecycle_talker nodes/lifecycle_talker.cpp)
 ament_target_dependencies(lifecycle_talker rclcpp rclcpp_lifecycle lifecycle_msgs std_msgs)
