@@ -12,6 +12,8 @@
 #include "lifecycle_msgs/srv/change_state.hpp"
 #include "lifecycle_msgs/srv/get_state.hpp"
 
+#include "behaviour_manager/service_client.hpp"
+
 // Helper functions to interact with a lifecycle node.
 class LifecycleServiceClient
 {
@@ -30,8 +32,8 @@ private:
     // Variables
     rclcpp::Node::SharedPtr node_;
     std::string lifecycle_node_name_;
-    std::shared_ptr<rclcpp::Client<lifecycle_msgs::srv::GetState>> get_state_;
-    std::shared_ptr<rclcpp::Client<lifecycle_msgs::srv::ChangeState>> change_state_;
+    ServiceClient<lifecycle_msgs::srv::GetState> get_state_;
+    ServiceClient<lifecycle_msgs::srv::ChangeState> change_state_;
 
     // Typedef
     typedef rclcpp::Client<lifecycle_msgs::srv::GetState>::FutureAndRequestId FutureGet;
@@ -39,7 +41,7 @@ private:
 
     // Functions
     template <typename FutureT>
-    std::future_status wait_for_result(const FutureT &future, std::chrono::seconds time_to_wait);
+    std::future_status wait_for_result(const FutureT &future_result, std::chrono::seconds time_to_wait);
 };
 
 #endif // BEHAVIOUR_MANAGER__LIFECYCLE_SERVICE_CLIENT_HPP_

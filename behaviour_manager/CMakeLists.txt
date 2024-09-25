@@ -25,9 +25,24 @@ install(
   DIRECTORY include/${PROJECT_NAME}
   DESTINATION include)
 
+## service_client (header only)
+add_library(service_client INTERFACE)
+ament_export_targets(service_client HAS_LIBRARY_TARGET)
+
+install(
+    TARGETS service_client
+    EXPORT service_client
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    RUNTIME DESTINATION bin
+    INCLUDES DESTINATION include
+)
+ament_export_include_directories(include)
+
 ## lifecycle_service_client
 add_library(lifecycle_service_client src/lifecycle_service_client.cpp)
 ament_target_dependencies(lifecycle_service_client rclcpp lifecycle_msgs)
+target_link_libraries(lifecycle_service_client service_client)
 ament_export_targets(lifecycle_service_client HAS_LIBRARY_TARGET)
 
 install(
