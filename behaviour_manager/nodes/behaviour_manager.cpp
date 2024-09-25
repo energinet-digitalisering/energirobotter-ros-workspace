@@ -66,120 +66,44 @@ private:
         // configure
         if (count_ == 0)
         {
-            if (!lifecycle_client_->change_state(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE))
-            {
-                return;
-            }
-            if (!lifecycle_client_->get_state())
-            {
-                return;
-            }
+            lifecycle_client_->change_state(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
         }
 
-        //         // activate
-        //         if (count_ == 1)
-        //         {
-        //             if (!rclcpp::ok())
-        //             {
-        //                 // return;
-        //             }
-        //             if (!this->change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE))
-        //             {
-        //                 // return;
-        //             }
-        //             if (!this->get_state())
-        //             {
-        //                 // return;
-        //             }
-        //         }
+        // activate
+        if (count_ == 1)
+        {
+            lifecycle_client_->change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE);
+        }
 
-        //         // deactivate
-        //         if (count_ == 2)
-        //         {
-        //             if (!rclcpp::ok())
-        //             {
-        //                 // return;
-        //             }
-        //             if (!this->change_state(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE))
-        //             {
-        //                 // return;
-        //             }
-        //             if (!this->get_state())
-        //             {
-        //                 // return;
-        //             }
-        //         }
+        // deactivate
+        if (count_ == 2)
+        {
+            lifecycle_client_->change_state(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
+        }
 
-        //         // activate it again
-        //         if (count_ == 2)
-        //         {
-        //             if (!rclcpp::ok())
-        //             {
-        //                 // return;
-        //             }
-        //             if (!this->change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE))
-        //             {
-        //                 // return;
-        //             }
-        //             if (!this->get_state())
-        //             {
-        //                 // return;
-        //             }
-        //         }
+        // activate it again
+        if (count_ == 3)
+        {
+            lifecycle_client_->change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE);
+        }
 
-        //         // and deactivate it again
-        //         if (count_ == 3)
-        //         {
-        //             if (!rclcpp::ok())
-        //             {
-        //                 // return;
-        //             }
-        //             if (!this->change_state(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE))
-        //             {
-        //                 // return;
-        //             }
-        //             if (!this->get_state())
-        //             {
-        //                 // return;
-        //             }
-        //         }
+        // and deactivate it again
+        if (count_ == 4)
+        {
+            lifecycle_client_->change_state(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
+        }
 
-        //         // we cleanup
-        //         if (count_ == 4)
-        //         {
-        //             if (!rclcpp::ok())
-        //             {
-        //                 // return;
-        //             }
-        //             if (!this->change_state(lifecycle_msgs::msg::Transition::TRANSITION_CLEANUP))
-        //             {
-        //                 // return;
-        //             }
-        //             if (!this->get_state())
-        //             {
-        //                 // return;
-        //             }
-        //         }
+        // we cleanup
+        if (count_ == 5)
+        {
+            lifecycle_client_->change_state(lifecycle_msgs::msg::Transition::TRANSITION_CLEANUP);
+        }
 
-        //         // and finally shutdown
-        //         // Note: We have to be precise here on which shutdown transition id to call
-        //         // We are currently in the unconfigured state and thus have to call
-        //         // TRANSITION_UNCONFIGURED_SHUTDOWN
-        //         if (count_ == 5)
-        //         {
-        //             if (!rclcpp::ok())
-        //             {
-        //                 // return;
-        //             }
-        //             if (!this->change_state(lifecycle_msgs::msg::Transition::TRANSITION_UNCONFIGURED_SHUTDOWN))
-        //             {
-        //                 // return;
-        //             }
-        //             if (!this->get_state())
-        //             {
-        //                 // return;
-        //             }
-        //         }
+        // and finally shutdown
+        if (count_ == 6)
+        {
+            lifecycle_client_->change_state(lifecycle_msgs::msg::Transition::TRANSITION_UNCONFIGURED_SHUTDOWN);
+        }
 
         count_++;
     }
