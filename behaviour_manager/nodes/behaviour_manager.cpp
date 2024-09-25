@@ -19,14 +19,7 @@ public:
         timer_ = this->create_wall_timer(std::chrono::duration<double>(1.0 / freq_), std::bind(&BehaviourManager::callback_timer, this));
 
         /***** Services *****/
-        // Create a timer with a very short duration to defer the initialization
-        init_timer_ = this->create_wall_timer(
-            std::chrono::milliseconds(0),
-            [this]() -> void
-            {
-                create_lifecycle_service_client();
-                init_timer_->cancel();
-            });
+        create_lifecycle_service_client();
     }
 
 private:
@@ -53,8 +46,16 @@ private:
     void
     create_lifecycle_service_client()
     {
-        lifecycle_client_ =
-            std::make_shared<LifecycleServiceClient>(lifecycle_node_, shared_from_this());
+        // shared_from_this() has to be called after initialization
+        // Create a timer with a very short duration to defer the initialization
+        init_timer_ = this->create_wall_timer(
+            std::chrono::milliseconds(0),
+            [this]() -> void
+            {
+                lifecycle_client_ =
+                    std::make_shared<LifecycleServiceClient>(lifecycle_node_, shared_from_this());
+                init_timer_->cancel();
+            });
     }
 
     /***** Callbacks *****/
