@@ -1,5 +1,8 @@
-#include <rclcpp/rclcpp.hpp>
+#include <map>
+#include <string>
+#include <vector>
 
+#include <rclcpp/rclcpp.hpp>
 #include "lifecycle_msgs/msg/state.hpp"
 #include "lifecycle_msgs/msg/transition.hpp"
 #include "lifecycle_msgs/srv/change_state.hpp"
@@ -13,7 +16,10 @@ public:
     BehaviourManager() : Node("behaviour_manager")
     {
         /***** Parameters *****/
+        declare_parameter("node_names", rclcpp::PARAMETER_STRING_ARRAY);
+
         freq_ = this->declare_parameter<double>("freq", 1.0);
+        node_names_ = get_parameter("node_names").as_string_array();
 
         /***** Timers *****/
         timer_ = this->create_wall_timer(std::chrono::duration<double>(1.0 / freq_), std::bind(&BehaviourManager::callback_timer, this));
@@ -31,20 +37,14 @@ private:
     rclcpp::TimerBase::SharedPtr init_timer_;
     rclcpp::TimerBase::SharedPtr timer_;
 
-    // Lifecycle node pointers
-    std::string lifecycle_node_ = "lifecycle_talker";
-    // Lifecycle service pointers
-    std::string node_get_state_topic_ = "lifecycle_talker/get_state";
-    std::string node_change_state_topic_ = "lifecycle_talker/change_state";
-
-    std::shared_ptr<LifecycleServiceClient> lifecycle_client_;
+    std::vector<std::string> node_names_;
+    std::map<std::string, std::shared_ptr<LifecycleServiceClient>> node_map_;
 
     // Variables
     size_t count_ = 0;
 
     /***** Functions *****/
-    void
-    create_lifecycle_service_client()
+    void create_lifecycle_service_client()
     {
         // shared_from_this() has to be called after initialization
         // Create a timer with a very short duration to defer the initialization
@@ -52,8 +52,14 @@ private:
             std::chrono::milliseconds(0),
             [this]() -> void
             {
-                lifecycle_client_ =
-                    std::make_shared<LifecycleServiceClient>(lifecycle_node_, shared_from_this());
+                for (auto &node_name : node_names_)
+                {
+                    RCLCPP_WARN_STREAM(this->get_logger(), "node name: " << node_name);
+
+                    node_map_[node_name] =
+                        std::make_shared<LifecycleServiceClient>(node_name, shared_from_this());
+                }
+
                 init_timer_->cancel();
             });
     }
@@ -67,43 +73,64 @@ private:
         // configure
         if (count_ == 0)
         {
-            lifecycle_client_->change_state(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
+            for (auto &node : node_map_)
+            {
+                node.second->change_state(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
+            }
         }
 
         // activate
         if (count_ == 1)
         {
-            lifecycle_client_->change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE);
+            for (auto &node : node_map_)
+            {
+                node.second->change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE);
+            }
         }
 
         // deactivate
         if (count_ == 2)
         {
-            lifecycle_client_->change_state(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
+            for (auto &node : node_map_)
+            {
+                node.second->change_state(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
+            }
         }
 
         // activate it again
         if (count_ == 3)
         {
-            lifecycle_client_->change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE);
+            for (auto &node : node_map_)
+            {
+                node.second->change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE);
+            }
         }
 
         // and deactivate it again
         if (count_ == 4)
         {
-            lifecycle_client_->change_state(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
+            for (auto &node : node_map_)
+            {
+                node.second->change_state(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
+            }
         }
 
         // we cleanup
         if (count_ == 5)
         {
-            lifecycle_client_->change_state(lifecycle_msgs::msg::Transition::TRANSITION_CLEANUP);
+            for (auto &node : node_map_)
+            {
+                node.second->change_state(lifecycle_msgs::msg::Transition::TRANSITION_CLEANUP);
+            }
         }
 
         // and finally shutdown
         if (count_ == 6)
         {
-            lifecycle_client_->change_state(lifecycle_msgs::msg::Transition::TRANSITION_UNCONFIGURED_SHUTDOWN);
+            for (auto &node : node_map_)
+            {
+                node.second->change_state(lifecycle_msgs::msg::Transition::TRANSITION_UNCONFIGURED_SHUTDOWN);
+            }
         }
 
         count_++;
