@@ -27,6 +27,7 @@ public:
                                                                                                                                 std::placeholders::_1, std::placeholders::_2));
 
         /***** Lifecycle Nodes Services *****/
+        init_allowed_transitions();
         create_lifecycle_service_client();
     }
 
@@ -46,9 +47,35 @@ private:
 
     // Variables
     std::vector<std::string> node_names_;
+    std::map<std::string, uint8_t> node_transition_log_;
     std::map<std::string, std::shared_ptr<LifecycleServiceClient>> node_map_;
 
+    std::map<uint8_t, std::vector<uint8_t>> allowed_transitions_;
+
     /***** Functions *****/
+    void init_allowed_transitions()
+    {
+        // https://design.ros2.org/articles/node_lifecycle.html
+        // Knowing the last transition gives information about the state.
+        // allowed_transitions_ given a transition, will return a vector with the allowed transitions, to avoid crash with Python Lifecyle nodes.
+        // Will be made redundant when this PR is merged: https://github.com/ros2/rclpy/pull/1319
+
+        allowed_transitions_[lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE] =
+            {
+                lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE,
+                lifecycle_msgs::msg::Transition::TRANSITION_CLEANUP,
+                lifecycle_msgs::msg::Transition::TRANSITION_UNCONFIGURED_SHUTDOWN,
+            };
+
+        allowed_transitions_[lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE] =
+            {
+                lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE,
+                lifecycle_msgs::msg::Transition::TRANSITION_UNCONFIGURED_SHUTDOWN,
+            };
+
+        allowed_transitions_[lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE] = allowed_transitions_[lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE];
+    }
+
     void create_lifecycle_service_client()
     {
         // shared_from_this() has to be called after initialization
@@ -69,35 +96,54 @@ private:
             });
     }
 
+    void change_state_node(std::string node_name, uint8_t transition)
+    {
+        if (node_transition_log_[node_name] == transition)
+        {
+            return;
+        }
+
+        node_map_[node_name]->change_state(transition);
+        node_transition_log_[node_name] = transition;
+    }
+
+    void change_state_all_nodes(uint8_t transition)
+    {
+        for (auto &node_name : node_names_)
+        {
+            std::vector<uint8_t> allowed_transitions = allowed_transitions_[node_transition_log_[node_name]];
+            if (not allowed_transitions.empty())
+            {
+                if (std::count(allowed_transitions.begin(), allowed_transitions.end(), transition) == 0)
+                {
+                    return;
+                }
+            }
+
+            change_state_node(node_name, transition);
+        }
+    }
+
     void configure_nodes()
     {
-        for (auto &node : node_map_)
-        {
-            node.second->change_state(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
-        }
+        change_state_all_nodes(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
     }
 
     void deactivate_nodes()
     {
-        for (auto &node : node_map_)
-        {
-            node.second->change_state(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
-        }
+        change_state_all_nodes(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
     }
 
     void shutdown_nodes()
     {
-        for (auto &node : node_map_)
-        {
-            node.second->change_state(lifecycle_msgs::msg::Transition::TRANSITION_CLEANUP);
-            node.second->change_state(lifecycle_msgs::msg::Transition::TRANSITION_UNCONFIGURED_SHUTDOWN);
-        }
+        change_state_all_nodes(lifecycle_msgs::msg::Transition::TRANSITION_CLEANUP);
+        change_state_all_nodes(lifecycle_msgs::msg::Transition::TRANSITION_UNCONFIGURED_SHUTDOWN);
     }
 
     void activate_node_exclusive(std::string node_name)
     {
         deactivate_nodes();
-        node_map_[node_name]->change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE);
+        change_state_node(node_name, lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE);
     }
 
     /***** Callbacks *****/
