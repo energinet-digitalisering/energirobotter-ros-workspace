@@ -109,6 +109,14 @@ private:
 
         if (node_map_.count(node_name) == 0)
         {
+            std::string message;
+            message = node_name + " is not a managed lifecylce node, valid nodes are: \n";
+            for (auto &node_name : node_names_)
+            {
+                message += "    " + node_name + '\n';
+            }
+            RCLCPP_WARN_STREAM(this->get_logger(), message);
+
             response->success = false;
             return;
         }
