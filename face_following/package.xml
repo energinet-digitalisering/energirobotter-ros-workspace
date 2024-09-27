@@ -9,6 +9,9 @@
 
   <exec_depend>servo_control</exec_depend>
 
+  <depend>lifecycle_msgs</depend>
+  <depend>lifecycle</depend>
+
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
   <test_depend>ament_pep257</test_depend>
