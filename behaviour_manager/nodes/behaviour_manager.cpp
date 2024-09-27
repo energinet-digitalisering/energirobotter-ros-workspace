@@ -22,7 +22,14 @@ public:
         node_names_ = get_parameter("node_names").as_string_array();
 
         /***** Services *****/
+
+        /***** Lifecycle Nodes Services *****/
         create_lifecycle_service_client();
+    }
+
+    ~BehaviourManager()
+    {
+        shutdown_nodes();
     }
 
 private:
@@ -33,6 +40,7 @@ private:
     // Node variables
     rclcpp::TimerBase::SharedPtr init_timer_;
 
+    // Variables
     std::vector<std::string> node_names_;
     std::map<std::string, std::shared_ptr<LifecycleServiceClient>> node_map_;
 
@@ -47,13 +55,45 @@ private:
             {
                 for (auto &node_name : node_names_)
                 {
-
                     node_map_[node_name] =
                         std::make_shared<LifecycleServiceClient>(node_name, shared_from_this());
                 }
 
+                configure_nodes();
+
                 init_timer_->cancel();
             });
+    }
+
+    void configure_nodes()
+    {
+        for (auto &node : node_map_)
+        {
+            node.second->change_state(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
+        }
+    }
+
+    void deactivate_nodes()
+    {
+        for (auto &node : node_map_)
+        {
+            node.second->change_state(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
+        }
+    }
+
+    void shutdown_nodes()
+    {
+        for (auto &node : node_map_)
+        {
+            node.second->change_state(lifecycle_msgs::msg::Transition::TRANSITION_CLEANUP);
+            node.second->change_state(lifecycle_msgs::msg::Transition::TRANSITION_UNCONFIGURED_SHUTDOWN);
+        }
+    }
+
+    void activate_node_exclusive(std::string node_name)
+    {
+        deactivate_nodes();
+        node_map_[node_name]->change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE);
     }
 
     /***** Callbacks *****/
