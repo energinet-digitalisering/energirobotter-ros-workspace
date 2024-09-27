@@ -1,0 +1,5 @@
+# Request node to activate.
+
+string node    # Name of node to activate 
+---
+bool success    # indicate successful node activation
