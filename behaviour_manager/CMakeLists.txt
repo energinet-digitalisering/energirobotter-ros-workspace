@@ -14,6 +14,7 @@ find_package(rclcpp REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 find_package(lifecycle_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(energirobotter_interfaces REQUIRED)
 
 ############################################################################
 
@@ -59,7 +60,7 @@ install(
 
 # behaviour_manager
 add_executable(behaviour_manager nodes/behaviour_manager.cpp)
-ament_target_dependencies(behaviour_manager rclcpp lifecycle_msgs)
+ament_target_dependencies(behaviour_manager rclcpp lifecycle_msgs energirobotter_interfaces)
 target_link_libraries(behaviour_manager lifecycle_service_client)
 
 add_executable(lifecycle_talker nodes/lifecycle_talker.cpp)

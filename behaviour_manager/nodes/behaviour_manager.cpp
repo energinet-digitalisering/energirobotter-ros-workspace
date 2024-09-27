@@ -7,6 +7,7 @@
 #include "lifecycle_msgs/msg/transition.hpp"
 #include "lifecycle_msgs/srv/change_state.hpp"
 #include "lifecycle_msgs/srv/get_state.hpp"
+#include "energirobotter_interfaces/srv/activate_node.hpp"
 
 #include "behaviour_manager/lifecycle_service_client.hpp"
 
@@ -22,6 +23,8 @@ public:
         node_names_ = get_parameter("node_names").as_string_array();
 
         /***** Services *****/
+        service_activate_node_ = this->create_service<energirobotter_interfaces::srv::ActivateNode>("/activate_node", std::bind(&BehaviourManager::callback_activate_node, this,
+                                                                                                                                std::placeholders::_1, std::placeholders::_2));
 
         /***** Lifecycle Nodes Services *****/
         create_lifecycle_service_client();
@@ -38,6 +41,7 @@ private:
     double freq_;
 
     // Node variables
+    rclcpp::Service<energirobotter_interfaces::srv::ActivateNode>::SharedPtr service_activate_node_;
     rclcpp::TimerBase::SharedPtr init_timer_;
 
     // Variables
@@ -97,11 +101,20 @@ private:
     }
 
     /***** Callbacks *****/
+    void callback_activate_node(
+        const std::shared_ptr<energirobotter_interfaces::srv::ActivateNode::Request> request,
+        std::shared_ptr<energirobotter_interfaces::srv::ActivateNode::Response> response)
     {
+        std::string node_name = request->node;
 
+        if (node_map_.count(node_name) == 0)
         {
+            response->success = false;
+            return;
         }
 
+        activate_node_exclusive(node_name);
+        response->success = true;
     }
 };
 
