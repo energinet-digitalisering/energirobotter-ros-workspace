@@ -100,6 +100,7 @@ private:
     {
         if (node_transition_log_[node_name] == transition)
         {
+            RCLCPP_INFO_STREAM(this->get_logger(), node_name << " is already in desired state, ignoring...");
             return;
         }
 
