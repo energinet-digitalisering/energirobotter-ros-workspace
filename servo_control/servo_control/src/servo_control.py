@@ -40,7 +40,9 @@ class ServoControl:
         self.error_acc = 0.0
         self.error_prev = 0.0
 
-        self.servo_coms = ServoComs(pwm_min, pwm_max, angle_min, angle_max, servo_id)
+        self.servo_coms = ServoComs(
+            pwm_min, pwm_max, angle_min, angle_max, speed_max, servo_id
+        )
 
         self.coms_successful = False
 
