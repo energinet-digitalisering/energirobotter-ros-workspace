@@ -20,9 +20,9 @@ class ServoControlNode(Node):
             self.get_parameter("operation_mode").get_parameter_value().string_value
         )
 
-        self.declare_parameter("com_protocol", "i2c")
-        com_protocol = (
-            self.get_parameter("com_protocol").get_parameter_value().string_value
+        self.declare_parameter("driver_device", "pca9685")
+        driver_device = (
+            self.get_parameter("driver_device").get_parameter_value().string_value
         )
 
         self.declare_parameter("com_port", "/dev/ttyACM0")
@@ -111,7 +111,7 @@ class ServoControlNode(Node):
             gain_P=gain_P,
             gain_I=gain_I,
             gain_D=gain_D,
-            protocol=com_protocol,
+            driver_device=driver_device,
             port=com_port,
         )
 

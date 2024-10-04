@@ -20,7 +20,7 @@ class ServoControl:
         gain_P=1.0,
         gain_I=0.0,
         gain_D=0.0,
-        protocol="serial",
+        driver_device="arduino",
         port="/dev/ttyACM0",
     ):
 
@@ -44,17 +44,17 @@ class ServoControl:
 
         self.coms_successful = False
 
-        match protocol:
-            case "serial":
-                self.coms_successful = self.servo_coms.init_serial(
+        match driver_device:
+            case "arduino":
+                self.coms_successful = self.servo_coms.init_arduino(
                     port=port, baudrate=115200, timeout=1.0
                 )
 
-            case "i2c":
-                self.coms_successful = self.servo_coms.init_i2c()
+            case "pca9685":
+                self.coms_successful = self.servo_coms.init_PCA9685()
 
             case _:
-                print("Invalid protocol")
+                print("Invalid driver device")
 
         self.servo_coms.write_angle(self.angle)
 

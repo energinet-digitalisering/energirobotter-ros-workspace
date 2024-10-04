@@ -1,7 +1,7 @@
 /**:
   ros__parameters:
     operation_mode: "angle"
-    com_protocol: "i2c"
+    driver_device: "pca9685"
     control_frequency: 0.05
     pwm_min: 2400
     pwm_max: 9600
