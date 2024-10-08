@@ -7,7 +7,6 @@ from rclpy.lifecycle import State
 from rclpy.lifecycle import TransitionCallbackReturn
 from rclpy.timer import Timer
 import std_msgs
-import std_msgs.msg
 import vision_msgs.msg
 
 
@@ -99,7 +98,7 @@ class FaceFollowingNode(Node):
         self.publisher_servo_pan.publish(std_msgs.msg.Float64(data=float(error_pan)))
         self.publisher_servo_tilt.publish(std_msgs.msg.Float64(data=float(error_tilt)))
 
-        ##################### Lifecyle Node Functions #####################
+    ##################### Lifecyle Node Functions #####################
 
     def on_configure(self, state: State) -> TransitionCallbackReturn:
         self.get_logger().info("on_configure() is called.")
