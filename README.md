@@ -1,6 +1,6 @@
-# Energirobotter Vision
+# Energirobotter Elrik
 
-Vision capabilities and camera handling for the Humanoid Robot project "Energirobotter". 
+Packages for the Elrik Humanoid Robot, part of the project "Energirobotter". 
 
 ## Setup
 
