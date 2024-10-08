@@ -7,7 +7,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
-package_name = "vision_bringup"
+package_name = "elrik_bringup"
 
 
 def launch_setup(context, *args, **kwargs):
@@ -18,7 +18,7 @@ def launch_setup(context, *args, **kwargs):
 
     vision_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            [FindPackageShare("vision_bringup"), "/launch", "/vision.launch.py"]
+            [FindPackageShare(package_name), "/launch", "/vision.launch.py"]
         ),
     )
 

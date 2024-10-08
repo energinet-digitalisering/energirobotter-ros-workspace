@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>vision_bringup</name>
+  <name>elrik_bringup</name>
   <version>0.0.0</version>
-  <description>Brinup package for vision system.</description>
+  <description>Brinup package for the Elrik robot, part of the Energirobotter project.</description>
   <maintainer email="xnlth@energinet.dk">Nicoline</maintainer>
   <license>Energinet</license>
 

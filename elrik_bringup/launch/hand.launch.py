@@ -8,7 +8,7 @@ from launch.substitutions import (
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
-package_name = "vision_bringup"
+package_name = "elrik_bringup"
 
 
 def launch_setup(context, *args, **kwargs):
