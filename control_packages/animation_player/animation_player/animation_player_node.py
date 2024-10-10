@@ -1,3 +1,5 @@
+import csv
+import os
 from typing import Optional
 
 import rclpy
@@ -7,6 +9,8 @@ from rclpy.lifecycle import State
 from rclpy.lifecycle import TransitionCallbackReturn
 from rclpy.timer import Timer
 import std_msgs
+
+from animation_player.src import csv_reader
 
 
 class AnimationPlayerNode(Node):
@@ -19,7 +23,7 @@ class AnimationPlayerNode(Node):
         self.declare_parameter("fps", 24)
         self.fps = self.get_parameter("fps").get_parameter_value().integer_value
 
-        self.declare_parameter("csv_file_path", 24)
+        self.declare_parameter("csv_file_path", "")
         self.csv_file_path = (
             self.get_parameter("csv_file_path").get_parameter_value().string_value
         )
@@ -30,22 +34,35 @@ class AnimationPlayerNode(Node):
 
         # Node variables
 
+        # CSV file setup
+
+        self.csv_reader = csv_reader.CSVReader(self.csv_file_path)
+
+    def __del__(self):
+        self.csv_close()
+
+    ##################### Functions #####################
+
     ##################### Callbacks #####################
 
-    def callback_timer(self): ...
+    def callback_timer(self):
+
+        row = self.csv_reader.get_next_row()
+
+        self.get_logger().info(str(row))
 
     ##################### Lifecyle Node Functions #####################
 
     def on_configure(self, state: State) -> TransitionCallbackReturn:
         self.get_logger().info("on_configure() is called.")
 
+        # Timers
+        self.timer = self.create_timer(1 / self.fps, self.callback_timer)
+
         # Publishers
         self.publisher_joint = self.create_publisher(
             std_msgs.msg.Float64, "/servo_0/set_angle", 1
         )
-
-        # Timers
-        self.timer = self.create_timer(1 / self.fps, self.callback_timer)
 
         return TransitionCallbackReturn.SUCCESS
 
