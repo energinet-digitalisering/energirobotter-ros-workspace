@@ -40,3 +40,6 @@ class CSVReader:
     def close(self):
         """Closes the file when done."""
         self.file.close()
+
+    def get_header(self):
+        return self.header
