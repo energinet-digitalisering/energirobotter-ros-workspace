@@ -6,7 +6,7 @@ from rclpy.lifecycle import Publisher
 from rclpy.lifecycle import State
 from rclpy.lifecycle import TransitionCallbackReturn
 from rclpy.timer import Timer
-import std_msgs
+import std_msgs.msg
 import vision_msgs.msg
 
 
