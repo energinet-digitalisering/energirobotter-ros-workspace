@@ -1,5 +1,3 @@
-import csv
-import os
 from typing import Optional
 
 import rclpy
@@ -28,18 +26,22 @@ class AnimationPlayerNode(Node):
             self.get_parameter("csv_file_path").get_parameter_value().string_value
         )
 
+        # CSV file setup
+        self.csv_reader = csv_reader.CSVReader(self.csv_file_path)
+
         # Lifecycle Node timers and publishers
         self.timer: Optional[Timer] = None
-        self.publisher_joint: Optional[Publisher] = None
+
+        self.joint_idx: int = {}
+        self.joint_publishers: Optional[Publisher] = {}
+        for idx, joint in enumerate(self.csv_reader.get_header()):
+            self.joint_idx[joint] = idx
+            self.joint_publishers[joint] = None
 
         # Node variables
 
-        # CSV file setup
-
-        self.csv_reader = csv_reader.CSVReader(self.csv_file_path)
-
     def __del__(self):
-        self.csv_close()
+        self.csv_reader.close()
 
     ##################### Functions #####################
 
@@ -47,9 +49,14 @@ class AnimationPlayerNode(Node):
 
     def callback_timer(self):
 
+        if None in self.joint_publishers.values():
+            return
+
         row = self.csv_reader.get_next_row()
 
-        self.get_logger().info(str(row))
+        for joint in self.joint_publishers.keys():
+            data = row[self.joint_idx[joint]]
+            self.joint_publishers[joint].publish(std_msgs.msg.Float64(data=float(data)))
 
     ##################### Lifecyle Node Functions #####################
 
@@ -57,12 +64,15 @@ class AnimationPlayerNode(Node):
         self.get_logger().info("on_configure() is called.")
 
         # Timers
-        self.timer = self.create_timer(1 / self.fps, self.callback_timer)
+        self.timer = self.create_timer(1.0 / self.fps, self.callback_timer)
 
         # Publishers
-        self.publisher_joint = self.create_publisher(
-            std_msgs.msg.Float64, "/servo_0/set_angle", 1
-        )
+        for joint in self.joint_publishers.keys():
+            self.joint_publishers[joint] = self.create_publisher(
+                std_msgs.msg.Float64, "/" + joint + "/set_error", 1
+            )
+
+        self.get_logger().info("on_configure() successful")
 
         return TransitionCallbackReturn.SUCCESS
 
@@ -78,7 +88,9 @@ class AnimationPlayerNode(Node):
         self.get_logger().info("on_cleanup() is called.")
 
         self.destroy_timer(self.timer)
-        self.destroy_publisher(self.publisher_joint)
+
+        for joint in self.joint_publishers.keys():
+            self.destroy_publisher(self.joint_publishers[joint])
 
         return TransitionCallbackReturn.SUCCESS
 
@@ -86,7 +98,9 @@ class AnimationPlayerNode(Node):
         self.get_logger().info("on_shutdown() is called.")
 
         self.destroy_timer(self.timer)
-        self.destroy_publisher(self.publisher_joint)
+
+        for joint in self.joint_publishers.keys():
+            self.destroy_publisher(self.joint_publishers[joint])
 
         return TransitionCallbackReturn.SUCCESS
 
