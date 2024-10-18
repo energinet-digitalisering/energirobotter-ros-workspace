@@ -4,24 +4,24 @@ Packages for the Elrik Humanoid Robot, part of the project "Energirobotter".
 
 ## Setup
 
-Clone this repository into a `workspace/src/` folder, along with [realsense-ros](https://github.com/IntelRealSense/realsense-ros/tree/ros2-master) (run commands from root of `workspace`):
+Clone this repository into a `workspace/src/` folder, along with [zed-ros2-wrapper](https://github.com/stereolabs/zed-ros2-wrapper) (run commands from root of `workspace`):
 
 ```
 git clone git@github.com:energinet-digitalisering/energirobotter-elrik.git src/energirobotter-elrik/
-git clone https://github.com/IntelRealSense/realsense-ros.git src/realsense-ros/
+git clone  --recursive https://github.com/stereolabs/zed-ros2-wrapper.git
 ```
 
-Setup RealSense SDK:
-```
-sudo apt install ros-humble-librealsense2*
-```
+Download and install [CUDA 12.6](https://developer.nvidia.com/cuda-downloads).
+
+Download and install [ZED SDK v4.1](https://www.stereolabs.com/en-dk/developers/release) for CUDA 12. When prompted if the ZED SDK installer shall install CUDA, say no. 
+
 
 ### Dependencies
 
 In `worspace` root, source ROS and install ROS dependencies with rosdep:
 ```
 source /opt/ros/humble/setup.bash
-rosdep install -i --from-path src --rosdistro $ROS_DISTRO --skip-keys=librealsense2 -y
+rosdep install --from-paths src --ignore-src -r -y
 ```
 
 Python modules not included in [rosdistro](https://github.com/ros/rosdistro/blob/master/rosdep/python.yaml) can be installed from root of workspace with:

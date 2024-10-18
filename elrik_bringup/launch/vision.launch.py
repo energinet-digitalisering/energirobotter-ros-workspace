@@ -22,6 +22,8 @@ def launch_setup(context, *args, **kwargs):
     use_mock_camera = LaunchConfiguration("use_mock_camera")
     use_compressed = LaunchConfiguration("use_compressed")
 
+    camera_model = "zed2i"
+
     image_w = 1280
     image_h = 720
 
@@ -42,9 +44,9 @@ def launch_setup(context, *args, **kwargs):
     )
 
     if use_compressed.perform(context) == "true":
-        image_topic = "/camera/camera/color/image_raw/compressed"
+        image_topic = "/zed/zed_node/left/image_rect_color/compressed"
     else:
-        image_topic = "/camera/camera/color/image_raw"
+        image_topic = "/zed/zed_node/left/image_rect_color"
 
     mock_camera_node = Node(
         package="mock_camera",
@@ -52,7 +54,7 @@ def launch_setup(context, *args, **kwargs):
         output="screen",
         condition=IfCondition(use_mock_camera),
         remappings=[
-            ("/camera", "/camera/camera/color/image_raw"),
+            ("/camera", image_topic),
         ],
     )
 
@@ -63,22 +65,23 @@ def launch_setup(context, *args, **kwargs):
             executable="webcam_pub_node",
             output="screen",
             remappings=[
-                ("/camera", "/camera/camera/color/image_raw"),
+                ("/camera", image_topic),
             ],
         )
 
         image_w = 640
         image_h = 480
 
-    real_camera_launch = IncludeLaunchDescription(
+    zed_camera_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            [FindPackageShare("realsense2_camera"), "/launch", "/rs_launch.py"]
+            [FindPackageShare("zed_wrapper"), "/launch", "/zed_camera.launch.py"]
         ),
         condition=IfCondition(
             PythonExpression(
                 PythonExpression(f"'{use_mock_camera.perform(context)}' == 'false'")
             )
         ),  # Workaround to use "if not" condition (https://robotics.stackexchange.com/a/101015)
+        launch_arguments={"camera_model": camera_model}.items(),
     )
 
     face_detection_node = Node(
@@ -127,7 +130,7 @@ def launch_setup(context, *args, **kwargs):
 
     return [
         mock_camera_node,
-        real_camera_launch,
+        zed_camera_launch,
         face_detection_node,
         face_following_node,
         servo_pan_node,
