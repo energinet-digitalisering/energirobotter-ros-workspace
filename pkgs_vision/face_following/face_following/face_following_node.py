@@ -68,9 +68,9 @@ class FaceFollowingNode(Node):
 
     def callback_timer(self):
 
-        if self.publisher_servo_pan is not None:
+        if self.publisher_servo_pan is None:
             return
-        if self.publisher_servo_tilt is not None:
+        if self.publisher_servo_tilt is None:
             return
 
         time_current = self.get_clock().now()
