@@ -1,1 +1,2 @@
--r servo_control/requirements.txt
+-r pkgs_control/servo_control/requirements.txt
+-r pkgs_teleoperation/teleoperation/requirements.txt
