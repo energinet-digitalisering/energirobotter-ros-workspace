@@ -1,9 +1,5 @@
 from cv_bridge import CvBridge
 
-# from vuer import Vuer
-# from vuer.events import ClientEvent
-# from vuer.schemas import Scene, ImageBackground
-
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import CompressedImage
@@ -38,7 +34,7 @@ class TeleoperationNode(Node):
 
         self.cv_bridge = CvBridge()
 
-        self.vuer_app = vuer_app.VuerApp(self.get_logger())
+        self.vuer_app = vuer_app.VuerApp()
 
     def callback_image_left(self, msg):
         self.image_left = self.cv_bridge.compressed_imgmsg_to_cv2(
@@ -51,7 +47,6 @@ class TeleoperationNode(Node):
         )
 
     def callback_timer(self):
-
         self.vuer_app.update_frames(self.image_left, self.image_right)
 
 

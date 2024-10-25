@@ -6,9 +6,7 @@ from vuer.schemas import Scene, ImageBackground
 
 
 class VuerApp:
-    def __init__(self, logger):
-
-        self.logger = logger
+    def __init__(self):
 
         self.app = Vuer()
         self.app.spawn(start=False)(self.set_vuer_images)
@@ -76,7 +74,6 @@ class VuerApp:
                     to="bgChildren",
                 )
                 # 'jpeg' encoding should give you about 30fps with a 16ms wait in-between.
-                # await sleep(0.0001)
                 await sleep(0.016 * 2)
 
 
