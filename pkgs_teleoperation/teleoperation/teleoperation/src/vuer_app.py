@@ -35,11 +35,22 @@ class VuerApp:
     async def set_vuer_images(self, session):
         session.set @ Scene()
 
+        print("New session ready")
+
         while True:
+
+            if len(self.app.ws) == 0:
+                print("WebSocket session is missing, ending session")
+                return
+            if len(self.app.ws) > 1:
+                print(
+                    "WARNING: More sessions open at once, which is currently not supportet by Elrik"
+                )
 
             if (not self.queue_image_left.empty()) and (
                 not self.queue_image_right.empty()
             ):
+
                 image_left = self.queue_image_left.get()
                 image_right = self.queue_image_right.get()
 
