@@ -119,6 +119,15 @@ def launch_setup(context, *args, **kwargs):
         parameters=[servo_params],
     )
 
+    servo_tilt_node = Node(
+        package="servo_control",
+        executable="servo_control_node",
+        name="servo_tilt",
+        namespace="servo_tilt",
+        output="screen",
+        parameters=[servo_params],
+    )
+
     rviz_node = Node(
         package="rviz2",
         executable="rviz2",
@@ -134,6 +143,7 @@ def launch_setup(context, *args, **kwargs):
         face_detection_node,
         face_following_node,
         servo_pan_node,
+        servo_tilt_node,
         rviz_node,
     ]
 
