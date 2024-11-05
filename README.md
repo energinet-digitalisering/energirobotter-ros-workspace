@@ -4,16 +4,34 @@ Packages for the Elrik Humanoid Robot, part of the project "Energirobotter".
 
 ## Setup
 
-Clone this repository into a `workspace/src/` folder, along with [zed-ros2-wrapper](https://github.com/stereolabs/zed-ros2-wrapper) (run commands from root of `workspace`):
+### Dialout Group
+
+Add your user to the dialout/tty group on Linux:
+```
+sudo usermod -a -G dialout your_user_name
+```
+
+Reboot your system.
+
+### Repository
+
+Clone this repository into a `workspace/src/` folder, along with [zed-ros2-wrapper](https://github.com/stereolabs/zed-ros2-wrapper):
 
 ```
-git clone git@github.com:energinet-digitalisering/energirobotter-elrik.git src/energirobotter-elrik/
+cd src
+git clone git@github.com:energinet-digitalisering/energirobotter-elrik.git
 git clone  --recursive https://github.com/stereolabs/zed-ros2-wrapper.git
 ```
 
+### ZED SDK
+
+#### Ubuntu 22.04
 Download and install [CUDA 12.6](https://developer.nvidia.com/cuda-downloads).
 
-Download and install [ZED SDK v4.1](https://www.stereolabs.com/en-dk/developers/release) for CUDA 12. When prompted if the ZED SDK installer shall install CUDA, say no. 
+Download and install [ZED SDK v4.2](https://www.stereolabs.com/en-dk/developers/release) for CUDA 12. When prompted if the ZED SDK installer shall install CUDA, say no. 
+
+#### Jetson Orin Nano
+Download and install [ZED SDK v4.2](https://www.stereolabs.com/en-dk/developers/release) for NVIDIA Jetson (ZED SDK for JetPack 6.0 GA (L4T 36.3)) 
 
 
 ### Dependencies
@@ -30,7 +48,7 @@ pip install -r src/energirobotter-elrik/requirements.txt
 ```
 
 ### AI model
-Download face detection model [yolov8n-face.pt](https://github.com/akanametov/yolov8-face/releases/download/v0.0.0/yolov8n-face.pt) from the [yolo-face repository](https://github.com/akanametov/yolo-face/tree/v0.0.0). Move the model into the `src/energirobotter-elrik/face_detection/models/` directory.
+Download face detection model [yolov8n-face.pt](https://github.com/akanametov/yolov8-face/releases/download/v0.0.0/yolov8n-face.pt) from the [yolo-face repository](https://github.com/akanametov/yolo-face/tree/v0.0.0). Move the model into the `src/energirobotter-elrik/pkgs_vision/face_detection/models/` directory.
 
 
 ### Build
