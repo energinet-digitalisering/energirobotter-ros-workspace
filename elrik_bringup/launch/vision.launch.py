@@ -39,7 +39,7 @@ def launch_setup(context, *args, **kwargs):
         [
             FindPackageShare(package_name),
             "config",
-            "servo_params.yaml",
+            "servo_head_params.yaml",
         ]
     )
 
