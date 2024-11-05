@@ -24,8 +24,8 @@ def launch_setup(context, *args, **kwargs):
 
     camera_model = "zed2i"
 
-    image_w = 1280
-    image_h = 720
+    image_w = 640
+    image_h = 360
 
     rviz_config_file = PathJoinSubstitution(
         [
@@ -150,7 +150,7 @@ def generate_launch_description():
             ),
             DeclareLaunchArgument(
                 "use_compressed",
-                default_value="false",
+                default_value="true",
                 description="Use compressed camera stream for faster performance. OBS: should be False when using mock camera.",
                 choices=["true", "false"],
             ),
