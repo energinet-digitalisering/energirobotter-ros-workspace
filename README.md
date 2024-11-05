@@ -30,8 +30,9 @@ Download and install [CUDA 12.6](https://developer.nvidia.com/cuda-downloads).
 
 Download and install [ZED SDK v4.2](https://www.stereolabs.com/en-dk/developers/release) for CUDA 12. When prompted if the ZED SDK installer shall install CUDA, say no. 
 
-#### Jetson Orin Nano
+### Jetson Orin Nano (Jetpack 6.0)
 Download and install [ZED SDK v4.2](https://www.stereolabs.com/en-dk/developers/release) for NVIDIA Jetson (ZED SDK for JetPack 6.0 GA (L4T 36.3)) 
+
 
 
 ### Dependencies
