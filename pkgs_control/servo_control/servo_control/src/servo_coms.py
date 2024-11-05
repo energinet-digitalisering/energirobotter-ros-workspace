@@ -145,7 +145,7 @@ class ServoComs:
                 self.servo_id,
                 pwm,
                 self.speed_max,
-                SCS_MOVING_ACC := 1000,  # SC Servo moving acc
+                SCS_MOVING_ACC := 255,  # SC Servo moving acc (in 8-bit)
             )
             if scs_comm_result != scservo_def.COMM_SUCCESS:
                 print("%s" % self.packet_handler.getTxRxResult(scs_comm_result))
