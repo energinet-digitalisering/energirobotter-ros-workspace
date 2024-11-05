@@ -55,6 +55,11 @@ class ServoControl:
             case "pca9685":
                 self.coms_successful = self.servo_coms.init_PCA9685()
 
+            case "waveshare_driver":
+                self.coms_successful = self.servo_coms.init_waveshare_driver(
+                    port=port, baudrate=115200
+                )
+
             case _:
                 print("Invalid driver device")
 
