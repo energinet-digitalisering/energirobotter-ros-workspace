@@ -31,6 +31,7 @@ def launch_setup(context, *args, **kwargs):
         [
             FindPackageShare(package_name),
             "config",
+            "rviz",
             "vision.rviz",
         ]
     )
@@ -39,6 +40,7 @@ def launch_setup(context, *args, **kwargs):
         [
             FindPackageShare(package_name),
             "config",
+            "servos",
             "servo_head_params.yaml",
         ]
     )

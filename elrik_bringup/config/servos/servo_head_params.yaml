@@ -9,18 +9,20 @@
     angle_software_min: 0
     angle_max: 360
     angle_software_max: 360
-    speed_max: 200
+    speed_max: 500
+    gain_P: 0.2
+    gain_D: 0.5
 
 /servo_pan/servo_pan:
   ros__parameters:
     servo_id: 8
-    angle_software_min: 115
+    angle_software_min: 120
     angle_software_max: 230
     dir: -1
 
 /servo_tilt/servo_tilt:
   ros__parameters:
     servo_id: 9
-    angle_software_min: 115
+    angle_software_min: 120
     angle_software_max: 230
     dir: 1
