@@ -44,6 +44,15 @@ def launch_setup(context, *args, **kwargs):
         ]
     )
 
+    zed_camera_params = PathJoinSubstitution(
+        [
+            FindPackageShare(package_name),
+            "config",
+            "zed_camera",
+            "optimised.yaml",
+        ]
+    ).perform(context)
+
     if use_compressed.perform(context) == "true":
         image_topic = "/zed/zed_node/left/image_rect_color/compressed"
     else:
@@ -82,7 +91,10 @@ def launch_setup(context, *args, **kwargs):
                 PythonExpression(f"'{use_mock_camera.perform(context)}' == 'false'")
             )
         ),  # Workaround to use "if not" condition (https://robotics.stackexchange.com/a/101015)
-        launch_arguments={"camera_model": camera_model}.items(),
+        launch_arguments={
+            "camera_model": camera_model,
+            "config_path": zed_camera_params,
+        }.items(),
     )
 
     face_detection_node = Node(
@@ -102,7 +114,7 @@ def launch_setup(context, *args, **kwargs):
         package="face_following",
         executable="face_following_node",
         output="screen",
-        parameters=[  # Intel Realsense Depth Camera D435i specs
+        parameters=[
             {"timer_period": 0.05},
             {"image_w": image_w},
             {"image_h": image_h},
