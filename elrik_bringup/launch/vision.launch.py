@@ -21,8 +21,7 @@ def launch_setup(context, *args, **kwargs):
     start_rviz = LaunchConfiguration("rviz")
     use_mock_camera = LaunchConfiguration("use_mock_camera")
     use_compressed = LaunchConfiguration("use_compressed")
-
-    camera_model = "zed2i"
+    camera_model = LaunchConfiguration("camera_model")
 
     image_w = 640
     image_h = 360
@@ -171,6 +170,12 @@ def generate_launch_description():
                 default_value="false",
                 description="Start RViz2 automatically with this launch file.",
                 choices=["true", "false"],
+            ),
+            DeclareLaunchArgument(
+                "camera_model",
+                default_value="zedm",
+                description="StereoLabs camera model.",
+                choices=["zedm", "zed2i"],
             ),
             OpaqueFunction(function=launch_setup),
         ]
