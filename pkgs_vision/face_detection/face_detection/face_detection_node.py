@@ -53,7 +53,14 @@ class FaceDetectionNode(Node):
             )
 
         # Publishers
-        self.publisher_annotation = self.create_publisher(Image, "/camera_annotated", 1)
+        if self.use_compressed:
+            self.publisher_annotation = self.create_publisher(
+                CompressedImage, "/camera_annotated", 1
+            )
+        else:
+            self.publisher_annotation = self.create_publisher(
+                Image, "/camera_annotated", 1
+            )
 
         self.publisher_bounding_box = self.create_publisher(
             BoundingBox2D, "/face_bounding_box", 1
@@ -146,10 +153,13 @@ class FaceDetectionNode(Node):
                 annotated, (int(box_target.x), int(box_target.y)), 10, (0, 255, 0), -1
             )
 
+        if self.use_compressed:
+            image_pub = self.cv_bridge.cv2_to_compressed_imgmsg(annotated)
+        else:
+            image_pub = self.cv_bridge.cv2_to_imgmsg(annotated, encoding="rgb8")
+
         # Publish annotated image
-        self.publisher_annotation.publish(
-            self.cv_bridge.cv2_to_imgmsg(annotated, encoding="rgb8")
-        )
+        self.publisher_annotation.publish(image_pub)
 
 
 def main(args=None):
