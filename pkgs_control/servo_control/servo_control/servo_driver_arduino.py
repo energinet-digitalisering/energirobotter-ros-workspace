@@ -18,7 +18,7 @@ class ServoDriverArduino(Node):
         self.declare_parameter("baudrate", 115200)
         baudrate = self.get_parameter("baudrate").get_parameter_value().integer_value
 
-        self.declare_parameter("timeout", 115200)
+        self.declare_parameter("timeout", 1.0)
         timeout = self.get_parameter("timeout").get_parameter_value().double_value
 
         # Subscriptions
