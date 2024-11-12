@@ -24,15 +24,23 @@ class ServoDriverWaveshare(Node):
         )
 
         # Port Setup
-        self.port_handler = PortHandler(port)
-        self.packet_handler = sms_sts(self.port_handler)
+        self.get_logger().info("Initializing serial communication with Waveshare...")
+        try:
+            self.port_handler = PortHandler(port)
+            self.packet_handler = sms_sts(self.port_handler)
 
-        if not self.port_handler.openPort():
-            self.get_logger().error("Failed to open port")
-            return
-        if not self.port_handler.setBaudRate(baudrate):
-            self.get_logger().error("Failed to set baud rate")
-            return
+            if not self.port_handler.openPort():
+                self.get_logger().error("Failed to open port, shutting down node...")
+                self.destroy_node()
+            if not self.port_handler.setBaudRate(baudrate):
+                self.get_logger().error(
+                    "Failed to set baud rate, shutting down node..."
+                )
+                self.destroy_node()
+            self.get_logger().info("Serial communication succesful")
+        except:
+            self.get_logger().error("Failed to open port, shutting down node...")
+            self.destroy_node()
 
     def callback_servo_command(self, msg):
 

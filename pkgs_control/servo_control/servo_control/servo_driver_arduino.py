@@ -27,15 +27,13 @@ class ServoDriverArduino(Node):
         )
 
         # Port Setup
-        self.get_logger().info("Initializing serial communication...")
+        self.get_logger().info("Initializing serial communication with Arduino...")
         try:
             self.serial = serial.Serial(port=port, baudrate=baudrate, timeout=timeout)
             self.get_logger().info("Serial communication succesful")
         except:
-            self.get_logger().error(
-                "Communication with Arduino unsuccesful, serial not available"
-            )
-            return
+            self.get_logger().error("Failed to open port, shutting down node...")
+            self.destroy_node()
 
     def callback_servo_command(self, msg):
         # write packet to serial

@@ -25,8 +25,8 @@ class ServoDriverPCA9685(Node):
             self.pca.frequency = 50
             self.get_logger().info("I2C communication with PCA9685 succesful")
         except:
-            self.get_logger().error("Failed to open port")
-            return
+            self.get_logger().error("Failed to open port, shutting down node...")
+            self.destroy_node()
 
     def callback_servo_command(self, msg):
         self.pca.channels[msg.servo_id].duty_cycle = msg.pwm
