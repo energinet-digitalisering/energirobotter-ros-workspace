@@ -45,15 +45,16 @@ class FaceFollowingNode(Node):
 
         # Lifecycle Node timers and publishers
         # self.timer: Optional[Timer] = None
-        # self.publisher_servo_pan: Optional[Publisher] = None
-        # self.publisher_servo_tilt: Optional[Publisher] = None
+        # self.publisher_servo_yaw: Optional[Publisher] = None
+        # self.publisher_servo_pitch: Optional[Publisher] = None
 
         # Publishers
-        self.publisher_servo_pan = self.create_publisher(
-            std_msgs.msg.Float64, "/servo_pan/set_error", 1
+        self.publisher_servo_pitch = self.create_publisher(
+            std_msgs.msg.Float64, "/head/pitch/set_error", 1
         )
-        self.publisher_servo_tilt = self.create_publisher(
-            std_msgs.msg.Float64, "/servo_tilt/set_error", 1
+
+        self.publisher_servo_yaw = self.create_publisher(
+            std_msgs.msg.Float64, "/head/yaw/set_error", 1
         )
 
         # Timers
@@ -81,9 +82,9 @@ class FaceFollowingNode(Node):
 
     def callback_timer(self):
 
-        if self.publisher_servo_pan is None:
+        if self.publisher_servo_pitch is None:
             return
-        if self.publisher_servo_tilt is None:
+        if self.publisher_servo_yaw is None:
             return
 
         time_current = self.get_clock().now()
@@ -93,23 +94,25 @@ class FaceFollowingNode(Node):
 
         # Stop following if detection is gone for too long
         if time_diff > self.detection_time_stop_follow:
-            # self.servo_pan.reset_position(self.timer_period)
-            # self.servo_tilt.reset_position(self.timer_period)
+            # self.servo_pitch.reset_position(self.timer_period)
+            # self.servo_yaw.reset_position(self.timer_period)
             return
 
         # Reset error if detection is gone for too long
         if time_diff > self.detection_time_stop_error:
-            error_pan = 0.0
-            error_tilt = 0.0
+            error_pitch = 0.0
+            error_yaw = 0.0
 
         else:
-            error_pan = self.center_x - self.target_x
-            error_tilt = self.center_y - self.target_y
+            error_pitch = self.center_y - self.target_y
+            error_yaw = self.center_x - self.target_x
 
         # Send command to servos
 
-        self.publisher_servo_pan.publish(std_msgs.msg.Float64(data=float(error_pan)))
-        self.publisher_servo_tilt.publish(std_msgs.msg.Float64(data=float(error_tilt)))
+        self.publisher_servo_pitch.publish(
+            std_msgs.msg.Float64(data=float(error_pitch))
+        )
+        self.publisher_servo_yaw.publish(std_msgs.msg.Float64(data=float(error_yaw)))
 
     ##################### Lifecyle Node Functions #####################
 
@@ -117,11 +120,11 @@ class FaceFollowingNode(Node):
     #     self.get_logger().info("on_configure() is called.")
 
     #     # Publishers
-    #     self.publisher_servo_pan = self.create_publisher(
-    #         std_msgs.msg.Float64, "/servo_pan/set_error", 1
+    #     self.publisher_servo_pitch = self.create_publisher(
+    #         std_msgs.msg.Float64, "/head/pitch/set_error", 1
     #     )
-    #     self.publisher_servo_tilt = self.create_publisher(
-    #         std_msgs.msg.Float64, "/servo_tilt/set_error", 1
+    #     self.publisher_servo_yaw = self.create_publisher(
+    #         std_msgs.msg.Float64, "/head/yaw/set_error", 1
     #     )
 
     #     # Timers
@@ -141,8 +144,8 @@ class FaceFollowingNode(Node):
     #     self.get_logger().info("on_cleanup() is called.")
 
     #     self.destroy_timer(self.timer)
-    #     self.destroy_publisher(self.publisher_servo_pan)
-    #     self.destroy_publisher(self.publisher_servo_tilt)
+    #     self.destroy_publisher(self.publisher_servo_yaw)
+    #     self.destroy_publisher(self.publisher_servo_pitch)
 
     #     return TransitionCallbackReturn.SUCCESS
 
@@ -150,8 +153,8 @@ class FaceFollowingNode(Node):
     #     self.get_logger().info("on_shutdown() is called.")
 
     #     self.destroy_timer(self.timer)
-    #     self.destroy_publisher(self.publisher_servo_pan)
-    #     self.destroy_publisher(self.publisher_servo_tilt)
+    #     self.destroy_publisher(self.publisher_servo_yaw)
+    #     self.destroy_publisher(self.publisher_servo_pitch)
 
     #     return TransitionCallbackReturn.SUCCESS
 
