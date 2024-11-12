@@ -6,10 +6,10 @@ from .src.SCServo_Python.scservo_sdk import PortHandler, sms_sts, scservo_def
 from energirobotter_interfaces.msg import ServoCommand
 
 
-class PortManagerWaveshare(Node):
+class ServoDriverWaveshare(Node):
 
     def __init__(self):
-        super().__init__("port_manager_waveshare")
+        super().__init__("servo_driver_waveshare")
 
         # Parameters
         self.declare_parameter("port", "/dev/ttyACM0")
@@ -54,10 +54,9 @@ class PortManagerWaveshare(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    port_manager_waveshare = PortManagerWaveshare()
-
-    rclpy.spin(port_manager_waveshare)
-    port_manager_waveshare.destroy_node()
+    node_handle = ServoDriverWaveshare()
+    rclpy.spin(node_handle)
+    node_handle.destroy_node()
     rclpy.shutdown()
 
 

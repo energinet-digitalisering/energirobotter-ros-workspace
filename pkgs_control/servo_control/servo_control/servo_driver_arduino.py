@@ -6,10 +6,10 @@ from rclpy.node import Node
 from energirobotter_interfaces.msg import ServoCommand
 
 
-class PortManagerArduino(Node):
+class ServoDriverArduino(Node):
 
     def __init__(self):
-        super().__init__("port_manager_arduino")
+        super().__init__("servo_driver_arduino")
 
         # Parameters
         self.declare_parameter("port", "/dev/ttyACM0")
@@ -46,10 +46,9 @@ class PortManagerArduino(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    port_manager_arduino = PortManagerArduino()
-
-    rclpy.spin(port_manager_arduino)
-    port_manager_arduino.destroy_node()
+    node_handle = ServoDriverArduino()
+    rclpy.spin(node_handle)
+    node_handle.destroy_node()
     rclpy.shutdown()
 
 

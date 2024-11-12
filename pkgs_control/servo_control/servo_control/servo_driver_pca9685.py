@@ -7,10 +7,10 @@ from rclpy.node import Node
 from energirobotter_interfaces.msg import ServoCommand
 
 
-class PortManagerPCA9685(Node):
+class ServoDriverPCA9685(Node):
 
     def __init__(self):
-        super().__init__("port_manager_pca9685")
+        super().__init__("servo_driver_pca9685")
 
         # Subscriptions
         self.subscription = self.create_subscription(
@@ -35,10 +35,9 @@ class PortManagerPCA9685(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    port_manager_pca9685 = PortManagerPCA9685()
-
-    rclpy.spin(port_manager_pca9685)
-    port_manager_pca9685.destroy_node()
+    node_handle = ServoDriverPCA9685()
+    rclpy.spin(node_handle)
+    node_handle.destroy_node()
     rclpy.shutdown()
 
 
