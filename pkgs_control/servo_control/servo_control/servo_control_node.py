@@ -14,7 +14,9 @@ class ServoControlNode(Node):
         # Parameters
 
         self.declare_parameter("servo_id", 0)
-        servo_id = self.get_parameter("servo_id").get_parameter_value().integer_value
+        self.servo_id = (
+            self.get_parameter("servo_id").get_parameter_value().integer_value
+        )
 
         self.declare_parameter("operation_mode", "angle")
         operation_mode = (
@@ -94,10 +96,10 @@ class ServoControlNode(Node):
             )
 
         self.publisher = self.create_publisher(
-            ServoCommand, driver_device + "/servo_command", 1
+            ServoCommand, "/" + driver_device + "/servo_command", 1
         )
 
-        self.get_logger().info(f"Initialising servo with id {servo_id}...")
+        self.get_logger().info(f"Initialising servo with id {self.servo_id}...")
 
         # Servo config
         self.servo = servo_control.ServoControl(

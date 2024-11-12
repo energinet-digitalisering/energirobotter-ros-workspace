@@ -123,20 +123,27 @@ def launch_setup(context, *args, **kwargs):
         ],
     )
 
-    servo_pan_node = Node(
+    servo_driver_node = Node(
         package="servo_control",
-        executable="servo_control_node",
-        name="servo_pan",
-        namespace="servo_pan",
+        executable="servo_driver_waveshare",
         output="screen",
         parameters=[servo_params],
     )
 
-    servo_tilt_node = Node(
+    servo_head_yaw_node = Node(
         package="servo_control",
         executable="servo_control_node",
-        name="servo_tilt",
-        namespace="servo_tilt",
+        namespace="head/yaw",
+        name="servo",
+        output="screen",
+        parameters=[servo_params],
+    )
+
+    servo_head_pitch_node = Node(
+        package="servo_control",
+        executable="servo_control_node",
+        namespace="head/pitch",
+        name="servo",
         output="screen",
         parameters=[servo_params],
     )
@@ -155,8 +162,9 @@ def launch_setup(context, *args, **kwargs):
         zed_camera_launch,
         face_detection_node,
         face_following_node,
-        servo_pan_node,
-        servo_tilt_node,
+        servo_driver_node,
+        servo_head_yaw_node,
+        servo_head_pitch_node,
         rviz_node,
     ]
 

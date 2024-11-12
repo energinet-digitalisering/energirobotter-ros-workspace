@@ -106,7 +106,7 @@ class ServoControl:
                 self.pwm_min,
             )
 
-        return angle, pwm
+        return int(angle), int(pwm)
 
     def angle_2_pwm(self, angle):
         pwm = int(
