@@ -1,10 +1,12 @@
 from typing import Optional
 
 import rclpy
-from rclpy.lifecycle import Node
-from rclpy.lifecycle import Publisher
-from rclpy.lifecycle import State
-from rclpy.lifecycle import TransitionCallbackReturn
+from rclpy.node import Node
+
+# from rclpy.lifecycle import Node
+# from rclpy.lifecycle import Publisher
+# from rclpy.lifecycle import State
+# from rclpy.lifecycle import TransitionCallbackReturn
 from rclpy.timer import Timer
 import std_msgs.msg
 import vision_msgs.msg
@@ -42,9 +44,20 @@ class FaceFollowingNode(Node):
         )
 
         # Lifecycle Node timers and publishers
-        self.timer: Optional[Timer] = None
-        self.publisher_servo_pan: Optional[Publisher] = None
-        self.publisher_servo_tilt: Optional[Publisher] = None
+        # self.timer: Optional[Timer] = None
+        # self.publisher_servo_pan: Optional[Publisher] = None
+        # self.publisher_servo_tilt: Optional[Publisher] = None
+
+        # Publishers
+        self.publisher_servo_pan = self.create_publisher(
+            std_msgs.msg.Float64, "/servo_pan/set_error", 1
+        )
+        self.publisher_servo_tilt = self.create_publisher(
+            std_msgs.msg.Float64, "/servo_tilt/set_error", 1
+        )
+
+        # Timers
+        self.timer = self.create_timer(self.timer_period, self.callback_timer)
 
         # Node variables
         self.detection_time_stamp = self.get_clock().now()
@@ -100,47 +113,47 @@ class FaceFollowingNode(Node):
 
     ##################### Lifecyle Node Functions #####################
 
-    def on_configure(self, state: State) -> TransitionCallbackReturn:
-        self.get_logger().info("on_configure() is called.")
+    # def on_configure(self, state: State) -> TransitionCallbackReturn:
+    #     self.get_logger().info("on_configure() is called.")
 
-        # Publishers
-        self.publisher_servo_pan = self.create_publisher(
-            std_msgs.msg.Float64, "/servo_pan/set_error", 1
-        )
-        self.publisher_servo_tilt = self.create_publisher(
-            std_msgs.msg.Float64, "/servo_tilt/set_error", 1
-        )
+    #     # Publishers
+    #     self.publisher_servo_pan = self.create_publisher(
+    #         std_msgs.msg.Float64, "/servo_pan/set_error", 1
+    #     )
+    #     self.publisher_servo_tilt = self.create_publisher(
+    #         std_msgs.msg.Float64, "/servo_tilt/set_error", 1
+    #     )
 
-        # Timers
-        self.timer = self.create_timer(self.timer_period, self.callback_timer)
+    #     # Timers
+    #     self.timer = self.create_timer(self.timer_period, self.callback_timer)
 
-        return TransitionCallbackReturn.SUCCESS
+    #     return TransitionCallbackReturn.SUCCESS
 
-    def on_activate(self, state: State) -> TransitionCallbackReturn:
-        self.get_logger().info("on_activate() is called.")
-        return super().on_activate(state)
+    # def on_activate(self, state: State) -> TransitionCallbackReturn:
+    #     self.get_logger().info("on_activate() is called.")
+    #     return super().on_activate(state)
 
-    def on_deactivate(self, state: State) -> TransitionCallbackReturn:
-        self.get_logger().info("on_deactivate() is called.")
-        return super().on_deactivate(state)
+    # def on_deactivate(self, state: State) -> TransitionCallbackReturn:
+    #     self.get_logger().info("on_deactivate() is called.")
+    #     return super().on_deactivate(state)
 
-    def on_cleanup(self, state: State) -> TransitionCallbackReturn:
-        self.get_logger().info("on_cleanup() is called.")
+    # def on_cleanup(self, state: State) -> TransitionCallbackReturn:
+    #     self.get_logger().info("on_cleanup() is called.")
 
-        self.destroy_timer(self.timer)
-        self.destroy_publisher(self.publisher_servo_pan)
-        self.destroy_publisher(self.publisher_servo_tilt)
+    #     self.destroy_timer(self.timer)
+    #     self.destroy_publisher(self.publisher_servo_pan)
+    #     self.destroy_publisher(self.publisher_servo_tilt)
 
-        return TransitionCallbackReturn.SUCCESS
+    #     return TransitionCallbackReturn.SUCCESS
 
-    def on_shutdown(self, state: State) -> TransitionCallbackReturn:
-        self.get_logger().info("on_shutdown() is called.")
+    # def on_shutdown(self, state: State) -> TransitionCallbackReturn:
+    #     self.get_logger().info("on_shutdown() is called.")
 
-        self.destroy_timer(self.timer)
-        self.destroy_publisher(self.publisher_servo_pan)
-        self.destroy_publisher(self.publisher_servo_tilt)
+    #     self.destroy_timer(self.timer)
+    #     self.destroy_publisher(self.publisher_servo_pan)
+    #     self.destroy_publisher(self.publisher_servo_tilt)
 
-        return TransitionCallbackReturn.SUCCESS
+    #     return TransitionCallbackReturn.SUCCESS
 
 
 def main(args=None):
