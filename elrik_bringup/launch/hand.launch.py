@@ -21,6 +21,13 @@ def launch_setup(context, *args, **kwargs):
         ]
     )
 
+    # Servo Driver
+    servo_driver_node = Node(
+        package="servo_control",
+        executable="servo_driver_pca9685",
+        output="screen",
+    )
+
     # Left Hand
     servo_left_pinky_node = Node(
         package="servo_control",
@@ -114,6 +121,7 @@ def launch_setup(context, *args, **kwargs):
     )
 
     return [
+        servo_driver_node,
         servo_left_pinky_node,
         servo_left_ring_node,
         servo_left_middle_node,
