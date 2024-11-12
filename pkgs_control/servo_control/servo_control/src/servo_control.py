@@ -24,6 +24,8 @@ class ServoControl:
         port="/dev/ttyACM0",
     ):
 
+        self.pwm_min = pwm_min
+        self.pwm_max = pwm_max
         self.angle_min = angle_min
         self.angle_software_min = angle_software_min
         self.angle_max = angle_max
@@ -36,6 +38,7 @@ class ServoControl:
 
         self.angle_init = (self.angle_max / 2) + self.angle_min
         self.angle = self.angle_init
+        self.pwm = self.angle_2_pwm(self.angle)
 
         self.error_acc = 0.0
         self.error_prev = 0.0
@@ -113,9 +116,12 @@ class ServoControl:
             self.angle_software_max,
         )
 
-        # Flip angle if direction is flipped
+        self.pwm = self.angle_2_pwm(self.angle)
+
+        # Flip angle and pwm to send if direction is flipped
         if self.dir >= 0:
             angle = self.angle
+            pwm = self.pwm
         elif self.dir < 0:
             angle = interval_map(
                 self.angle,
@@ -124,8 +130,23 @@ class ServoControl:
                 self.angle_max,
                 self.angle_min,
             )
+            pwm = interval_map(
+                self.pwm,
+                self.pwm_min,
+                self.pwm_max,
+                self.pwm_max,
+                self.pwm_min,
+            )
 
         self.servo_coms.write_angle(angle)
+
+    def angle_2_pwm(self, angle):
+        pwm = int(
+            interval_map(
+                angle, self.angle_min, self.angle_max, self.pwm_min, self.pwm_max
+            )
+        )
+        return pwm
 
     def reach_angle(self, t_d, angle, speed_desired=(-1)):
         angle_gain_p = 10.0
