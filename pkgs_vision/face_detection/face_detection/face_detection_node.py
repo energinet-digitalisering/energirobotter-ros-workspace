@@ -26,6 +26,11 @@ class FaceDetectionNode(Node):
         super().__init__("face_detection_node")
 
         # Parameters
+        self.declare_parameter("inference_device", 1280)
+        self.inference_device = (
+            self.get_parameter("").get_parameter_value().string_value
+        )
+
         self.declare_parameter("image_w", 1280)
         self.image_w = self.get_parameter("image_w").get_parameter_value().integer_value
 

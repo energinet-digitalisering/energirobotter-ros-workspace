@@ -18,6 +18,7 @@ package_name = "elrik_bringup"
 
 
 def launch_setup(context, *args, **kwargs):
+    inference_device = LaunchConfiguration("inference_device")
     start_rviz = LaunchConfiguration("rviz")
     use_mock_camera = LaunchConfiguration("use_mock_camera")
     use_compressed = LaunchConfiguration("use_compressed")
@@ -103,6 +104,7 @@ def launch_setup(context, *args, **kwargs):
         output="screen",
         remappings=[("/camera", image_topic)],
         parameters=[
+            {"inference_device": inference_device},
             {"image_w": image_w},
             {"image_h": image_h},
             {"use_compressed": use_compressed},
@@ -173,6 +175,12 @@ def generate_launch_description():
 
     return LaunchDescription(
         [
+            DeclareLaunchArgument(
+                "inference_device",
+                default_value="jetson",
+                description="Device that runs inference.",
+                choices=["", "jetson"],
+            ),
             DeclareLaunchArgument(
                 "use_mock_camera",
                 default_value="false",
