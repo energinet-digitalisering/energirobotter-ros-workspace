@@ -1,4 +1,5 @@
 # YOLO models
+*.onnx
 *.pt
 
 # Python
