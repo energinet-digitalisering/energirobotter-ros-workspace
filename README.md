@@ -4,6 +4,17 @@ Packages for the Elrik Humanoid Robot, part of the project "Energirobotter".
 
 ## Setup
 
+### Dialout Group
+
+Add your user to the dialout/tty group on Linux:
+```
+sudo usermod -a -G dialout your_user_name
+```
+
+Reboot your system.
+
+### Repository
+
 Clone this repository into a `workspace/src/` folder, along with [zed-ros2-wrapper](https://github.com/stereolabs/zed-ros2-wrapper):
 
 ```
@@ -12,12 +23,14 @@ git clone git@github.com:energinet-digitalisering/energirobotter-elrik.git
 git clone  --recursive https://github.com/stereolabs/zed-ros2-wrapper.git
 ```
 
-### Ubuntu 22.04
+### ZED SDK
+
+#### Ubuntu 22.04
 Download and install [CUDA 12.6](https://developer.nvidia.com/cuda-downloads).
 
 Download and install [ZED SDK v4.2](https://www.stereolabs.com/en-dk/developers/release) for CUDA 12. When prompted if the ZED SDK installer shall install CUDA, say no. 
 
-### Jetson Orin Nano (Jetpack 6.0)
+#### Jetson Orin Nano (Jetpack 6.0)
 Download and install [ZED SDK v4.2](https://www.stereolabs.com/en-dk/developers/release) for NVIDIA Jetson (ZED SDK for JetPack 6.0 GA (L4T 36.3)) 
 
 

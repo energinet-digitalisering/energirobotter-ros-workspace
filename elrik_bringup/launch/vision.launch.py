@@ -21,16 +21,16 @@ def launch_setup(context, *args, **kwargs):
     start_rviz = LaunchConfiguration("rviz")
     use_mock_camera = LaunchConfiguration("use_mock_camera")
     use_compressed = LaunchConfiguration("use_compressed")
+    camera_model = LaunchConfiguration("camera_model")
 
-    camera_model = "zed2i"
-
-    image_w = 1280
-    image_h = 720
+    image_w = 640
+    image_h = 360
 
     rviz_config_file = PathJoinSubstitution(
         [
             FindPackageShare(package_name),
             "config",
+            "rviz",
             "vision.rviz",
         ]
     )
@@ -39,9 +39,19 @@ def launch_setup(context, *args, **kwargs):
         [
             FindPackageShare(package_name),
             "config",
-            "servo_params.yaml",
+            "servos",
+            "servo_head_params.yaml",
         ]
     )
+
+    zed_camera_params = PathJoinSubstitution(
+        [
+            FindPackageShare(package_name),
+            "config",
+            "zed_camera",
+            "optimised.yaml",
+        ]
+    ).perform(context)
 
     if use_compressed.perform(context) == "true":
         image_topic = "/zed/zed_node/left/image_rect_color/compressed"
@@ -81,7 +91,10 @@ def launch_setup(context, *args, **kwargs):
                 PythonExpression(f"'{use_mock_camera.perform(context)}' == 'false'")
             )
         ),  # Workaround to use "if not" condition (https://robotics.stackexchange.com/a/101015)
-        launch_arguments={"camera_model": camera_model}.items(),
+        launch_arguments={
+            "camera_model": camera_model,
+            "config_path": zed_camera_params,
+        }.items(),
     )
 
     face_detection_node = Node(
@@ -101,7 +114,7 @@ def launch_setup(context, *args, **kwargs):
         package="face_following",
         executable="face_following_node",
         output="screen",
-        parameters=[  # Intel Realsense Depth Camera D435i specs
+        parameters=[
             {"timer_period": 0.05},
             {"image_w": image_w},
             {"image_h": image_h},
@@ -115,6 +128,15 @@ def launch_setup(context, *args, **kwargs):
         executable="servo_control_node",
         name="servo_pan",
         namespace="servo_pan",
+        output="screen",
+        parameters=[servo_params],
+    )
+
+    servo_tilt_node = Node(
+        package="servo_control",
+        executable="servo_control_node",
+        name="servo_tilt",
+        namespace="servo_tilt",
         output="screen",
         parameters=[servo_params],
     )
@@ -134,6 +156,7 @@ def launch_setup(context, *args, **kwargs):
         face_detection_node,
         face_following_node,
         servo_pan_node,
+        servo_tilt_node,
         rviz_node,
     ]
 
@@ -150,7 +173,7 @@ def generate_launch_description():
             ),
             DeclareLaunchArgument(
                 "use_compressed",
-                default_value="false",
+                default_value="true",
                 description="Use compressed camera stream for faster performance. OBS: should be False when using mock camera.",
                 choices=["true", "false"],
             ),
@@ -159,6 +182,12 @@ def generate_launch_description():
                 default_value="false",
                 description="Start RViz2 automatically with this launch file.",
                 choices=["true", "false"],
+            ),
+            DeclareLaunchArgument(
+                "camera_model",
+                default_value="zedm",
+                description="StereoLabs camera model.",
+                choices=["zedm", "zed2i"],
             ),
             OpaqueFunction(function=launch_setup),
         ]

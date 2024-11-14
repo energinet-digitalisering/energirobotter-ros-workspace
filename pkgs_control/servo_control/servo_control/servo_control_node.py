@@ -55,8 +55,8 @@ class ServoControlNode(Node):
             self.get_parameter("angle_software_max").get_parameter_value().integer_value
         )
 
-        self.declare_parameter("speed_max", 200.0)
-        speed_max = self.get_parameter("speed_max").get_parameter_value().double_value
+        self.declare_parameter("speed_max", 200)
+        speed_max = self.get_parameter("speed_max").get_parameter_value().integer_value
 
         self.declare_parameter("dir", 1)
         dir = self.get_parameter("dir").get_parameter_value().integer_value

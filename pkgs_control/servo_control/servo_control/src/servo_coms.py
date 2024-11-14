@@ -69,7 +69,7 @@ class ServoComs:
             print("Communication with PCA9685 unsuccesful, I2C not available")
             return False
 
-    def init_waveshare_driver(self, port="/dev/ttyACM0", baudrate=115200):
+    def init_waveshare_driver(self, port="/dev/ttyUSB0", baudrate=1000000):
         self.port_handler = PortHandler(port)
         self.packet_handler = sms_sts(self.port_handler)
 
@@ -145,7 +145,7 @@ class ServoComs:
                 self.servo_id,
                 pwm,
                 self.speed_max,
-                SCS_MOVING_ACC := 1000,  # SC Servo moving acc
+                SCS_MOVING_ACC := 255,  # SC Servo moving acc (in 8-bit)
             )
             if scs_comm_result != scservo_def.COMM_SUCCESS:
                 print("%s" % self.packet_handler.getTxRxResult(scs_comm_result))
