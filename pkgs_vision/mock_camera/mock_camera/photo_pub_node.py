@@ -11,7 +11,7 @@ class MockCameraNode(Node):
     def __init__(self):
         super().__init__("photo_pub_node")
 
-        self.declare_parameter("timer_period", 0.5)
+        self.declare_parameter("timer_period", (1.0 / 24.0))
         timer_period = (
             self.get_parameter("timer_period").get_parameter_value().double_value
         )
