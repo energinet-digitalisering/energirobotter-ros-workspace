@@ -1,5 +1,7 @@
 # YOLO models
+*.onnx
 *.pt
+*.trt
 
 # Python
 __pycache__/
