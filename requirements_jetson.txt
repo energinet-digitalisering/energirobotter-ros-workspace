@@ -1,0 +1,3 @@
+-r pkgs_control/servo_control/requirements.txt
+-r pkgs_teleoperation/teleoperation/requirements.txt
+-r pkgs_vision/face_detection/requirements_jetson.txt
