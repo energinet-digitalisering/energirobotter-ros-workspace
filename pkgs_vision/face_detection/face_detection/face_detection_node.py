@@ -8,6 +8,8 @@ from rclpy.node import Node
 from sensor_msgs.msg import Image, CompressedImage
 from vision_msgs.msg import BoundingBox2D, Pose2D, Point2D
 
+from face_detection.src import inference_yolo
+
 
 class Box:
     def __init__(self, x, y, w, h):
@@ -80,36 +82,12 @@ class FaceDetectionNode(Node):
         model_path = (
             "install/face_detection/share/face_detection/models/yolov8n-face.pt"
         )
-        self.model = YOLO(model_path)
-        self.box_prev = Box(self.image_w / 2, self.image_h / 2, 0, 0)
+
+        self.model = inference_yolo.InferenceYolo(
+            model_path, self.image_w, self.image_h, self.box_size_multiplier
+        )
 
         self.cv_bridge = CvBridge()
-
-    def box_closest(self, target, boxes):
-
-        distance_min = 2 * self.image_w
-        box = None
-        for x, y, w, h in boxes:
-            distance = np.linalg.norm([target[0] - x, target[1] - y])
-
-            if distance < distance_min:
-                distance_min = distance
-                box = Box(x, y, w, h)
-
-        return box
-
-    def box_largest(self, boxes):
-
-        largest_size = 0
-        box = None
-        for x, y, w, h in boxes:
-            size = w * h
-
-            if size > (largest_size):
-                largest_size = size
-                box = Box(x, y, w, h)
-
-        return box
 
     def camera_callback(self, msg):
 
@@ -121,56 +99,34 @@ class FaceDetectionNode(Node):
             image = self.cv_bridge.imgmsg_to_cv2(msg, desired_encoding="rgb8")
 
         # Run face detection model
-        results = self.model.predict(source=image, show=False, verbose=False)
-        annotated = results[0].plot(show=False)
+        results, box = self.model.detect_faces(image)
 
-        # Convert results to list of boxes
-        boxes = []
-        for result in results:
-            for box in result.boxes.xywh.tolist():
-                boxes.append(box)
+        # Create bounding box message
+        box_msg = BoundingBox2D(
+            center=Pose2D(
+                position=Point2D(x=box.x, y=box.y),
+                theta=0.0,
+            ),
+            size_x=box.w,
+            size_y=box.h,
+        )
 
-        if len(boxes) != 0:  # Ensure detection
+        # Publish bounding box
+        self.publisher_bounding_box.publish(box_msg)
 
-            box_closest = self.box_closest((self.box_prev.x, self.box_prev.y), boxes)
-            box_largest = self.box_largest(boxes)
-
-            box_size_buffer = box_closest.size() * self.box_size_multiplier
-
-            box_target = (
-                box_largest
-                if (box_largest.size() > (box_closest.size() + box_size_buffer))
-                else box_closest
-            )
-
-            self.box_prev = box_target
-
-            # Create bounding box message
-            box_msg = BoundingBox2D(
-                center=Pose2D(
-                    position=Point2D(x=box_target.x, y=box_target.y),
-                    theta=0.0,
-                ),
-                size_x=box_target.w,
-                size_y=box_target.h,
-            )
-
-            # Publish bounding box
-            self.publisher_bounding_box.publish(box_msg)
         if self.publish_annotation:
 
             # Add circle to targeted bounding box on annotated image
-            cv2.circle(
-                annotated, (int(box_target.x), int(box_target.y)), 10, (0, 255, 0), -1
-            )
+            annotated = results[0].plot(show=False)
+            cv2.circle(annotated, (int(box.x), int(box.y)), 10, (0, 255, 0), -1)
 
-        if self.use_compressed:
-            image_pub = self.cv_bridge.cv2_to_compressed_imgmsg(annotated)
-        else:
-            image_pub = self.cv_bridge.cv2_to_imgmsg(annotated, encoding="rgb8")
+            if self.use_compressed:
+                image_pub = self.cv_bridge.cv2_to_compressed_imgmsg(annotated)
+            else:
+                image_pub = self.cv_bridge.cv2_to_imgmsg(annotated, encoding="rgb8")
 
-        # Publish annotated image
-        self.publisher_annotation.publish(image_pub)
+            # Publish annotated image
+            self.publisher_annotation.publish(image_pub)
 
 
 def main(args=None):
