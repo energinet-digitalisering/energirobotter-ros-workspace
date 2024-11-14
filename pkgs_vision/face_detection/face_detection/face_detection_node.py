@@ -31,6 +31,11 @@ class FaceDetectionNode(Node):
             self.get_parameter("").get_parameter_value().string_value
         )
 
+        self.declare_parameter("publish_annotation", False)
+        self.publish_annotation = (
+            self.get_parameter("publish_annotation").get_parameter_value().bool_value
+        )
+
         self.declare_parameter("image_w", 1280)
         self.image_w = self.get_parameter("image_w").get_parameter_value().integer_value
 
@@ -152,6 +157,7 @@ class FaceDetectionNode(Node):
 
             # Publish bounding box
             self.publisher_bounding_box.publish(box_msg)
+        if self.publish_annotation:
 
             # Add circle to targeted bounding box on annotated image
             cv2.circle(

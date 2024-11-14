@@ -105,6 +105,7 @@ def launch_setup(context, *args, **kwargs):
         remappings=[("/camera", image_topic)],
         parameters=[
             {"inference_device": inference_device},
+            {"publish_annotation": True},
             {"image_w": image_w},
             {"image_h": image_h},
             {"use_compressed": use_compressed},
