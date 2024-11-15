@@ -1,7 +1,7 @@
 /**:
   ros__parameters:
-    operation_mode: "control"
-    driver_device: "waveshare_driver"
+    operation_mode: "angle"
+    driver_device: "waveshare"
     com_port: "/dev/ttyUSB0"
     pwm_min: 0
     pwm_max: 4095
@@ -17,49 +17,49 @@
 /arm_left/shoulder_pitch/servo:
   ros__parameters:
     servo_id: 7
-    angle_software_min: 115
+    angle_software_min: 120
     angle_software_max: 230
     dir: 1
 
 /arm_left/shoulder_roll/servo:
   ros__parameters:
     servo_id: 6
-    angle_software_min: 115
+    angle_software_min: 120
     angle_software_max: 230
     dir: 1
 
 /arm_left/arm_yaw/servo:
   ros__parameters:
     servo_id: 5
-    angle_software_min: 115
+    angle_software_min: 120
     angle_software_max: 230
     dir: 1
 
 /arm_left/elbow_pitch/servo:
   ros__parameters:
     servo_id: 4
-    angle_software_min: 115
+    angle_software_min: 120
     angle_software_max: 230
     dir: 1
 
 /arm_left/forearm_yaw/servo:
   ros__parameters:
     servo_id: 3
-    angle_software_min: 115
+    angle_software_min: 120
     angle_software_max: 230
     dir: 1
 
 /arm_left/wrist_pitch/servo:
   ros__parameters:
     servo_id: 2
-    angle_software_min: 115
+    angle_software_min: 120
     angle_software_max: 230
     dir: 1
 
 /arm_left/wrist_roll/servo:
   ros__parameters:
     servo_id: 1
-    angle_software_min: 115
+    angle_software_min: 120
     angle_software_max: 230
     dir: 1
 
@@ -69,48 +69,48 @@
 /arm_right/shoulder_pitch/servo:
   ros__parameters:
     servo_id: 17
-    angle_software_min: 115
+    angle_software_min: 120
     angle_software_max: 230
-    dir: 1
+    dir: -1
 
 /arm_right/shoulder_roll/servo:
   ros__parameters:
     servo_id: 16
-    angle_software_min: 115
+    angle_software_min: 120
     angle_software_max: 230
     dir: 1
 
 /arm_right/arm_yaw/servo:
   ros__parameters:
     servo_id: 15
-    angle_software_min: 115
+    angle_software_min: 120
     angle_software_max: 230
     dir: 1
 
 /arm_right/elbow_pitch/servo:
   ros__parameters:
     servo_id: 14
-    angle_software_min: 115
+    angle_software_min: 120
     angle_software_max: 230
     dir: 1
 
 /arm_right/forearm_yaw/servo:
   ros__parameters:
     servo_id: 13
-    angle_software_min: 115
+    angle_software_min: 120
     angle_software_max: 230
     dir: 1
 
 /arm_right/wrist_pitch/servo:
   ros__parameters:
     servo_id: 12
-    angle_software_min: 115
+    angle_software_min: 120
     angle_software_max: 230
     dir: 1
 
 /arm_right/wrist_roll/servo:
   ros__parameters:
     servo_id: 11
-    angle_software_min: 115
+    angle_software_min: 120
     angle_software_max: 230
     dir: 1
