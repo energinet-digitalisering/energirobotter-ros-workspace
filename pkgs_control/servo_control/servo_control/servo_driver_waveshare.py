@@ -12,7 +12,7 @@ class ServoDriverWaveshare(Node):
         super().__init__("servo_driver_waveshare")
 
         # Parameters
-        self.declare_parameter("port", "/dev/ttyACM0")
+        self.declare_parameter("port", "/dev/ttyUSB0")
         port = self.get_parameter("port").get_parameter_value().string_value
 
         self.declare_parameter("baudrate", 115200)
