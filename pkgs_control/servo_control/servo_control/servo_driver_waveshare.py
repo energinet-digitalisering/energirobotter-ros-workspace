@@ -48,10 +48,10 @@ class ServoDriverWaveshare(Node):
             msg.servo_id, msg.pwm, SCS_MOVING_SPEED := 255, SCS_MOVING_ACC := 255
         )
 
-        if scs_comm_result != scservo_def.COMM_SUCCESS:
-            self.get_logger().error(
-                f"Error in servo communication for servo id {msg.servo_id}: {scs_comm_result}"
-            )
+        # if scs_comm_result != scservo_def.COMM_SUCCESS:
+        #     self.get_logger().error(
+        #         f"Error in servo communication for servo id {msg.servo_id}: {scs_comm_result}"
+        #     )
 
         # if scs_comm_result != scservo_def.COMM_SUCCESS:
         #     print("%s" % self.packet_handler.getTxRxResult(scs_comm_result))
