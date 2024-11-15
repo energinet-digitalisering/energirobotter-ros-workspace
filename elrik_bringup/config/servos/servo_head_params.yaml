@@ -14,8 +14,7 @@
     angle_max: 360
     angle_software_max: 360
     speed_max: 500
-    gain_P: 0.2
-    gain_D: 0.5
+
 
 /head/yaw/servo:
   ros__parameters:
@@ -23,6 +22,8 @@
     angle_software_min: 120
     angle_software_max: 230
     dir: -1
+    gain_P: 0.2
+    gain_D: 0.5
 
 /head/pitch/servo:
   ros__parameters:
@@ -30,3 +31,5 @@
     angle_software_min: 120
     angle_software_max: 230
     dir: 1
+    gain_P: 0.3
+    gain_D: 0.8
