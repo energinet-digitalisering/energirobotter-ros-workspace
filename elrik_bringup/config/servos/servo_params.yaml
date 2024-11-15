@@ -15,4 +15,4 @@
     angle_software_min: 0
     angle_max: 180
     angle_software_max: 180
-    speed_max: 200.0
+    speed_max: 200

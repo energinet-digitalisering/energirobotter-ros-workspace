@@ -17,6 +17,7 @@ def launch_setup(context, *args, **kwargs):
         [
             FindPackageShare(package_name),
             "config",
+            "servos",
             "servo_hand_params.yaml",
         ]
     )
