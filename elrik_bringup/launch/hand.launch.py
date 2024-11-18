@@ -17,8 +17,16 @@ def launch_setup(context, *args, **kwargs):
         [
             FindPackageShare(package_name),
             "config",
+            "servos",
             "servo_hand_params.yaml",
         ]
+    )
+
+    # Servo Driver
+    servo_driver_node = Node(
+        package="servo_control",
+        executable="servo_driver_pca9685",
+        output="screen",
     )
 
     # Left Hand
@@ -114,6 +122,7 @@ def launch_setup(context, *args, **kwargs):
     )
 
     return [
+        servo_driver_node,
         servo_left_pinky_node,
         servo_left_ring_node,
         servo_left_middle_node,

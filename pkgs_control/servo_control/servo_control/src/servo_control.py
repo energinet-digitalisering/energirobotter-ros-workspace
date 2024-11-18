@@ -1,6 +1,5 @@
 import numpy as np
 
-from .servo_coms import ServoComs
 from .utils import interval_map
 
 
@@ -14,16 +13,15 @@ class ServoControl:
         angle_software_min,
         angle_max,
         angle_software_max,
-        speed_max,  # angles/scond
-        servo_id=0,
+        speed_max,  # angles/second
         dir=1,  # Direction config for upside-down placement (-1 or 1)
         gain_P=1.0,
         gain_I=0.0,
         gain_D=0.0,
-        driver_device="arduino",
-        port="/dev/ttyACM0",
     ):
 
+        self.pwm_min = pwm_min
+        self.pwm_max = pwm_max
         self.angle_min = angle_min
         self.angle_software_min = angle_software_min
         self.angle_max = angle_max
@@ -36,37 +34,10 @@ class ServoControl:
 
         self.angle_init = (self.angle_max / 2) + self.angle_min
         self.angle = self.angle_init
+        self.pwm = self.angle_2_pwm(self.angle)
 
         self.error_acc = 0.0
         self.error_prev = 0.0
-
-        self.servo_coms = ServoComs(
-            pwm_min, pwm_max, angle_min, angle_max, speed_max, servo_id
-        )
-
-        self.coms_successful = False
-
-        match driver_device:
-            case "arduino":
-                self.coms_successful = self.servo_coms.init_arduino(
-                    port=port, baudrate=115200, timeout=1.0
-                )
-
-            case "pca9685":
-                self.coms_successful = self.servo_coms.init_PCA9685()
-
-            case "waveshare_driver":
-                self.coms_successful = self.servo_coms.init_waveshare_driver(
-                    port=port, baudrate=115200
-                )
-
-            case _:
-                print("Invalid driver device")
-
-        self.servo_coms.write_angle(self.angle)
-
-    def ready(self):
-        return self.coms_successful
 
     def controller_PID(self, error, error_acc, error_prev, gain_P, gain_I, gain_D):
 
@@ -113,9 +84,12 @@ class ServoControl:
             self.angle_software_max,
         )
 
-        # Flip angle if direction is flipped
+        self.pwm = self.angle_2_pwm(self.angle)
+
+        # Flip angle and pwm to send if direction is flipped
         if self.dir >= 0:
             angle = self.angle
+            pwm = self.pwm
         elif self.dir < 0:
             angle = interval_map(
                 self.angle,
@@ -124,13 +98,28 @@ class ServoControl:
                 self.angle_max,
                 self.angle_min,
             )
+            pwm = interval_map(
+                self.pwm,
+                self.pwm_min,
+                self.pwm_max,
+                self.pwm_max,
+                self.pwm_min,
+            )
 
-        self.servo_coms.write_angle(angle)
+        return int(angle), int(pwm)
+
+    def angle_2_pwm(self, angle):
+        pwm = int(
+            interval_map(
+                angle, self.angle_min, self.angle_max, self.pwm_min, self.pwm_max
+            )
+        )
+        return pwm
 
     def reach_angle(self, t_d, angle, speed_desired=(-1)):
         angle_gain_p = 10.0
         error = (angle - self.angle) * angle_gain_p
-        self.compute_control(t_d, error, speed_desired)
+        return self.compute_control(t_d, error, speed_desired)
 
     def reset_position(self, t_d):
-        self.reach_angle(t_d, self.angle_init)
+        return self.reach_angle(t_d, self.angle_init)

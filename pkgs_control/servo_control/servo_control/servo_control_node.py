@@ -2,6 +2,7 @@ import rclpy
 from rclpy.node import Node
 import std_msgs.msg
 
+from energirobotter_interfaces.msg import ServoCommand
 from servo_control.src import servo_control
 
 
@@ -13,20 +14,19 @@ class ServoControlNode(Node):
         # Parameters
 
         self.declare_parameter("servo_id", 0)
-        servo_id = self.get_parameter("servo_id").get_parameter_value().integer_value
+        self.servo_id = (
+            self.get_parameter("servo_id").get_parameter_value().integer_value
+        )
 
         self.declare_parameter("operation_mode", "angle")
         operation_mode = (
             self.get_parameter("operation_mode").get_parameter_value().string_value
         )
 
-        self.declare_parameter("driver_device", "pca9685")
+        self.declare_parameter("driver_device", "waveshare")
         driver_device = (
             self.get_parameter("driver_device").get_parameter_value().string_value
         )
-
-        self.declare_parameter("com_port", "/dev/ttyACM0")
-        com_port = self.get_parameter("com_port").get_parameter_value().string_value
 
         self.declare_parameter("control_frequency", 0.05)
         self.control_frequency = (
@@ -82,7 +82,7 @@ class ServoControlNode(Node):
 
             # Timers
             self.timer_angle = self.create_timer(
-                self.control_frequency, self.callback_timer_angle
+                self.control_frequency, self.callback_timer_set_angle
             )
 
         # Operation mode setup
@@ -95,7 +95,11 @@ class ServoControlNode(Node):
                 1,
             )
 
-        self.get_logger().info(f"Initialising servo with id {servo_id}...")
+        self.publisher = self.create_publisher(
+            ServoCommand, "/" + driver_device + "/servo_command", 1
+        )
+
+        self.get_logger().info(f"Initialising servo with id {self.servo_id}...")
 
         # Servo config
         self.servo = servo_control.ServoControl(
@@ -106,33 +110,35 @@ class ServoControlNode(Node):
             angle_max,
             angle_software_max,
             speed_max,
-            servo_id=servo_id,
             dir=dir,
             gain_P=gain_P,
             gain_I=gain_I,
             gain_D=gain_D,
-            driver_device=driver_device,
-            port=com_port,
         )
-
-        if not self.servo.ready():
-            self.get_logger().error(
-                "Servo could not be initialised, shutting down node..."
-            )
-            self.destroy_node()
 
         # Node variables
         self.desired_angle = self.servo.angle_init
 
+    def publish(self, angle, pwm):
+
+        msg = ServoCommand()
+        msg.servo_id = self.servo_id
+        msg.angle = angle
+        msg.pwm = pwm
+
+        self.publisher.publish(msg)
+
     def callback_set_angle(self, msg):
         self.desired_angle = msg.data
 
-    def callback_timer_angle(self):
-        self.servo.reach_angle(self.control_frequency, self.desired_angle)
+    def callback_timer_set_angle(self):
+        angle, pwm = self.servo.reach_angle(self.control_frequency, self.desired_angle)
+        self.publish(angle, pwm)
 
     def callback_set_error(self, msg):
         error = msg.data
-        self.servo.compute_control(self.control_frequency, error)
+        angle, pwm = self.servo.compute_control(self.control_frequency, error)
+        self.publish(angle, pwm)
 
 
 def main(args=None):

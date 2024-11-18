@@ -1,8 +1,12 @@
+/servo_driver_waveshare:
+  ros__parameters:
+    port: "/dev/ttyUSB0"
+    baudrate: 115200
+
 /**:
   ros__parameters:
     operation_mode: "control"
-    driver_device: "waveshare_driver"
-    com_port: "/dev/ttyUSB0"
+    driver_device: "waveshare"
     pwm_min: 0
     pwm_max: 4095
     angle_min: 0
@@ -10,19 +14,22 @@
     angle_max: 360
     angle_software_max: 360
     speed_max: 500
-    gain_P: 0.2
-    gain_D: 0.5
 
-/servo_pan/servo_pan:
+
+/head/yaw/servo:
   ros__parameters:
     servo_id: 8
     angle_software_min: 120
     angle_software_max: 230
     dir: -1
+    gain_P: 0.2
+    gain_D: 0.5
 
-/servo_tilt/servo_tilt:
+/head/pitch/servo:
   ros__parameters:
     servo_id: 9
     angle_software_min: 120
     angle_software_max: 230
     dir: 1
+    gain_P: 0.3
+    gain_D: 0.8
