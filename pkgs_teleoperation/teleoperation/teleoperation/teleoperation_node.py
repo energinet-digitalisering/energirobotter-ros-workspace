@@ -18,11 +18,11 @@ class TeleoperationNode(Node):
 
         # Subscribers
         self.subscription_image_left = self.create_subscription(
-            CompressedImage, "/image_left", self.callback_image_left, 10
+            CompressedImage, "/image_left", self.callback_image_left, 1
         )
 
         self.subscription_image_right = self.create_subscription(
-            CompressedImage, "/image_right", self.callback_image_right, 10
+            CompressedImage, "/image_right", self.callback_image_right, 1
         )
 
         # Timers
