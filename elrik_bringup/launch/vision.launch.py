@@ -66,6 +66,9 @@ def launch_setup(context, *args, **kwargs):
         remappings=[
             ("/camera", image_topic),
         ],
+        parameters=[
+            {"use_compressed": use_compressed},
+        ],
     )
 
     if use_mock_camera.perform(context) == "webcam":
