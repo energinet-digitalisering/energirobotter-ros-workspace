@@ -4,7 +4,10 @@ from multiprocessing import Process, Queue
 import os
 import signal
 from vuer import Vuer
-from vuer.schemas import Scene, ImageBackground
+from vuer.events import Set
+from vuer.schemas import DefaultScene, ImageBackground
+
+import cv2
 
 
 class VuerApp:
@@ -51,7 +54,10 @@ class VuerApp:
         """Handle session lifecycle and set Vuer images."""
         try:
             # Initialize the session
-            session.set @ Scene()
+            session @ Set(
+                DefaultScene(up=[0, 1, 0]),
+            )
+
             self.logger.info("New session started")
 
             # Ensure the WebSocket is active
@@ -73,40 +79,48 @@ class VuerApp:
         self.logger.info("Processing images")
 
         while len(self.app.ws) > 0:
-            if not self.queue_image_left.empty() and not self.queue_image_right.empty():
-                image_left = self.queue_image_left.get()
-                image_right = self.queue_image_right.get()
 
-                session.upsert(
-                    [
-                        ImageBackground(
-                            image_left,
-                            aspect=1.778,
-                            height=1,
-                            distanceToCamera=1,
-                            layers=1,
-                            format="jpeg",
-                            quality=90,
-                            key="background-left",
-                            interpolate=True,
-                        ),
-                        ImageBackground(
-                            image_right,
-                            aspect=1.778,
-                            height=1,
-                            distanceToCamera=1,
-                            layers=2,
-                            format="jpeg",
-                            quality=90,
-                            key="background-right",
-                            interpolate=True,
-                        ),
-                    ],
-                    to="bgChildren",
-                )
+            if self.queue_image_left.empty() or self.queue_image_right.empty():
+                self.logger.warning("Empty image found, skipping frame update")
+                continue
 
-                # 'jpeg' encoding should give you about 30fps with a 16ms wait in-between.
-                await sleep(0.016 * 2)
+            image_left = self.queue_image_left.get(block=True)
+            image_right = self.queue_image_right.get(block=True)
+
+            if image_left is None or image_right is None:
+                self.logger.warning("Image is None, skipping frame update")
+                continue
+
+            session.upsert(
+                [
+                    ImageBackground(
+                        image_left,
+                        aspect=1.778,
+                        height=1,
+                        distanceToCamera=1,
+                        layers=1,
+                        format="jpeg",
+                        quality=90,
+                        key="background-left",
+                        interpolate=True,
+                    ),
+                    ImageBackground(
+                        image_right,
+                        aspect=1.778,
+                        height=1,
+                        distanceToCamera=1,
+                        layers=2,
+                        format="jpeg",
+                        quality=90,
+                        key="background-right",
+                        interpolate=True,
+                    ),
+                ],
+                to="bgChildren",
+            )
+
+            # 'jpeg' encoding should give you about 30fps with a 16ms wait in-between.
+            await sleep(0.016 * 2)
 
         self.logger.info("WebSocket closed, exiting image processing loop")
 
