@@ -7,8 +7,6 @@ from vuer import Vuer
 from vuer.events import Set
 from vuer.schemas import DefaultScene, ImageBackground
 
-import cv2
-
 
 class VuerApp:
     def __init__(self):
