@@ -70,6 +70,11 @@ class ServoControlNode(Node):
         self.declare_parameter("gain_D", 0.0)
         gain_D = self.get_parameter("gain_D").get_parameter_value().double_value
 
+        # Publishers
+        self.publisher = self.create_publisher(
+            ServoCommand, "/" + driver_device + "/servo_command", 1
+        )
+
         # Operation mode setup
         if operation_mode == "angle":
             # Subscriptions
@@ -94,10 +99,6 @@ class ServoControlNode(Node):
                 self.callback_set_error,
                 1,
             )
-
-        self.publisher = self.create_publisher(
-            ServoCommand, "/" + driver_device + "/servo_command", 1
-        )
 
         feedback_enabled = True if driver_device == "waveshare" else False
 
