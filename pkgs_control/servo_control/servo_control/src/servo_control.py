@@ -18,6 +18,7 @@ class ServoControl:
         gain_P=1.0,
         gain_I=0.0,
         gain_D=0.0,
+        feedback_enabled=False,
     ):
 
         self.pwm_min = pwm_min
@@ -31,7 +32,7 @@ class ServoControl:
         self.gain_P = gain_P
         self.gain_I = gain_I
         self.gain_D = gain_D
-        self.feedback_enabled = False
+        self.feedback_enabled = feedback_enabled
 
         self.angle_init = (self.angle_max / 2) + self.angle_min
         self.angle = self.angle_init
