@@ -75,6 +75,15 @@ class ServoControlNode(Node):
             ServoCommand, "/" + driver_device + "/servo_command", 1
         )
 
+        # Subscriptions
+        if driver_device == "waveshare":
+            self.subscription = self.create_subscription(
+                ServoCommand,
+                "waveshare/servo_feedback",
+                self.callback_servo_feedback,
+                1,
+            )
+
         # Operation mode setup
         if operation_mode == "angle":
             # Subscriptions
@@ -131,6 +140,12 @@ class ServoControlNode(Node):
         msg.pwm = pwm
 
         self.publisher.publish(msg)
+
+    def callback_servo_command(self, msg):
+        if msg.servo_id != self.servo_id:
+            return
+
+        self.servo.set_feedback_pwm(msg.pwm)
 
     def callback_set_angle(self, msg):
         self.desired_angle = msg.data
