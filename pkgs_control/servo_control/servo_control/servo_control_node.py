@@ -28,7 +28,7 @@ class ServoControlNode(Node):
             self.get_parameter("driver_device").get_parameter_value().string_value
         )
 
-        self.declare_parameter("control_frequency", 0.05)
+        self.declare_parameter("control_frequency", 0.1)
         self.control_frequency = (
             self.get_parameter("control_frequency").get_parameter_value().double_value
         )
@@ -55,8 +55,10 @@ class ServoControlNode(Node):
             self.get_parameter("angle_software_max").get_parameter_value().integer_value
         )
 
-        self.declare_parameter("speed_max", 200)
-        speed_max = self.get_parameter("speed_max").get_parameter_value().integer_value
+        self.declare_parameter("angle_speed_max", 200)
+        angle_speed_max = (
+            self.get_parameter("angle_speed_max").get_parameter_value().integer_value
+        )
 
         self.declare_parameter("dir", 1)
         dir = self.get_parameter("dir").get_parameter_value().integer_value
@@ -76,18 +78,18 @@ class ServoControlNode(Node):
         )
 
         # Subscriptions
-        if driver_device == "waveshare":
-            self.subscription = self.create_subscription(
-                ServoCommand,
-                "waveshare/servo_feedback",
-                self.callback_servo_feedback,
-                1,
-            )
+        # if driver_device == "waveshare":
+        self.sub_feedback = self.create_subscription(
+            ServoCommand,
+            "/waveshare/servo_feedback",
+            self.callback_servo_feedback,
+            1,
+        )
 
         # Operation mode setup
         if operation_mode == "angle":
             # Subscriptions
-            self.subscription = self.create_subscription(
+            self.sub_set_angle = self.create_subscription(
                 std_msgs.msg.Float64,
                 "set_angle",
                 self.callback_set_angle,
@@ -100,28 +102,29 @@ class ServoControlNode(Node):
             )
 
         # Operation mode setup
-        if operation_mode == "control":
+        elif operation_mode == "control":
             # Subscriptions
-            self.subscription = self.create_subscription(
+            self.sub_set_error = self.create_subscription(
                 std_msgs.msg.Float64,
                 "set_error",
                 self.callback_set_error,
                 1,
             )
 
-        feedback_enabled = True if driver_device == "waveshare" else False
+        # feedback_enabled = True if driver_device == "waveshare" else False
+        feedback_enabled = True
 
         self.get_logger().info(f"Initialising servo with id {self.servo_id}...")
 
         # Servo config
         self.servo = servo_control.ServoControl(
-            pwm_min,
-            pwm_max,
-            angle_min,
-            angle_software_min,
-            angle_max,
-            angle_software_max,
-            speed_max,
+            pwm_min=pwm_min,
+            pwm_max=pwm_max,
+            angle_min=angle_min,
+            angle_software_min=angle_software_min,
+            angle_max=angle_max,
+            angle_software_max=angle_software_max,
+            angle_speed_max=angle_speed_max,
             dir=dir,
             gain_P=gain_P,
             gain_I=gain_I,
@@ -141,7 +144,8 @@ class ServoControlNode(Node):
 
         self.publisher.publish(msg)
 
-    def callback_servo_command(self, msg):
+    def callback_servo_feedback(self, msg):
+
         if msg.servo_id != self.servo_id:
             return
 
