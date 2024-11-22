@@ -116,6 +116,14 @@ class ServoControl:
         )
         return pwm
 
+    def pwm_2_angle(self, pwm):
+        angle = int(
+            interval_map(
+                pwm, self.pwm_min, self.pwm_max, self.angle_min, self.angle_max
+            )
+        )
+        return angle
+
     def reach_angle(self, t_d, angle, speed_desired=(-1)):
         angle_gain_p = 10.0
         error = (angle - self.angle) * angle_gain_p
