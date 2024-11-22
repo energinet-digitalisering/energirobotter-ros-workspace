@@ -99,6 +99,8 @@ class ServoControlNode(Node):
             ServoCommand, "/" + driver_device + "/servo_command", 1
         )
 
+        feedback_enabled = True if driver_device == "waveshare" else False
+
         self.get_logger().info(f"Initialising servo with id {self.servo_id}...")
 
         # Servo config
@@ -114,6 +116,7 @@ class ServoControlNode(Node):
             gain_P=gain_P,
             gain_I=gain_I,
             gain_D=gain_D,
+            feedback_enabled=feedback_enabled,
         )
 
         # Node variables

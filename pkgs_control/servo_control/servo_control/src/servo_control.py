@@ -31,6 +31,7 @@ class ServoControl:
         self.gain_P = gain_P
         self.gain_I = gain_I
         self.gain_D = gain_D
+        self.feedback_enabled = False
 
         self.angle_init = (self.angle_max / 2) + self.angle_min
         self.angle = self.angle_init
@@ -38,6 +39,14 @@ class ServoControl:
 
         self.error_acc = 0.0
         self.error_prev = 0.0
+
+    def set_feedback_angle(self, feedback_angle):
+        self.angle = feedback_angle
+        self.pwm = self.angle_2_pwm(feedback_angle)
+
+    def set_feedback_pwm(self, feedback_pwm):
+        self.pwm = feedback_pwm
+        self.angle = self.pwm_2_angle(feedback_pwm)
 
     def controller_PID(self, error, error_acc, error_prev, gain_P, gain_I, gain_D):
 
@@ -75,31 +84,32 @@ class ServoControl:
         )
 
         # Apply control to angle position
-        self.angle += vel_control * t_d
+        angle = self.angle
+        angle += vel_control * t_d
 
         # Clamp values between min and max angle
-        self.angle = np.clip(
-            self.angle,
+        angle = np.clip(
+            angle,
             self.angle_software_min,
             self.angle_software_max,
         )
+        pwm = self.angle_2_pwm(angle)
 
-        self.pwm = self.angle_2_pwm(self.angle)
+        if not self.feedback_enabled:
+            self.angle = angle
+            self.pwm = pwm
 
         # Flip angle and pwm to send if direction is flipped
-        if self.dir >= 0:
-            angle = self.angle
-            pwm = self.pwm
-        elif self.dir < 0:
+        if self.dir < 0:
             angle = interval_map(
-                self.angle,
+                angle,
                 self.angle_min,
                 self.angle_max,
                 self.angle_max,
                 self.angle_min,
             )
             pwm = interval_map(
-                self.pwm,
+                pwm,
                 self.pwm_min,
                 self.pwm_max,
                 self.pwm_max,
