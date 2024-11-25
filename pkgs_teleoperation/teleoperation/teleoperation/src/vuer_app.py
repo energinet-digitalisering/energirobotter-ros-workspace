@@ -3,7 +3,7 @@ import logging
 from multiprocessing import Process, Queue
 import os
 import signal
-from vuer import Vuer
+from vuer import Vuer, VuerSession
 from vuer.events import Set
 from vuer.schemas import DefaultScene, ImageBackground
 
@@ -16,8 +16,9 @@ class VuerApp:
 
         # Initialize the Vuer app
         self.app = Vuer()
-        self.app.spawn(start=False)(self.set_vuer_images)
+        self.app.spawn(start=False)(self.session_manager)
 
+        # Member variables
         self.queue_image_left = Queue(maxsize=2)
         self.queue_image_right = Queue(maxsize=2)
 
@@ -30,16 +31,15 @@ class VuerApp:
         signal.signal(signal.SIGTERM, self.cleanup)
 
     def __del__(self):
-        # Ensure cleanup on object deletion
+        """Ensure cleanup on object deletion"""
         self.cleanup()
 
     def run(self):
-        # Run the Vuer app
+        """Run the Vuer app"""
         self.app.run()
 
     def update_frames(self, left, right):
-
-        # Update the image queues with new frames
+        """Update the image queues with new frames."""
         if self.queue_image_left.full():
             self.queue_image_left.get()
         self.queue_image_left.put(left)
@@ -48,47 +48,36 @@ class VuerApp:
             self.queue_image_right.get()
         self.queue_image_right.put(right)
 
-    async def set_vuer_images(self, session):
-        """Handle session lifecycle and set Vuer images."""
         try:
-            # Initialize the session
-            session @ Set(
-                DefaultScene(up=[0, 1, 0]),
-            )
 
-            self.logger.info("New session started")
-
-            # Ensure the WebSocket is active
-            if len(self.app.ws) == 0:
-                self.logger.warning("WebSocket session missing, ending session")
-                return
-
-            # Process images
-            await self.process_images(session)
-
-        except Exception as e:
-            self.logger.error(f"Error in set_vuer_images: {e}", exc_info=True)
-
-        finally:
-            self.logger.info("Ending session processing")
-
-    async def process_images(self, session):
-        """Process image frames and send them to Vuer."""
+    async def session_manager(self, session: VuerSession):
+        """Process image frames and send them to Vuer, as well as retrieving hand-tracking data."""
         self.logger.info("Processing images")
 
+        # Ensure the WebSocket is active
+        if len(self.app.ws) == 0:
+            self.logger.warning("WebSocket session missing, ending session")
+            return
+
+        # Initialize the session
+        session.set @ DefaultScene(frameloop="always")
+
+        # Session loop
         while len(self.app.ws) > 0:
 
+            # Handle image queue
             if self.queue_image_left.empty() or self.queue_image_right.empty():
-                self.logger.warning("Empty image found, skipping frame update")
+                self.logger.debug("Empty image found, skipping frame update")
                 continue
 
             image_left = self.queue_image_left.get(block=True)
             image_right = self.queue_image_right.get(block=True)
 
             if image_left is None or image_right is None:
-                self.logger.warning("Image is None, skipping frame update")
+                self.logger.debug("Image is None, skipping frame update")
                 continue
 
+            # Session content
             session.upsert(
                 [
                     ImageBackground(

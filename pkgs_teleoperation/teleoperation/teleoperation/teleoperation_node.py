@@ -29,8 +29,8 @@ class TeleoperationNode(Node):
         self.timer = self.create_timer(1.0 / self.fps, self.callback_timer)
 
         # Variables
-        self.image_left: CompressedImage = None
-        self.image_right: CompressedImage = None
+        self.image_left = None
+        self.image_right = None
 
         self.cv_bridge = CvBridge()
 
