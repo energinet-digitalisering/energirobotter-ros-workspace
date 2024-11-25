@@ -1,11 +1,11 @@
 from asyncio import sleep
 import logging
-from multiprocessing import Process, Queue
+from multiprocessing import Array, Process, Queue
 import os
 import signal
 from vuer import Vuer, VuerSession
 from vuer.events import Set
-from vuer.schemas import DefaultScene, ImageBackground
+from vuer.schemas import DefaultScene, Hands, ImageBackground
 
 
 class VuerApp:
@@ -16,11 +16,15 @@ class VuerApp:
 
         # Initialize the Vuer app
         self.app = Vuer()
+        self.app.add_handler("HAND_MOVE")(self.handler_hands)
         self.app.spawn(start=False)(self.session_manager)
 
         # Member variables
         self.queue_image_left = Queue(maxsize=2)
         self.queue_image_right = Queue(maxsize=2)
+
+        self.left_hand = Array("d", 16, lock=True)
+        self.right_hand = Array("d", 16, lock=True)
 
         # Start the Vuer app in a separate process
         self.process = Process(target=self.run)
@@ -48,7 +52,18 @@ class VuerApp:
             self.queue_image_right.get()
         self.queue_image_right.put(right)
 
+    async def handler_hands(self, event, session: VuerSession):
+        """Handle hand tracking data"""
+
+        # self.logger.info("States:")
+        # self.logger.info(event.value["leftState"])
+        # self.logger.info(event.value["rightState"])
+
         try:
+            self.left_hand[:] = event.value["left"]
+            self.right_hand[:] = event.value["right"]
+        except:
+            pass
 
     async def session_manager(self, session: VuerSession):
         """Process image frames and send them to Vuer, as well as retrieving hand-tracking data."""
@@ -61,6 +76,9 @@ class VuerApp:
 
         # Initialize the session
         session.set @ DefaultScene(frameloop="always")
+        session.upsert @ Hands(
+            fps=30, stream=True, key="hands", showLeft=True, showRight=True
+        )
 
         # Session loop
         while len(self.app.ws) > 0:
