@@ -68,7 +68,7 @@
     servo_id: 1
     angle_software_min: 120
     angle_software_max: 230
-    dir: 1
+    dir: -1
     gear_ratio: 1
 
 
@@ -95,7 +95,7 @@
     servo_id: 15
     angle_software_min: 120
     angle_software_max: 230
-    dir: 1
+    dir: -1
     gear_ratio: 3
 
 /arm_right/elbow_pitch/servo:
@@ -103,7 +103,7 @@
     servo_id: 14
     angle_software_min: 120
     angle_software_max: 230
-    dir: 1
+    dir: -1
     gear_ratio: 3
 
 /arm_right/forearm_yaw/servo:
@@ -112,7 +112,7 @@
     angle_software_min: 120
     angle_software_max: 270
     angle_speed_max: 270
-    dir: 1
+    dir: -1
     gear_ratio: 1
 
 /arm_right/wrist_pitch/servo:
@@ -120,7 +120,7 @@
     servo_id: 12
     angle_software_min: 120
     angle_software_max: 230
-    dir: 1
+    dir: -1
     gear_ratio: 1
 
 /arm_right/wrist_roll/servo:
