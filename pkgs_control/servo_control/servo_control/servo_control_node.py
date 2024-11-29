@@ -63,6 +63,11 @@ class ServoControlNode(Node):
         self.declare_parameter("dir", 1)
         dir = self.get_parameter("dir").get_parameter_value().integer_value
 
+        self.declare_parameter("gear_ratio", 1)
+        gear_ratio = (
+            self.get_parameter("gear_ratio").get_parameter_value().integer_value
+        )
+
         self.declare_parameter("gain_P", 1.0)
         gain_P = self.get_parameter("gain_P").get_parameter_value().double_value
 
@@ -126,6 +131,7 @@ class ServoControlNode(Node):
             angle_software_max=angle_software_max,
             angle_speed_max=angle_speed_max,
             dir=dir,
+            gear_ratio=gear_ratio,
             gain_P=gain_P,
             gain_I=gain_I,
             gain_D=gain_D,
@@ -156,7 +162,9 @@ class ServoControlNode(Node):
 
     def callback_timer_set_angle(self):
         angle, pwm = self.servo.reach_angle(self.control_frequency, self.desired_angle)
-        self.publish(angle, pwm)
+
+        if angle != self.desired_angle:
+            self.publish(angle, pwm)
 
     def callback_set_error(self, msg):
         error = msg.data

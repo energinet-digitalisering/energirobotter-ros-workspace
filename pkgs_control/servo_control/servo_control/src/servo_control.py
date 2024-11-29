@@ -14,7 +14,9 @@ class ServoControl:
         angle_max,
         angle_software_max,
         angle_speed_max,  # angles/second
+        default_position=180,
         dir=1,  # Direction config for upside-down placement (-1 or 1)
+        gear_ratio=1,
         gain_P=1.0,
         gain_I=0.0,
         gain_D=0.0,
@@ -28,13 +30,15 @@ class ServoControl:
         self.angle_max = angle_max
         self.angle_software_max = angle_software_max
         self.angle_speed_max = angle_speed_max
+        self.default_position = default_position
         self.dir = dir
+        self.gear_ratio = gear_ratio
         self.gain_P = gain_P
         self.gain_I = gain_I
         self.gain_D = gain_D
         self.feedback_enabled = feedback_enabled
 
-        self.angle_init = (self.angle_max / 2) + self.angle_min
+        self.angle_init = self.default_position
         self.angle = self.angle_init
         self.pwm = self.angle_2_pwm(self.angle)
 
@@ -42,12 +46,16 @@ class ServoControl:
         self.error_prev = 0.0
 
     def set_feedback_angle(self, feedback_angle):
-        self.angle = feedback_angle
+        self.angle = self.gearing_in(
+            feedback_angle, self.default_position, self.gear_ratio
+        )
         self.pwm = self.angle_2_pwm(feedback_angle)
 
     def set_feedback_pwm(self, feedback_pwm):
         self.pwm = feedback_pwm
-        self.angle = self.pwm_2_angle(feedback_pwm)
+        self.angle = self.gearing_in(
+            self.pwm_2_angle(feedback_pwm), self.default_position, self.gear_ratio
+        )
 
     def controller_PID(self, error, error_acc, error_prev, gain_P, gain_I, gain_D):
 
@@ -82,6 +90,8 @@ class ServoControl:
             if angle_speed_desired < self.angle_speed_max
             else self.angle_speed_max
         )
+
+        # angle_speed_max *= self.gear_ratio  # Increase speeds at higher gear ratios
 
         # Clamp values between min and max speed
         vel_control = np.clip(
@@ -123,7 +133,11 @@ class ServoControl:
                 self.pwm_min,
             )
 
-        return int(angle), int(pwm)
+        # Apply gearing ratio
+        angle_geared = self.gearing_out(angle, self.default_position, self.gear_ratio)
+        pwm_geared = self.angle_2_pwm(angle_geared)
+
+        return int(angle), int(pwm_geared)
 
     def angle_2_pwm(self, angle):
         pwm = int(
@@ -140,6 +154,18 @@ class ServoControl:
             )
         )
         return angle
+
+    def gearing_in(self, value, zero_pos, gear_ratio):
+        """Given the output angle of a gear, calculate the input angle"""
+        offset = (value - zero_pos) / gear_ratio
+        ungeared = offset + zero_pos
+        return ungeared
+
+    def gearing_out(self, value, zero_pos, gear_ratio):
+        """Given the input angle of a gear, calculate the output angle"""
+        offset = value - zero_pos
+        geared = zero_pos + offset * gear_ratio
+        return geared
 
     def reach_angle(self, t_d, angle, angle_speed_desired=(-1)):
         angle_gain_p = 10.0
