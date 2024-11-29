@@ -20,6 +20,7 @@ setup(
     entry_points={
         "console_scripts": [
             "ik_manager_node = ik_manager.ik_manager_node:main",
+            "ik_visualizer_node = ik_manager.ik_visualizer_node:main",
         ],
     },
 )
