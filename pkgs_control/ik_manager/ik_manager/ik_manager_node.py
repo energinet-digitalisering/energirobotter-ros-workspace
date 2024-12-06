@@ -1,105 +1,75 @@
+import numpy as np
 import rclpy
 from rclpy.node import Node
-import pinocchio
-import numpy as np
+from sensor_msgs.msg import JointState
+from geometry_msgs.msg import Vector3
+
+from ik_manager.src import kinematics_pinoccio
 
 
 class IKManagerNode(Node):
     def __init__(self):
         super().__init__("ik_manager_node")
 
-        # Load the robot model
-        model = pinocchio.buildModelFromUrdf(
-            "install/elrik_description/share/elrik_description/urdf/elrik.urdf"
+        # Subscriptions
+        self.target_pos_sub = self.create_subscription(
+            Vector3,
+            "/target_pos",
+            self.callback_target_pos,
+            1,
         )
-        data = model.createData()
 
-        # Set a neutral configuration (initial joint angles)
-        q = pinocchio.neutral(model)
+        # Publishers
+        self.joint_state_pub = self.create_publisher(JointState, "/joint_states", 10)
 
-        # Desired end-effector pose (example)
-        desired_position = np.array([0.1, 0.2, 0.3])  # XYZ target
-        desired_rotation = np.eye(3)  # Identity rotation matrix
-        desired_pose = pinocchio.SE3(desired_rotation, desired_position)
+        # Timers
+        self.timer = self.create_timer(1.0, self.callback_publish_joint_states)
 
-        # Perform inverse kinematics
-        frame_name = "left_hand_link"  # End-effector frame
-        if model.existFrame(frame_name):
-            frame_index = model.getFrameId(frame_name)
-            q_solution = self.compute_ik(model, data, q, frame_index, desired_pose)
+        # Node variables
+        self.target_pos = [0.2, -0.4, 0.0]
 
-            if q_solution is not None:
-                self.get_logger().info(f"IK solution found: {q_solution}")
-                # Update forward kinematics with new solution
-                pinocchio.forwardKinematics(model, data, q_solution)
-                pinocchio.updateFramePlacements(model, data)
-                updated_pose = data.oMf[frame_index]
-                self.get_logger().info(
-                    f"Updated End-effector position: {updated_pose.translation}"
-                )
-                for i, angle in enumerate(q_solution):
-                    self.get_logger().info(
-                        f"Joint {model.names[i]}: {np.rad2deg(angle)}"
-                    )
+        self.ik_solver = kinematics_pinoccio.KinematicsPinoccio(
+            urdf_path="install/elrik_description/share/elrik_description/urdf/phobos_generated.urdf"
+        )
 
-                # for i, name in enumerate(model.names):
-                # self.get_logger().info(f"Index {i}: {name}")
+    ##################### Callbacks #####################
 
-            else:
-                self.get_logger().error("Failed to compute IK solution.")
-        else:
-            self.get_logger().error(f"Frame '{frame_name}' not found in model!")
+    def callback_target_pos(self, msg):
+        self.get_logger().info(f"Updating target position: [{msg.x}, {msg.y}, {msg.z}]")
+        self.target_pos = [msg.x, msg.y, msg.z]
 
-    def compute_ik(
-        self, model, data, q_init, frame_index, desired_pose, tol=1e-4, max_iter=100
-    ):
+    def callback_publish_joint_states(self):
         """
-        Compute the inverse kinematics for a given end-effector pose.
-
-        Args:
-            model: Pinocchio model of the robot.
-            data: Pinocchio data object.
-            q_init: Initial joint configuration.
-            frame_index: Frame index of the end-effector.
-            desired_pose: Desired SE3 pose of the end-effector.
-            tol: Tolerance for position/orientation error.
-            max_iter: Maximum number of iterations.
-
-        Returns:
-            Solution joint configuration or None if no solution is found.
+        Publish the joint states based on the IK solution.
         """
-        q = q_init.copy()
-        for i in range(max_iter):
-            # Compute current pose of the end-effector
-            pinocchio.forwardKinematics(model, data, q)
-            pinocchio.updateFramePlacements(model, data)
-            current_pose = data.oMf[frame_index]
 
-            # Compute pose error
-            position_error = desired_pose.translation - current_pose.translation
-            rotation_error = 0.5 * (
-                np.cross(current_pose.rotation[:, 0], desired_pose.rotation[:, 0])
-                + np.cross(current_pose.rotation[:, 1], desired_pose.rotation[:, 1])
-                + np.cross(current_pose.rotation[:, 2], desired_pose.rotation[:, 2])
+        joint_names = self.ik_solver.get_joint_names()
+
+        # Perform IK
+        q_solution = self.ik_solver.perform_ik(
+            "link_right_hand", np.array(self.target_pos), np.eye(3)
+        )
+
+        if q_solution is None:
+            q_solution = self.ik_solver.q_init
+
+        expected_joint_count = len(joint_names)
+        q_positions = q_solution[:expected_joint_count]
+
+        if len(q_positions) != expected_joint_count:
+            self.get_logger().error(
+                f"Mismatch between joint names ({expected_joint_count}) and joint positions ({len(q_positions)})."
             )
-            error = np.concatenate([position_error, rotation_error])
+            return
 
-            # Check for convergence
-            if np.linalg.norm(error) < tol:
-                return q
+        # Create message
+        joint_state_msg = JointState()
+        joint_state_msg.header.stamp = self.get_clock().now().to_msg()
+        joint_state_msg.name = joint_names
+        joint_state_msg.position = [float(pos) for pos in q_positions]
 
-            # Compute Jacobian
-            J = pinocchio.computeFrameJacobian(model, data, q, frame_index)
-            J_pos_orient = J[:6]  # Use both position and orientation components
-
-            # Compute joint velocity update
-            dq = np.linalg.pinv(J_pos_orient).dot(error)
-
-            # Update joint configuration
-            q = pinocchio.integrate(model, q, dq)
-
-        # Return None if no solution is found within max_iter
-        return None
+        # Publish the joint state message
+        self.joint_state_pub.publish(joint_state_msg)
 
 
 def main(args=None):

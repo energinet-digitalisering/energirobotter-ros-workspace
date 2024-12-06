@@ -13,16 +13,23 @@ class IKVisualizerNode(Node):
 
         # Define the joint names and IK solution
         self.joint_names = [
-            "joint_1",
-            "joint_2",
-            "joint_3",
-            "joint_4",
-            "joint_5",
-            "joint_6",
-            "joint_7",
-            "joint_8",
-            "joint_9",
-            "joint_10",
+            "joint_head_yaw",
+            "joint_head_pitch",
+            "joint_head_roll",
+            "joint_left_shoulder_pitch",
+            "joint_left_shoulder_roll",
+            "joint_left_arm_yaw",
+            "joint_left_elbow_pitch",
+            "joint_left_forearm_yaw",
+            "joint_left_wrist_pitch",
+            "joint_left_wrist_roll",
+            "joint_right_shoulder_pitch",
+            "joint_right_shoulder_roll",
+            "joint_right_arm_yaw",
+            "joint_right_elbow_pitch",
+            "joint_right_forearm_yaw",
+            "joint_right_wrist_pitch",
+            "joint_right_wrist_roll",
         ]
         self.ik_solution = [
             -0.07555402,
@@ -35,6 +42,13 @@ class IKVisualizerNode(Node):
             0.07332419,
             0.13982251,
             0.1745678,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
         ]  # Replace with your actual IK result
 
         # Publish the state periodically
@@ -50,7 +64,6 @@ class IKVisualizerNode(Node):
         joint_state_msg.position = self.ik_solution
 
         self.joint_state_pub.publish(joint_state_msg)
-        self.get_logger().info("Published joint states to RViz")
 
 
 def main(args=None):

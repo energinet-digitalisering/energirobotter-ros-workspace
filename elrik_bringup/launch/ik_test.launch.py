@@ -9,7 +9,7 @@ def generate_launch_description():
                 package="robot_state_publisher",
                 executable="robot_state_publisher",
                 arguments=[
-                    "install/elrik_description/share/elrik_description/urdf/elrik.urdf"
+                    "install/elrik_description/share/elrik_description/urdf/phobos_generated.urdf"
                 ],
                 output="screen",
             ),
@@ -18,12 +18,10 @@ def generate_launch_description():
                 executable="rviz2",
                 arguments=[
                     "-d",
-                    "install/elrik_description/share/elrik_description/config/elrik.rviz",
+                    "install/elrik_description/share/elrik_description/rviz/elrik_display.rviz",
                 ],
                 output="screen",
             ),
-            Node(
-                package="ik_manager", executable="ik_visualizer_node", output="screen"
-            ),
+            Node(package="ik_manager", executable="ik_manager_node", output="screen"),
         ]
     )
