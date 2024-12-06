@@ -1,4 +1,11 @@
 <robot name="elrik" version="1.0">
+  <joint name="world_joint" type="fixed">
+      <origin xyz="0 0 0.964145" rpy="0 0 0"/>  <!-- 0.964145 is the height of the robot from its origin -->
+      <parent link="world"/>
+      <child link="link_torso"/>
+  </joint>
+  <link name="world"/>
+
   <joint name="joint_head_pitch" type="revolute">
     <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
     <origin rpy="-0.00000 1.57080 0.00000" xyz="0.00012 0.00000 0.03998"/>
@@ -25,28 +32,28 @@
     <origin rpy="-1.57080 0.00000 3.14159" xyz="0.00020 -0.12745 0.01486"/>
     <parent link="link_left_shoulder_x"/>
     <child link="link_left_upper_arm"/>
-    <axis xyz="0.00000 0.00000 1.00000"/>
+    <axis xyz="0.00000 0.00000 -1.00000"/>
   </joint>
   <joint name="joint_left_elbow_pitch" type="revolute">
     <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
-    <origin rpy="-3.14159 -1.57080 -3.14159" xyz="0.00011 0.00027 0.23600"/>
+    <origin rpy="3.14159 -1.57080 3.14159" xyz="0.00011 0.00027 0.23600"/>
     <parent link="link_left_upper_arm"/>
     <child link="link_left_forearm"/>
-    <axis xyz="0.00000 0.00000 1.00000"/>
+    <axis xyz="0.00000 0.00000 -1.00000"/>
   </joint>
   <joint name="joint_left_forearm_yaw" type="revolute">
     <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
     <origin rpy="-3.14159 -1.57080 0.00000" xyz="0.09363 -0.00002 0.00011"/>
     <parent link="link_left_forearm"/>
     <child link="link_left_wrist"/>
-    <axis xyz="0.00000 0.00000 1.00000"/>
+    <axis xyz="0.00000 0.00000 -1.00000"/>
   </joint>
   <joint name="joint_left_shoulder_pitch" type="revolute">
     <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
     <origin rpy="0.00000 1.04720 0.00000" xyz="0.16356 -0.00077 0.19342"/>
     <parent link="link_torso"/>
     <child link="link_left_shoulder"/>
-    <axis xyz="0.00000 0.00000 1.00000"/>
+    <axis xyz="0.00000 0.00000 -1.00000"/>
   </joint>
   <joint name="joint_left_shoulder_roll" type="revolute">
     <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
@@ -57,10 +64,10 @@
   </joint>
   <joint name="joint_left_wrist_pitch" type="revolute">
     <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
-    <origin rpy="1.79848 -1.57080 1.34311" xyz="-0.00110 -0.00019 0.17400"/>
+    <origin rpy="1.43744 -1.57080 1.70415" xyz="-0.00110 -0.00019 0.17400"/>
     <parent link="link_left_wrist"/>
     <child link="link_left_wrist_x"/>
-    <axis xyz="0.00000 0.00000 1.00000"/>
+    <axis xyz="0.00000 0.00000 -1.00000"/>
   </joint>
   <joint name="joint_left_wrist_roll" type="revolute">
     <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
@@ -90,12 +97,19 @@
     <child link="link_right_wrist"/>
     <axis xyz="0.00000 0.00000 1.00000"/>
   </joint>
+  <joint name="joint_right_shoulder_pitch" type="revolute">
+    <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
+    <origin rpy="0.00000 0.00000 0.00000" xyz="-0.16356 -0.00077 0.19342"/>
+    <parent link="link_torso"/>
+    <child link="link_right_shoulder"/>
+    <axis xyz="-0.86603 0.00000 0.50000"/>
+  </joint>
   <joint name="joint_right_shoulder_roll" type="revolute">
     <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
     <origin rpy="1.57080 0.00000 -0.00000" xyz="-0.09335 0.00077 0.05402"/>
     <parent link="link_right_shoulder"/>
     <child link="link_right_shoulder_x"/>
-    <axis xyz="0.00000 0.00000 1.00000"/>
+    <axis xyz="0.00000 0.00000 -1.00000"/>
   </joint>
   <joint name="joint_right_wrist_pitch" type="revolute">
     <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
@@ -109,14 +123,7 @@
     <origin rpy="1.57080 1.57080 0.00000" xyz="-0.00000 0.00000 -0.00000"/>
     <parent link="link_right_wrist_x"/>
     <child link="link_right_hand"/>
-    <axis xyz="0.00000 0.00000 1.00000"/>
-  </joint>
-  <joint name="link_right_shoulder_joint" type="revolute">
-    <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
-    <origin rpy="0.00000 0.00000 0.00000" xyz="-0.16356 -0.00077 0.19342"/>
-    <parent link="link_torso"/>
-    <child link="link_right_shoulder"/>
-    <axis xyz="-0.86603 0.00000 0.50000"/>
+    <axis xyz="0.00000 0.00000 -1.00000"/>
   </joint>
   <link name="link_head_pitch">
     <collision name="head_pitch_collision">
@@ -134,7 +141,7 @@
       <origin rpy="0.00000 -1.57080 0.00000" xyz="0.00000 0.00000 0.00000"/>
       <material name="Opaque(160,160,160)"/>
       <geometry>
-        <mesh filename="file://$(find elrik_description)/meshes/stl/head_pitch.stl" scale="1.00000 1.00000 1.00000"/>
+        <mesh filename="package://elrik_description/meshes/stl/head_pitch.stl" scale="1.00000 1.00000 1.00000"/>
       </geometry>
     </visual>
   </link>
@@ -160,14 +167,14 @@
       <origin rpy="-1.57080 0.00000 0.00000" xyz="0.00620 0.03059 0.03605"/>
       <material name="Plastic - Texture - Random (Yellow)"/>
       <geometry>
-        <mesh filename="file://$(find elrik_description)/meshes/stl/camera.stl" scale="1.00000 1.00000 1.00000"/>
+        <mesh filename="package://elrik_description/meshes/stl/camera.stl" scale="1.00000 1.00000 1.00000"/>
       </geometry>
     </visual>
     <visual name="head_roll">
       <origin rpy="-1.57080 0.00000 0.00000" xyz="0.00000 -0.00000 -0.00000"/>
       <material name="Opaque(160,160,160)"/>
       <geometry>
-        <mesh filename="file://$(find elrik_description)/meshes/stl/head_roll.stl" scale="1.00000 1.00000 1.00000"/>
+        <mesh filename="package://elrik_description/meshes/stl/head_roll.stl" scale="1.00000 1.00000 1.00000"/>
       </geometry>
     </visual>
   </link>
@@ -187,7 +194,7 @@
       <origin rpy="0.00000 0.00000 0.00000" xyz="-0.00000 0.00000 0.00000"/>
       <material name="Opaque(25,25,25)"/>
       <geometry>
-        <mesh filename="file://$(find elrik_description)/meshes/stl/head_yaw.stl" scale="1.00000 1.00000 1.00000"/>
+        <mesh filename="package://elrik_description/meshes/stl/head_yaw.stl" scale="1.00000 1.00000 1.00000"/>
       </geometry>
     </visual>
   </link>
@@ -207,7 +214,7 @@
       <origin rpy="0.00000 -1.57080 0.00000" xyz="-0.00000 0.00000 0.00000"/>
       <material name="Opaque(25,25,25)"/>
       <geometry>
-        <mesh filename="file://$(find elrik_description)/meshes/stl/left_forearm.stl" scale="1.00000 1.00000 1.00000"/>
+        <mesh filename="package://elrik_description/meshes/stl/left_forearm.stl" scale="1.00000 1.00000 1.00000"/>
       </geometry>
     </visual>
   </link>
@@ -224,10 +231,10 @@
       <mass value="0.20000"/>
     </inertial>
     <visual name="left_hand">
-      <origin rpy="-1.57080 0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
+      <origin rpy="-1.57080 0.00000 0.00000" xyz="-0.00000 0.00000 0.00000"/>
       <material name="Opaque(160,160,160)"/>
       <geometry>
-        <mesh filename="file://$(find elrik_description)/meshes/stl/left_hand.stl" scale="1.00000 1.00000 1.00000"/>
+        <mesh filename="package://elrik_description/meshes/stl/left_hand.stl" scale="1.00000 1.00000 1.00000"/>
       </geometry>
     </visual>
   </link>
@@ -244,10 +251,10 @@
       <mass value="0.20000"/>
     </inertial>
     <visual name="left_shoulder">
-      <origin rpy="0.00000 -1.04720 0.00000" xyz="0.00000 -0.00000 -0.00000"/>
+      <origin rpy="0.00000 -1.04720 -0.00000" xyz="0.00000 -0.00000 -0.00000"/>
       <material name="Opaque(25,25,25)"/>
       <geometry>
-        <mesh filename="file://$(find elrik_description)/meshes/stl/left_shoulder.stl" scale="1.00000 1.00000 1.00000"/>
+        <mesh filename="package://elrik_description/meshes/stl/left_shoulder.stl" scale="1.00000 1.00000 1.00000"/>
       </geometry>
     </visual>
   </link>
@@ -267,7 +274,7 @@
       <origin rpy="-1.57080 0.00000 0.00000" xyz="0.00000 0.00000 -0.00000"/>
       <material name="Opaque(179,179,179)"/>
       <geometry>
-        <mesh filename="file://$(find elrik_description)/meshes/stl/left_shoulder_x.stl" scale="1.00000 1.00000 1.00000"/>
+        <mesh filename="package://elrik_description/meshes/stl/left_shoulder_x.stl" scale="1.00000 1.00000 1.00000"/>
       </geometry>
     </visual>
   </link>
@@ -287,7 +294,7 @@
       <origin rpy="3.14159 0.00000 3.14159" xyz="0.00000 0.00000 -0.00000"/>
       <material name="Opaque(191,189,187)"/>
       <geometry>
-        <mesh filename="file://$(find elrik_description)/meshes/stl/left_upper_arm.stl" scale="1.00000 1.00000 1.00000"/>
+        <mesh filename="package://elrik_description/meshes/stl/left_upper_arm.stl" scale="1.00000 1.00000 1.00000"/>
       </geometry>
     </visual>
   </link>
@@ -307,13 +314,13 @@
       <origin rpy="3.14159 0.00000 0.00000" xyz="0.00000 -0.00000 -0.00000"/>
       <material name="Opaque(160,160,160)"/>
       <geometry>
-        <mesh filename="file://$(find elrik_description)/meshes/stl/left_wrist.stl" scale="1.00000 1.00000 1.00000"/>
+        <mesh filename="package://elrik_description/meshes/stl/left_wrist.stl" scale="1.00000 1.00000 1.00000"/>
       </geometry>
     </visual>
   </link>
   <link name="link_left_wrist_x">
     <collision name="left_wrist_x_collision">
-      <origin rpy="0.00000 -1.57080 0.00000" xyz="-0.00775 0.00002 0.00201"/>
+      <origin rpy="-0.00000 -1.57080 0.00000" xyz="-0.00775 0.00002 0.00201"/>
       <geometry>
         <box size="0.07164 0.08000 0.06454"/>
       </geometry>
@@ -324,10 +331,10 @@
       <mass value="0.20000"/>
     </inertial>
     <visual name="left_wrist_x">
-      <origin rpy="0.00000 -1.57080 0.00000" xyz="0.00000 0.00000 0.00000"/>
+      <origin rpy="-0.00000 -1.57080 0.00000" xyz="0.00000 0.00000 0.00000"/>
       <material name="Opaque(25,25,25)"/>
       <geometry>
-        <mesh filename="file://$(find elrik_description)/meshes/stl/left_wrist_x.stl" scale="1.00000 1.00000 1.00000"/>
+        <mesh filename="package://elrik_description/meshes/stl/left_wrist_x.stl" scale="1.00000 1.00000 1.00000"/>
       </geometry>
     </visual>
   </link>
@@ -347,7 +354,7 @@
       <origin rpy="-0.00000 1.57080 0.00000" xyz="0.00000 -0.00000 -0.00000"/>
       <material name="Opaque(25,25,25)"/>
       <geometry>
-        <mesh filename="file://$(find elrik_description)/meshes/stl/right_forearm.stl" scale="1.00000 1.00000 1.00000"/>
+        <mesh filename="package://elrik_description/meshes/stl/right_forearm.stl" scale="1.00000 1.00000 1.00000"/>
       </geometry>
     </visual>
   </link>
@@ -367,7 +374,7 @@
       <origin rpy="-1.57080 0.00000 0.00000" xyz="0.00009 -0.00002 0.02290"/>
       <material name="Opaque(160,160,160)"/>
       <geometry>
-        <mesh filename="file://$(find elrik_description)/meshes/stl/right_hand.stl" scale="1.00000 1.00000 1.00000"/>
+        <mesh filename="package://elrik_description/meshes/stl/right_hand.stl" scale="1.00000 1.00000 1.00000"/>
       </geometry>
     </visual>
   </link>
@@ -387,7 +394,7 @@
       <origin rpy="-0.00000 0.00000 0.00000" xyz="-0.00000 0.00000 0.00000"/>
       <material name="Opaque(25,25,25)"/>
       <geometry>
-        <mesh filename="file://$(find elrik_description)/meshes/stl/right_shoulder.stl" scale="1.00000 1.00000 1.00000"/>
+        <mesh filename="package://elrik_description/meshes/stl/right_shoulder.stl" scale="1.00000 1.00000 1.00000"/>
       </geometry>
     </visual>
   </link>
@@ -407,7 +414,7 @@
       <origin rpy="-1.57080 0.00000 0.00000" xyz="0.00000 0.00000 -0.00000"/>
       <material name="Opaque(179,179,179)"/>
       <geometry>
-        <mesh filename="file://$(find elrik_description)/meshes/stl/right_shoulder_x.stl" scale="1.00000 1.00000 1.00000"/>
+        <mesh filename="package://elrik_description/meshes/stl/right_shoulder_x.stl" scale="1.00000 1.00000 1.00000"/>
       </geometry>
     </visual>
   </link>
@@ -427,7 +434,7 @@
       <origin rpy="3.14159 -0.00000 0.00000" xyz="0.00000 0.00000 -0.00000"/>
       <material name="Opaque(191,189,187)"/>
       <geometry>
-        <mesh filename="file://$(find elrik_description)/meshes/stl/right_upper_arm.stl" scale="1.00000 1.00000 1.00000"/>
+        <mesh filename="package://elrik_description/meshes/stl/right_upper_arm.stl" scale="1.00000 1.00000 1.00000"/>
       </geometry>
     </visual>
   </link>
@@ -447,7 +454,7 @@
       <origin rpy="-3.14159 0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
       <material name="Opaque(160,160,160)"/>
       <geometry>
-        <mesh filename="file://$(find elrik_description)/meshes/stl/right_wrist.stl" scale="1.00000 1.00000 1.00000"/>
+        <mesh filename="package://elrik_description/meshes/stl/right_wrist.stl" scale="1.00000 1.00000 1.00000"/>
       </geometry>
     </visual>
   </link>
@@ -467,7 +474,7 @@
       <origin rpy="-0.00000 1.57080 0.00000" xyz="-0.00000 -0.00000 -0.00000"/>
       <material name="Opaque(25,25,25)"/>
       <geometry>
-        <mesh filename="file://$(find elrik_description)/meshes/stl/right_wrist_x.stl" scale="1.00000 1.00000 1.00000"/>
+        <mesh filename="package://elrik_description/meshes/stl/right_wrist_x.stl" scale="1.00000 1.00000 1.00000"/>
       </geometry>
     </visual>
   </link>
@@ -487,7 +494,7 @@
       <origin rpy="0.00000 0.00000 0.00000" xyz="0.00000 -0.00000 0.00000"/>
       <material name="ABS (White)"/>
       <geometry>
-        <mesh filename="file://$(find elrik_description)/meshes/stl/torso.stl" scale="1.00000 1.00000 1.00000"/>
+        <mesh filename="package://elrik_description/meshes/stl/torso.stl" scale="1.00000 1.00000 1.00000"/>
       </geometry>
     </visual>
   </link>

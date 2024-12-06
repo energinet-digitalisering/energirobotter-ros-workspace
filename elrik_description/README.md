@@ -6,7 +6,7 @@ Robot URFD description of Elrik.
 
 The URDF file and meshes are generated/exported from Blender 3.3, using the [Phobos addon](https://github.com/dfki-ric/phobos) (see [video guide](https://www.youtube.com/watch?v=JGPyNxzVlYA&t)). 
 
-In the generated URDF, change all relative paths `../` with `file://$(find elrik_description)/`.
+In the generated URDF, change all relative paths `../` with `file://$(find elrik_description)/` or `package://elrik_description/`.
 
 If simulating physics, add a `<dynamics damping="1.0" friction="1.0"/>` tag to all joints.
 
