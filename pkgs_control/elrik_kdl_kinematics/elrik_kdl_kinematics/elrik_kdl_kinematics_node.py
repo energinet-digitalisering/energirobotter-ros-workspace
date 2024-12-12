@@ -30,11 +30,20 @@ class ElrikKdlKinematics(Node):
             self.end_effectors[1]: self.callback_target_pos_right,
             self.end_effectors[2]: self.callback_target_pos_head,
         }
-        self.target_pose = {}
+        self.target_pose = {
+            self.end_effectors[0]: np.array(
+                [[1, 0, 0, 0.5], [0, 1, 0, 0.5], [0, 0, 1, 0.5], [0, 0, 0, 1]]
+            ),
+            self.end_effectors[1]: np.array(
+                [[1, 0, 0, 0.5], [0, 1, 0, 0.5], [0, 0, 1, 0.5], [0, 0, 0, 1]]
+            ),
+            self.end_effectors[2]: np.array(
+                [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+            ),
+        }
         self.q_init = {}
         self.chain, self.fk_solver, self.ik_solver = {}, {}, {}
         self.target_sub = {}
-        self.max_joint_vel = {}
 
         self.timer = self.create_timer(0.5, self.callback_publish_joint_states)
 
@@ -60,12 +69,6 @@ class ElrikKdlKinematics(Node):
                     f'Added subscription on "{self.target_sub[end_effector].topic}"'
                 )
 
-                self.max_joint_vel[end_effector] = np.array(
-                    [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
-                )
-                self.target_pose[end_effector] = np.array(
-                    [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
-                )
                 self.q_init[end_effector] = [0] * chain.getNrOfJoints()
                 self.chain[end_effector] = chain
                 self.fk_solver[end_effector] = fk_solver
@@ -88,14 +91,15 @@ class ElrikKdlKinematics(Node):
         """
         for end_effector in self.end_effectors:
 
-            error, q_solution = inverse_kinematics(
-                self.ik_solver[end_effector],
-                q0=self.q_init[end_effector],
-                target_pose=self.target_pose[end_effector],
-                nb_joints=self.chain[end_effector].getNrOfJoints(),
-            )
-
-            # TODO: check error
+            if end_effector != self.end_effectors[2]:  # Skip head
+                error, q_solution = inverse_kinematics(
+                    self.ik_solver[end_effector],
+                    q0=self.q_init[end_effector],
+                    target_pose=self.target_pose[end_effector],
+                    nb_joints=self.chain[end_effector].getNrOfJoints(),
+                )
+            else:
+                q_solution = self.q_init[end_effector]
 
             joint_state_msg = JointState()
             joint_state_msg.header.stamp = self.get_clock().now().to_msg()
