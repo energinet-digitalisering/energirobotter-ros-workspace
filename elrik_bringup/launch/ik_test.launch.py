@@ -22,6 +22,10 @@ def generate_launch_description():
                 ],
                 output="screen",
             ),
-            Node(package="ik_manager", executable="ik_manager_node", output="screen"),
+            Node(
+                package="elrik_kdl_kinematics",
+                executable="elrik_kdl_kinematics_node",
+                output="screen",
+            ),
         ]
     )

@@ -1,3 +1,2 @@
 -r pkgs_control/servo_control/requirements.txt
--r pkgs_control/ik_manager/requirements.txt
 -r pkgs_teleoperation/teleoperation/requirements.txt
