@@ -23,14 +23,19 @@ class IKManagerNode(Node):
         self.joint_state_pub = self.create_publisher(JointState, "/joint_states", 10)
 
         # Timers
-        self.timer = self.create_timer(1.0, self.callback_publish_joint_states)
+        self.timer = self.create_timer(0.5, self.callback_publish_joint_states)
 
         # Node variables
-        self.target_pos = [0.2, -0.4, 0.0]
+        self.target_pos = [-0.25601042, -0.01441534, 0.58050495]
+        # self.target_pos = [-1.5, -1.5, -1.5]
+        valid_pos_1 = [-0.3, -0.2, 1.2]
+        self.init_pose = [-0.25601042, -0.01441534, 0.58050495]
 
         self.ik_solver = kinematics_pinoccio.KinematicsPinoccio(
             urdf_path="install/elrik_description/share/elrik_description/urdf/phobos_generated.urdf"
         )
+
+        self.generator = self.combination_generator()
 
     ##################### Callbacks #####################
 
@@ -43,10 +48,14 @@ class IKManagerNode(Node):
         Publish the joint states based on the IK solution.
         """
 
+        # self.get_logger().info(
+        #     f"x: {self.target_pos[0]}, y: {self.target_pos[1]}, z: {self.target_pos[2]}"
+        # )
+
         joint_names = self.ik_solver.get_joint_names()
 
         # Perform IK
-        q_solution = self.ik_solver.perform_ik(
+        success, q_solution = self.ik_solver.perform_ik(
             "link_right_hand", np.array(self.target_pos), np.eye(3)
         )
 
@@ -70,6 +79,28 @@ class IKManagerNode(Node):
 
         # Publish the joint state message
         self.joint_state_pub.publish(joint_state_msg)
+
+        # if not success:
+        #     self.target_pos = next(self.generator)
+
+    def combination_generator(self, start=-1.5, end=1.5, step=0.1):
+        """
+        Generator that yields combinations of three numbers in the interval [start, end]
+        with the specified step size.
+
+        Args:
+            start (float): Start of the interval (inclusive).
+            end (float): End of the interval (inclusive).
+            step (float): Step size for the interval.
+
+        Yields:
+            tuple: The next combination of three numbers.
+        """
+        values = np.arange(start, end + step, step)
+        for x in values:
+            for y in values:
+                for z in values:
+                    yield (x, y, z)
 
 
 def main(args=None):
