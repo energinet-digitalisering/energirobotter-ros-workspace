@@ -1,3 +1,9 @@
+# Logs
+*.log
+
+# Large 3D models
+*.dae
+
 # YOLO models
 *.onnx
 *.pt
