@@ -58,9 +58,7 @@ class ElrikServoManager:
         if not self.coms_active:
             return
 
-        for name, command in command_dict.items():
-
-            desired_angle = np.rad2deg(command)
+        for name, desired_angle in command_dict.items():
 
             angle, pwm = self.servos[name].reach_angle(
                 self.control_frequency, desired_angle
@@ -75,7 +73,7 @@ class ElrikServoManager:
 
         for name in self.servos.keys():
             feedback_pwm = self.packet_handler.ReadPos(self.servos[name].servo_id)[0]
-            self.servos[name].set_feecback_pwm(feedback_pwm)
+            self.servos[name].set_feedback_pwm(feedback_pwm)
 
     def get_default_servo_commands(self):
         command_dict = {}
