@@ -44,10 +44,16 @@ class ElrikServoManager:
             self.coms_active = False
 
         # Load and process each JSON file
-        json_files = [  # List of JSON configuration files
-            "servo_arm_left_params.json",
-            "servo_arm_right_params.json",
+        # json_files = [  # List of JSON configuration files
+        #     "servo_arm_left_params.json",
+        #     "servo_arm_right_params.json",
+        # ]
+
+        # DEBUG
+        json_files = [
+            "servo_arm_right_params_test.json",
         ]
+        # DEBUG END
 
         for json_file in json_files:
             with open(f"{config_folder_path}/{json_file}", "r") as file:
