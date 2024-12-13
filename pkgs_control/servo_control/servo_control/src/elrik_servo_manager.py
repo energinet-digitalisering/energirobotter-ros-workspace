@@ -58,13 +58,13 @@ class ElrikServoManager:
         if not self.coms_active:
             return
 
-        for name, desired_angle in command_dict.items():
+        for name in self.servos.keys():
 
             angle, pwm = self.servos[name].reach_angle(
-                self.control_frequency, desired_angle
+                self.control_frequency, command_dict[name]
             )
 
-            if angle != desired_angle:
+            if angle != command_dict[name]:
                 self._send_command(self.servos[name].servo_id, pwm)
 
     def update_feedback(self):
