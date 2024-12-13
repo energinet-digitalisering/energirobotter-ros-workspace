@@ -11,7 +11,7 @@
         "angle_software_max": 230,
         "angle_speed_max": 50,
         "default_position": 180,
-        "feedback_enabled": true,
+        "feedback_enabled": false,
         "gain_P": 1.0,
         "gain_I": 0.0,
         "gain_D": 0.0
@@ -28,7 +28,7 @@
         "angle_software_max": 230,
         "angle_speed_max": 50,
         "default_position": 180,
-        "feedback_enabled": true,
+        "feedback_enabled": false,
         "gain_P": 1.0,
         "gain_I": 0.0,
         "gain_D": 0.0
@@ -45,7 +45,7 @@
         "angle_software_max": 230,
         "angle_speed_max": 50,
         "default_position": 180,
-        "feedback_enabled": true,
+        "feedback_enabled": false,
         "gain_P": 1.0,
         "gain_I": 0.0,
         "gain_D": 0.0
