@@ -1,3 +1,4 @@
+import logging
 import numpy as np
 
 from .utils import interval_map
@@ -23,6 +24,9 @@ class ServoControl:
         gain_D=0.0,
         feedback_enabled=False,
     ):
+
+        self.logger = logging.getLogger("ServoControl")
+        logging.basicConfig(level=logging.INFO)
 
         self.servo_id = servo_id
         self.pwm_min = pwm_min
