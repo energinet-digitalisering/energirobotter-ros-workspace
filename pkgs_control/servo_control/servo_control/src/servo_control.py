@@ -52,12 +52,18 @@ class ServoControl:
         self.error_prev = 0.0
 
     def set_feedback_angle(self, feedback_angle):
+        if not self.feedback_enabled:
+            return
+
         self.angle = self.gearing_in(
             feedback_angle, self.default_position, self.gear_ratio
         )
         self.pwm = self.angle_2_pwm(feedback_angle)
 
     def set_feedback_pwm(self, feedback_pwm):
+        if not self.feedback_enabled:
+            return
+
         self.pwm = feedback_pwm
         self.angle = self.gearing_in(
             self.pwm_2_angle(feedback_pwm), self.default_position, self.gear_ratio
