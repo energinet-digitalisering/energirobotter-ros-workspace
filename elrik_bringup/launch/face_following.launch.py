@@ -109,7 +109,7 @@ def launch_setup(context, *args, **kwargs):
             {"image_w": image_w},
             {"image_h": image_h},
             {"use_compressed": use_compressed},
-            {"box_size_multiplier": 0.5},
+            {"box_size_multiplier": 1.5},
         ],
     )
 
