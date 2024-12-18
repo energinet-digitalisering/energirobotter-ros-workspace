@@ -108,6 +108,10 @@ class ElrikServoManager:
             self.logger.info(f"Added servo: {name}")
 
     def _send_command(self, id, pwm):
+
+        # self.logger.info(f"Stopping pwm of: {pwm}")
+        # return
+
         if not self.coms_active:
             return
 
