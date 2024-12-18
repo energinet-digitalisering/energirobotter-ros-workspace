@@ -1,3 +1,5 @@
+import numpy as np
+
 import rclpy
 from rclpy.node import Node
 import std_msgs.msg
@@ -20,6 +22,11 @@ class FaceFollowingNode(Node):
 
         self.declare_parameter("image_h", 720)
         self.image_h = self.get_parameter("image_h").get_parameter_value().integer_value
+
+        self.declare_parameter("dead_zone", 0)
+        self.dead_zone = (
+            self.get_parameter("dead_zone").get_parameter_value().integer_value
+        )
 
         self.declare_parameter("fov_w", 70)
         self.fov_w = self.get_parameter("fov_w").get_parameter_value().integer_value
@@ -85,14 +92,20 @@ class FaceFollowingNode(Node):
             # self.servo_yaw.reset_position(self.timer_period)
             return
 
+        error_pitch = self.center_y - self.target_y
+        error_yaw = self.center_x - self.target_x
+
         # Reset error if detection is gone for too long
         if time_diff > self.detection_time_stop_error:
             error_pitch = 0.0
             error_yaw = 0.0
 
-        else:
-            error_pitch = self.center_y - self.target_y
-            error_yaw = self.center_x - self.target_x
+        # Dead zone
+        if np.abs(error_pitch) < self.dead_zone:
+            error_pitch = 0.0
+
+        if np.abs(error_yaw) < self.dead_zone:
+            error_yaw = 0.0
 
         # Send command to servos
         self.publisher_servo_pitch.publish(

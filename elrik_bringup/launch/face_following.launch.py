@@ -123,6 +123,7 @@ def launch_setup(context, *args, **kwargs):
             {"timer_period": 0.05},
             {"image_w": image_w},
             {"image_h": image_h},
+            {"dead_zone": 20},
             {"fov_w": 69},
             {"fov_h": 42},
         ],
