@@ -65,7 +65,7 @@ class ElrikServoManager:
             )
 
             if angle != command_dict[name]:
-                self._send_command(self.servos[name].servo_id, pwm)
+                self._send_command(self.servos[name], pwm)
 
     def update_feedback(self):
         if not self.coms_active:
@@ -107,7 +107,7 @@ class ElrikServoManager:
 
             self.logger.info(f"Added servo: {name}")
 
-    def _send_command(self, id, pwm):
+    def _send_command(self, servo, pwm):
 
         # self.logger.info(f"Stopping pwm of: {pwm}")
         # return
@@ -115,8 +115,22 @@ class ElrikServoManager:
         if not self.coms_active:
             return
 
+        angle = servo.pwm_2_angle(pwm)
+
+        if angle < servo.angle_software_min:
+            self.logger.info(
+                f"Stopping pwm of {pwm}, that would result in angle of {angle}, which is below limit of {servo.angle_software_min}"
+            )
+            return
+
+        if angle > servo.angle_software_max:
+            self.logger.info(
+                f"Stopping pwm of {pwm}, that would result in angle of {angle}, which is beyond limit of {servo.angle_software_max}"
+            )
+            return
+
         scs_comm_result, scs_error = self.packet_handler.WritePosEx(
-            id, pwm, SCS_MOVING_SPEED := 1000, SCS_MOVING_ACC := 255
+            servo.servo_id, pwm, SCS_MOVING_SPEED := 1000, SCS_MOVING_ACC := 255
         )
 
         # if scs_comm_result != scservo_def.COMM_SUCCESS:
