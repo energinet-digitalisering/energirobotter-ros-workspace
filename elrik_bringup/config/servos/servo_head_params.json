@@ -12,9 +12,9 @@
         "angle_speed_max": 50,
         "default_position": 180,
         "feedback_enabled": false,
-        "gain_P": 1.0,
+        "gain_P": 0.2,
         "gain_I": 0.0,
-        "gain_D": 0.0
+        "gain_D": 0.5
     },
     "joint_head_pitch": {
         "servo_id": 9,
@@ -29,9 +29,9 @@
         "angle_speed_max": 50,
         "default_position": 180,
         "feedback_enabled": false,
-        "gain_P": 1.0,
+        "gain_P": 0.3,
         "gain_I": 0.0,
-        "gain_D": 0.0
+        "gain_D": 0.8
     },
     "joint_head_roll": {
         "servo_id": 10,
@@ -46,7 +46,7 @@
         "angle_speed_max": 50,
         "default_position": 180,
         "feedback_enabled": false,
-        "gain_P": 1.0,
+        "gain_P": 0.0,
         "gain_I": 0.0,
         "gain_D": 0.0
     }
