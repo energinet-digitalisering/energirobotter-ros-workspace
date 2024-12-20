@@ -72,6 +72,9 @@ class ElrikServoManager:
             return
 
         for name in self.servos.keys():
+            if not self.servos[name].feedback_enabled:
+                continue
+
             feedback_pwm = self.packet_handler.ReadPos(self.servos[name].servo_id)[0]
             self.servos[name].set_feedback_pwm(feedback_pwm)
 
