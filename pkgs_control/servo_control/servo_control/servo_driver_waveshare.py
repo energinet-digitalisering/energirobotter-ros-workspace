@@ -24,9 +24,9 @@ class ServoDriverWaveshare(Node):
         )
 
         # Publishers
-        self.publisher = self.create_publisher(
-            ServoCommand, "waveshare/servo_feedback", 10
-        )
+        # self.publisher = self.create_publisher(
+        #     ServoCommand, "waveshare/servo_feedback", 10
+        # )
 
         # Port Setup
         self.get_logger().info("Initializing serial communication with Waveshare...")
@@ -53,13 +53,13 @@ class ServoDriverWaveshare(Node):
             msg.servo_id, msg.pwm, SCS_MOVING_SPEED := 255, SCS_MOVING_ACC := 255
         )
 
-        pos_feedback = ServoCommand(
-            servo_id=msg.servo_id,
-            angle=0,
-            pwm=self.packet_handler.ReadPos(msg.servo_id)[0],
-        )
+        # pos_feedback = ServoCommand(
+        #     servo_id=msg.servo_id,
+        #     angle=0,
+        #     pwm=self.packet_handler.ReadPos(msg.servo_id)[0],
+        # )
 
-        self.publisher.publish(pos_feedback)
+        # self.publisher.publish(pos_feedback)
 
         # if scs_comm_result != scservo_def.COMM_SUCCESS:
         #     self.get_logger().error(

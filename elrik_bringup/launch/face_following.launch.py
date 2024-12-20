@@ -22,6 +22,7 @@ def launch_setup(context, *args, **kwargs):
     use_mock_camera = LaunchConfiguration("use_mock_camera")
     use_compressed = LaunchConfiguration("use_compressed")
     camera_model = LaunchConfiguration("camera_model")
+    run_inference_local = LaunchConfiguration("run_inference_local")
 
     image_w = 640
     image_h = 360
@@ -109,8 +110,9 @@ def launch_setup(context, *args, **kwargs):
             {"image_w": image_w},
             {"image_h": image_h},
             {"use_compressed": use_compressed},
-            {"box_size_multiplier": 0.5},
+            {"box_size_multiplier": 1.5},
         ],
+        condition=IfCondition(run_inference_local),
     )
 
     face_following_node = Node(
@@ -121,6 +123,7 @@ def launch_setup(context, *args, **kwargs):
             {"timer_period": 0.05},
             {"image_w": image_w},
             {"image_h": image_h},
+            {"dead_zone": 20},
             {"fov_w": 69},
             {"fov_h": 42},
         ],
@@ -199,6 +202,12 @@ def generate_launch_description():
                 default_value="zedm",
                 description="StereoLabs camera model.",
                 choices=["zedm", "zed2i"],
+            ),
+            DeclareLaunchArgument(
+                "run_inference_local",
+                default_value="true",
+                description="If face_detection is run on this machine, or run separately on another",
+                choices=["true", "false"],
             ),
             OpaqueFunction(function=launch_setup),
         ]
