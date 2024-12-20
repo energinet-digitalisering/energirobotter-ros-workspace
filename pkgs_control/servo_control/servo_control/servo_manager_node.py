@@ -38,7 +38,7 @@ class ServoManagerNode(Node):
         self.servo_commands = self.servo_manager.get_default_servo_commands()
 
     def callback_joint_states(self, msg):
-        self.servo_commands = dict(zip(msg.name, np.rad2deg(msg.position) + 180))
+        self.servo_commands = dict(zip(msg.name, np.rad2deg(msg.position)))
 
         # self.get_logger().info(f"Updated joint positions: {joint_positions}")
 
