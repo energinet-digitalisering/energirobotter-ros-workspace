@@ -4,6 +4,7 @@ import numpy as np
 
 from .SCServo_Python.scservo_sdk import PortHandler, sms_sts, scservo_def
 
+from .utils import interval_map
 from servo_control.src.servo_control import ServoControl
 
 PORT = "/dev/ttyUSB0"
@@ -46,7 +47,9 @@ class ElrikServoManager:
         # Load and process each JSON file
         json_files = [  # List of JSON configuration files
             # "servo_arm_left_params.json",
-            "servo_arm_right_params.json",
+            # "servo_arm_right_params.json",
+            "servo_right_elbow_test.json",
+            # "servo_test.json",
         ]
 
         for json_file in json_files:
@@ -61,6 +64,9 @@ class ElrikServoManager:
         for name in self.servos.keys():
 
             angle_target = command_dict[name] + self.servos[name].default_position
+
+            self.logger.info(f"[{name}] - angle_target: {angle_target}")
+
             angle, pwm = self.servos[name].reach_angle(
                 self.control_frequency, angle_target
             )
@@ -113,25 +119,39 @@ class ElrikServoManager:
 
     def _send_command(self, servo, pwm):
 
-        # self.logger.info(f"Stopping pwm of: {pwm}")
-        # return
-
         if not self.coms_active:
             return
 
+        # Extra safety check
         angle = servo.pwm_2_angle(pwm)
 
-        if angle < servo.angle_software_min:
+        # Flip angle if direction is flipped
+        if servo.dir < 0:
+            angle = interval_map(
+                angle,
+                servo.angle_min,
+                servo.angle_max,
+                servo.angle_max,
+                servo.angle_min,
+            )
+
+        # Apply gear ratio
+        angle_geared = servo.gearing_in(angle, servo.default_position, servo.gear_ratio)
+
+        if angle_geared < servo.angle_software_min:
             self.logger.info(
-                f"Stopping pwm of {pwm}, that would result in angle of {angle}, which is below limit of {servo.angle_software_min}"
+                f"Servo {servo.servo_id} - Stopping pwm of {pwm}, that would result in angle of {angle_geared}, which is below limit of {servo.angle_software_min}"
             )
             return
 
-        if angle > servo.angle_software_max:
+        if angle_geared > servo.angle_software_max:
             self.logger.info(
-                f"Stopping pwm of {pwm}, that would result in angle of {angle}, which is beyond limit of {servo.angle_software_max}"
+                f"Servo {servo.servo_id} - Stopping pwm of {pwm}, that would result in angle of {angle_geared}, which is beyond limit of {servo.angle_software_max}"
             )
             return
+
+        # self.logger.info(f"Stopping pwm of: {pwm}, angle of: {angle}")
+        # return
 
         scs_comm_result, scs_error = self.packet_handler.WritePosEx(
             servo.servo_id, pwm, SCS_MOVING_SPEED := 1000, SCS_MOVING_ACC := 255
