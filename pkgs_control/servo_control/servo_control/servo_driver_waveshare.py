@@ -29,14 +29,14 @@ class ServoDriverWaveshare(Node):
         )
 
         # Publishers
-        self.pub_feedback = self.create_publisher(
-            ServoCommand, "waveshare/servo_feedback", 1
-        )
+        # self.pub_feedback = self.create_publisher(
+        #     ServoCommand, "waveshare/servo_feedback", 1
+        # )
 
         # Timers
-        self.timer_feedback = self.create_timer(
-            self.feedback_frequency, self.callback_timer_feedback
-        )
+        # self.timer_feedback = self.create_timer(
+        #     self.feedback_frequency, self.callback_timer_feedback
+        # )
 
         # Node variables
         self.known_servo_ids = []
@@ -80,19 +80,19 @@ class ServoDriverWaveshare(Node):
         # elif scs_error != 0:
         #     print("%s" % self.packet_handler.getRxPacketError(scs_error))
 
-    def callback_timer_feedback(self):
+    # def callback_timer_feedback(self):
 
-        for servo_id in self.known_servo_ids:
+    #     for servo_id in self.known_servo_ids:
 
-            feedback_pwm = self.packet_handler.ReadPos(servo_id)[0]
+    #         feedback_pwm = self.packet_handler.ReadPos(servo_id)[0]
 
-            pos_feedback = ServoCommand(
-                servo_id=servo_id,
-                angle=0,
-                pwm=feedback_pwm,
-            )
+    #         pos_feedback = ServoCommand(
+    #             servo_id=servo_id,
+    #             angle=0,
+    #             pwm=feedback_pwm,
+    #         )
 
-            self.pub_feedback.publish(pos_feedback)
+    #         self.pub_feedback.publish(pos_feedback)
 
 
 def main(args=None):
