@@ -123,6 +123,9 @@ class ElrikServoManager:
         # Extra safety check
         angle = servo.pwm_2_angle(pwm)
 
+        # Apply gear ratio
+        angle = servo.gearing_in(angle, servo.default_position, servo.gear_ratio)
+
         # Flip angle if direction is flipped
         if servo.dir < 0:
             angle = interval_map(
@@ -132,9 +135,6 @@ class ElrikServoManager:
                 servo.angle_max,
                 servo.angle_min,
             )
-
-        # Apply gear ratio
-        angle_geared = servo.gearing_in(angle, servo.default_position, servo.gear_ratio)
 
         if angle < servo.angle_software_min:
             self.logger.warning(
