@@ -65,14 +65,12 @@ class ElrikServoManager:
 
             angle_target = command_dict[name] + self.servos[name].default_position
 
-            self.logger.info(f"[{name}] - angle_target: {angle_target}")
-
-            angle, pwm = self.servos[name].reach_angle(
+            angle_cmd, pwm_cmd = self.servos[name].reach_angle(
                 self.control_frequency, angle_target
             )
 
-            if angle != angle_target:
-                self._send_command(self.servos[name], pwm)
+            if self.servos[name].angle != angle_target:
+                self._send_command(self.servos[name], pwm_cmd)
 
     def update_feedback(self):
         if not self.coms_active:
@@ -138,15 +136,15 @@ class ElrikServoManager:
         # Apply gear ratio
         angle_geared = servo.gearing_in(angle, servo.default_position, servo.gear_ratio)
 
-        if angle_geared < servo.angle_software_min:
-            self.logger.info(
-                f"Servo {servo.servo_id} - Stopping pwm of {pwm}, that would result in angle of {angle_geared}, which is below limit of {servo.angle_software_min}"
+        if angle < servo.angle_software_min:
+            self.logger.warning(
+                f"Servo {servo.servo_id} - Stopping pwm of {pwm}, that would result in angle of {angle}, which is below limit of {servo.angle_software_min}"
             )
             return
 
-        if angle_geared > servo.angle_software_max:
-            self.logger.info(
-                f"Servo {servo.servo_id} - Stopping pwm of {pwm}, that would result in angle of {angle_geared}, which is beyond limit of {servo.angle_software_max}"
+        if angle > servo.angle_software_max:
+            self.logger.warning(
+                f"Servo {servo.servo_id} - Stopping pwm of {pwm}, that would result in angle of {angle}, which is beyond limit of {servo.angle_software_max}"
             )
             return
 
