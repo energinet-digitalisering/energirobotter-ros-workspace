@@ -46,9 +46,9 @@ class ElrikServoManager:
 
         # Load and process each JSON file
         json_files = [  # List of JSON configuration files
-            # "servo_arm_left_params.json",
-            # "servo_arm_right_params.json",
-            "servo_right_elbow_test.json",
+            "servo_arm_left_params.json",
+            "servo_arm_right_params.json",
+            # "servo_right_elbow_test.json",
             # "servo_test.json",
         ]
 
@@ -165,7 +165,7 @@ class ElrikServoManager:
             )
             return
 
-        # self.logger.info(f"Stopping pwm of: {pwm}, angle of: {angle}")
+        # self.logger.info(f"Stopping pwm of: {pwm}, angle of: {int(np.round(angle))}")
         # return
 
         scs_comm_result, scs_error = self.packet_handler.WritePosEx(
