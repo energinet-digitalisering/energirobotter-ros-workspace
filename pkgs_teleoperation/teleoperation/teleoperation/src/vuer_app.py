@@ -23,8 +23,8 @@ class VuerApp:
         self.queue_image_left = Queue(maxsize=2)
         self.queue_image_right = Queue(maxsize=2)
 
-        self.left_hand = Array("d", 16, lock=True)
-        self.right_hand = Array("d", 16, lock=True)
+        self.hand_left = Array("d", (16 * 25), lock=True)
+        self.hand_right = Array("d", (16 * 25), lock=True)
 
         # Start the Vuer app in a separate process
         self.process = Process(target=self.run)
