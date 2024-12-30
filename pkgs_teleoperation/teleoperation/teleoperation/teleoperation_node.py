@@ -49,6 +49,8 @@ class TeleoperationNode(Node):
     def callback_timer(self):
         self.vuer_app.update_frames(self.image_left, self.image_right)
 
+        data_hand_left, data_hand_right = self.vuer_app.get_tracking_hands()
+
 
 def main(args=None):
     rclpy.init(args=args)
