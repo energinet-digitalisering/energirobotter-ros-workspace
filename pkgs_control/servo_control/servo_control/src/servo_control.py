@@ -44,6 +44,8 @@ class ServoControl:
         self.gain_D = gain_D
         self.feedback_enabled = feedback_enabled
 
+        self.zero_position = (angle_max + angle_min) // 2
+
         self.angle_init = self.default_position
         self.angle = self.angle_init
         self.pwm = self.angle_2_pwm(self.angle)
@@ -55,9 +57,7 @@ class ServoControl:
         if not self.feedback_enabled:
             return
 
-        self.angle = self.gearing_in(
-            feedback_angle, self.default_position, self.gear_ratio
-        )
+        self.angle = self.gearing_in(feedback_angle, self.gear_ratio)
         self.pwm = self.angle_2_pwm(feedback_angle)
 
     def set_feedback_pwm(self, feedback_pwm):
@@ -65,9 +65,7 @@ class ServoControl:
             return
 
         self.pwm = feedback_pwm
-        self.angle = self.gearing_in(
-            self.pwm_2_angle(feedback_pwm), self.default_position, self.gear_ratio
-        )
+        self.angle = self.gearing_in(self.pwm_2_angle(feedback_pwm), self.gear_ratio)
 
     def controller_PID(self, error, error_acc, error_prev, gain_P, gain_I, gain_D):
 
@@ -147,9 +145,7 @@ class ServoControl:
             )
 
         # Apply gearing ratio
-        angle_cmd_geared = self.gearing_out(
-            angle_cmd, self.default_position, self.gear_ratio
-        )
+        angle_cmd_geared = self.gearing_out(angle_cmd, self.gear_ratio)
         pwm_cmd_geared = self.angle_2_pwm(angle_cmd_geared)
 
         return int(angle_cmd_geared), int(pwm_cmd_geared)
@@ -170,16 +166,16 @@ class ServoControl:
         )
         return angle
 
-    def gearing_in(self, value, zero_pos, gear_ratio):
+    def gearing_in(self, value, gear_ratio):
         """Given the output angle of a gear, calculate the input angle"""
-        offset = (value - zero_pos) / gear_ratio
-        ungeared = offset + zero_pos
+        offset = (value - self.zero_position) / gear_ratio
+        ungeared = offset + self.zero_position
         return ungeared
 
-    def gearing_out(self, value, zero_pos, gear_ratio):
+    def gearing_out(self, value, gear_ratio):
         """Given the input angle of a gear, calculate the output angle"""
-        offset = value - zero_pos
-        geared = zero_pos + offset * gear_ratio
+        offset = value - self.zero_position
+        geared = self.zero_position + offset * gear_ratio
         return geared
 
     def reach_angle(self, t_d, angle, angle_speed_desired=(-1)):
