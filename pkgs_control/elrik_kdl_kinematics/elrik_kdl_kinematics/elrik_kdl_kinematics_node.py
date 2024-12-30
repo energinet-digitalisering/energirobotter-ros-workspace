@@ -30,6 +30,7 @@ class ElrikKdlKinematics(Node):
             self.end_effectors[1]: self.callback_target_pos_right,
             self.end_effectors[2]: self.callback_target_pos_head,
         }
+
         self.target_pose = {
             self.end_effectors[0]: np.array(
                 [[1, 0, 0, 0.5], [0, 1, 0, 0.5], [0, 0, 1, 0.5], [0, 0, 0, 1]]
@@ -41,11 +42,12 @@ class ElrikKdlKinematics(Node):
                 [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
             ),
         }
+
         self.q_init = {}
         self.chain, self.fk_solver, self.ik_solver = {}, {}, {}
         self.target_sub = {}
 
-        self.timer = self.create_timer(0.5, self.callback_publish_joint_states)
+        self.timer = self.create_timer(0.5, self.callback_timer_publish_joint_states)
 
         self.joint_state_pub = self.create_publisher(JointState, "/joint_states", 10)
 
@@ -85,7 +87,7 @@ class ElrikKdlKinematics(Node):
     def callback_target_pos_head(self, msg: PoseStamped):
         self.target_pose[self.end_effectors[2]] = ros_pose_to_matrix(msg.pose)
 
-    def callback_publish_joint_states(self):
+    def callback_timer_publish_joint_states(self):
         """
         Publish the joint states based on the IK solution.
         """
