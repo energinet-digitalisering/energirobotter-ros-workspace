@@ -121,11 +121,27 @@ class ElrikServoManager:
         if not self.coms_active:
             return
 
-        # Extra safety check
+        # Extra safety checks
+        # Raw PWM check
+        if pwm is None:
+            self.logger.warning("pwm is None")
+            return
+
+        if not isinstance(pwm, (int, float)):
+            self.logger.warning(f"Invalid type: {pwm} is not a number.")
+            return False
+
+        pwm_min = 0
+        pwm_max = 4095
+        if not pwm_min <= pwm <= pwm_max:
+            print(f"Out of range: {pwm} is not between {pwm_min} and {pwm_max}.")
+            return False
+
+        # Angle limits check
         angle = servo.pwm_2_angle(pwm)
 
         # Apply gear ratio
-        angle = servo.gearing_in(angle, servo.default_position, servo.gear_ratio)
+        angle = servo.gearing_in(angle, servo.gear_ratio)
 
         # Flip angle if direction is flipped
         if servo.dir < 0:
