@@ -42,6 +42,29 @@ class VuerApp:
         """Run the Vuer app"""
         self.app.run()
 
+    def cleanup(self, signum=None, frame=None):
+        """Clean up resources and terminate process."""
+        self.logger.info("Cleaning up VuerApp...")
+
+        # Terminate the process if it's still running
+        if hasattr(self, "process") and self.process.is_alive():
+            self.logger.info("Terminating subprocess...")
+            self.process.terminate()
+            self.process.join()
+
+        # Close the image queues
+        if not self.queue_image_left.empty():
+            self.queue_image_left.close()
+
+        if not self.queue_image_right.empty():
+            self.queue_image_right.close()
+
+        self.logger.info("Cleanup complete. Exiting.")
+
+        # Explicitly exit when cleaning up from a signal
+        if signum is not None:
+            os._exit(0)
+
     def update_frames(self, left, right):
         """Update the image queues with new frames."""
         if self.queue_image_left.full():
@@ -142,28 +165,6 @@ class VuerApp:
 
         self.logger.info("WebSocket closed, exiting image processing loop")
 
-    def cleanup(self, signum=None, frame=None):
-        """Clean up resources and terminate process."""
-        self.logger.info("Cleaning up VuerApp...")
-
-        # Terminate the process if it's still running
-        if hasattr(self, "process") and self.process.is_alive():
-            self.logger.info("Terminating subprocess...")
-            self.process.terminate()
-            self.process.join()
-
-        # Close the image queues
-        if not self.queue_image_left.empty():
-            self.queue_image_left.close()
-
-        if not self.queue_image_right.empty():
-            self.queue_image_right.close()
-
-        self.logger.info("Cleanup complete. Exiting.")
-
-        # Explicitly exit when cleaning up from a signal
-        if signum is not None:
-            os._exit(0)
 
 
 if __name__ == "__main__":
