@@ -1,6 +1,7 @@
 from asyncio import sleep
 import logging
 from multiprocessing import Array, Process, Queue
+import numpy as np
 import os
 import signal
 from vuer import Vuer, VuerSession
@@ -173,6 +174,21 @@ class VuerApp:
 
         self.logger.info("WebSocket closed, exiting image processing loop")
 
+    @property
+    def hand_left(self):
+        return (
+            np.array(self.hand_left_shared)
+            .reshape((NR_OF_HAND_JOINTS, 4, 4))
+            .transpose(0, 2, 1)
+        )
+
+    @property
+    def hand_right(self):
+        return (
+            np.array(self.hand_right_shared)
+            .reshape((NR_OF_HAND_JOINTS, 4, 4))
+            .transpose(0, 2, 1)
+        )
 
 
 if __name__ == "__main__":
