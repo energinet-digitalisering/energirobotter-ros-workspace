@@ -29,6 +29,15 @@ class TeleoperationNode(Node):
             CompressedImage, "/image_right", self.callback_image_right, 1
         )
 
+        # Publishers
+        self.pose_left_pub = self.create_publisher(
+            PoseStamped, "/link_left_hand/target_pose", 1
+        )
+
+        self.pose_right_pub = self.create_publisher(
+            PoseStamped, "/link_right_hand/target_pose", 1
+        )
+
         # Timers
         self.timer = self.create_timer(1.0 / self.fps, self.callback_timer)
 
@@ -77,7 +86,10 @@ class TeleoperationNode(Node):
         )
 
         msg_pose_left = self.tf_matrix_to_msg(left_wrist_mat)
+        self.pose_left_pub.publish(msg_pose_left)
+
         msg_pose_right = self.tf_matrix_to_msg(right_wrist_mat)
+        self.pose_right_pub.publish(msg_pose_right)
 
 
 def main(args=None):
