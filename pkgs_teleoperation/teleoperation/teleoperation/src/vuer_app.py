@@ -8,6 +8,10 @@ from vuer.events import Set
 from vuer.schemas import DefaultScene, Hands, ImageBackground
 
 
+NR_OF_HAND_JOINTS = 25
+HAND_JOINT_DATA_SIZE = 16
+
+
 class VuerApp:
     def __init__(self):
         # Initialize logging
@@ -23,8 +27,12 @@ class VuerApp:
         self.queue_image_left = Queue(maxsize=2)
         self.queue_image_right = Queue(maxsize=2)
 
-        self.hand_left = Array("d", (16 * 25), lock=True)
-        self.hand_right = Array("d", (16 * 25), lock=True)
+        self.hand_left_shared = Array(
+            "d", (NR_OF_HAND_JOINTS * HAND_JOINT_DATA_SIZE), lock=True
+        )
+        self.hand_right_shared = Array(
+            "d", (NR_OF_HAND_JOINTS * HAND_JOINT_DATA_SIZE), lock=True
+        )
 
         # Start the Vuer app in a separate process
         self.process = Process(target=self.run)
@@ -87,16 +95,16 @@ class VuerApp:
 
         # Left hand data
         try:
-            self.hand_left[:] = event.value["left"]
             self.logger.info("Tracking left")
+            self.hand_left_shared[:] = event.value["left"]
         except Exception as e:
             self.logger.info("Left hand not tracked: " + str(e))
             pass
 
         # Right hand data
         try:
-            self.hand_right[:] = event.value["right"]
             self.logger.info("Tracking right")
+            self.hand_right_shared[:] = event.value["right"]
         except Exception as e:
             self.logger.info("Right hand not tracked: " + str(e))
             pass
