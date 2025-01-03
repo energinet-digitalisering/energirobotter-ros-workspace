@@ -95,18 +95,18 @@ class VuerApp:
 
         # Left hand data
         try:
-            self.logger.info("Tracking left")
             self.hand_left_shared[:] = event.value["left"]
+            self.logger.debug("Tracking left")
         except Exception as e:
-            self.logger.info("Left hand not tracked: " + str(e))
+            self.logger.debug("Left hand not tracked: " + str(e))
             pass
 
         # Right hand data
         try:
-            self.logger.info("Tracking right")
             self.hand_right_shared[:] = event.value["right"]
+            self.logger.debug("Tracking right")
         except Exception as e:
-            self.logger.info("Right hand not tracked: " + str(e))
+            self.logger.debug("Right hand not tracked: " + str(e))
             pass
 
     async def session_manager(self, session: VuerSession):
