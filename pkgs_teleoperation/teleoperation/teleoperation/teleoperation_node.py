@@ -4,7 +4,8 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import CompressedImage
 
-from teleoperation.src import vuer_app
+from teleoperation.src.vuer_app import VuerApp
+from teleoperation.src.vuer_transformer import VuerTransformer
 
 
 class TeleoperationNode(Node):
@@ -34,7 +35,8 @@ class TeleoperationNode(Node):
 
         self.cv_bridge = CvBridge()
 
-        self.vuer_app = vuer_app.VuerApp()
+        self.vuer_app = VuerApp()
+        self.vuer_transformer = VuerTransformer()
 
     def callback_image_left(self, msg):
         self.image_left = self.cv_bridge.compressed_imgmsg_to_cv2(
@@ -48,8 +50,10 @@ class TeleoperationNode(Node):
 
     def callback_timer(self):
         self.vuer_app.update_frames(self.image_left, self.image_right)
+        head_mat, left_wrist_mat, right_wrist_mat = self.vuer_transformer.process(
+            self.vuer_app
+        )
 
-        data_hand_left, data_hand_right = self.vuer_app.get_tracking_hands()
 
 
 def main(args=None):

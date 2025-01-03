@@ -84,9 +84,6 @@ class VuerApp:
             self.queue_image_right.get()
         self.queue_image_right.put(right)
 
-    def get_tracking_hands(self):
-        return self.hand_left, self.hand_right
-
     async def on_hand_move(self, event, session: VuerSession):
         """Handle hand tracking data"""
 
