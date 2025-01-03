@@ -1,5 +1,7 @@
 import numpy as np
 
+JOINT_ID_WRIST = 0
+
 
 class VuerTransformer:
     def __init__(self):
@@ -41,11 +43,11 @@ class VuerTransformer:
         # self.vuer_head_mat = self.mat_update(self.vuer_head_mat, tv.head_matrix.copy())
 
         self.vuer_right_wrist_mat = self.mat_update(
-            self.vuer_right_wrist_mat, vuer_app.hand_right[0].copy()
+            self.vuer_right_wrist_mat, vuer_app.hand_right[JOINT_ID_WRIST].copy()
         )
 
         self.vuer_left_wrist_mat = self.mat_update(
-            self.vuer_left_wrist_mat, vuer_app.hand_left[0].copy()
+            self.vuer_left_wrist_mat, vuer_app.hand_left[JOINT_ID_WRIST].copy()
         )
 
         # change of basis
