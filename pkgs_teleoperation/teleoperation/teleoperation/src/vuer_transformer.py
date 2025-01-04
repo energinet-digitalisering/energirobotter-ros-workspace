@@ -23,7 +23,12 @@ class VuerTransformer:
         )
 
         self.grd_yup2grd_zup = np.array(
-            [[0, 0, -1, 0], [-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1]]
+            [
+                [1, 0, 0, 0],  # Map X (VR) -> X (Robot)
+                [0, 0, -1, 0],  # Map Z (VR) -> Y (Robot)
+                [0, 1, 0, 0],  # Map Y (VR) -> Z (Robot)
+                [0, 0, 0, 1],
+            ]
         )
 
     def flat_to_nested_matricies(self, array, rows):
