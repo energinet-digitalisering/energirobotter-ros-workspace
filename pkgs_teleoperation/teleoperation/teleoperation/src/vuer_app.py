@@ -10,7 +10,7 @@ from vuer.schemas import DefaultScene, Hands, ImageBackground
 
 
 NR_OF_HAND_JOINTS = 25
-HAND_JOINT_DATA_SIZE = 16
+TF_MATRIX_SIZE = 16
 
 
 class VuerApp:
@@ -29,10 +29,10 @@ class VuerApp:
         self.queue_image_right = Queue(maxsize=2)
 
         self.hand_left_shared = Array(
-            "d", (NR_OF_HAND_JOINTS * HAND_JOINT_DATA_SIZE), lock=True
+            "d", (NR_OF_HAND_JOINTS * TF_MATRIX_SIZE), lock=True
         )
         self.hand_right_shared = Array(
-            "d", (NR_OF_HAND_JOINTS * HAND_JOINT_DATA_SIZE), lock=True
+            "d", (NR_OF_HAND_JOINTS * TF_MATRIX_SIZE), lock=True
         )
 
         # Start the Vuer app in a separate process
