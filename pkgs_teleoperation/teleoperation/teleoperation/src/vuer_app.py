@@ -21,6 +21,7 @@ class VuerApp:
 
         # Initialize the Vuer app
         self.app = Vuer()
+        self.app.add_handler("CAMERA_MOVE")(self.on_camera_move)
         self.app.add_handler("HAND_MOVE")(self.on_hand_move)
         self.app.spawn(start=False)(self.session_manager)
 
@@ -28,6 +29,7 @@ class VuerApp:
         self.queue_image_left = Queue(maxsize=2)
         self.queue_image_right = Queue(maxsize=2)
 
+        self.head_matrix_shared = Array("d", (TF_MATRIX_SIZE), lock=True)
         self.hand_left_shared = Array(
             "d", (NR_OF_HAND_JOINTS * TF_MATRIX_SIZE), lock=True
         )
@@ -83,6 +85,15 @@ class VuerApp:
         if self.queue_image_right.full():
             self.queue_image_right.get()
         self.queue_image_right.put(right)
+
+    async def on_camera_move(self, event, session: VuerSession):
+        """Handle head tracking data"""
+
+        try:
+            self.head_matrix_shared[:] = event.value["camera"]["matrix"]
+        except Exception as e:
+            self.logger.debug("Head not tracked: " + str(e))
+            pass
 
     async def on_hand_move(self, event, session: VuerSession):
         """Handle hand tracking data"""
@@ -170,6 +181,10 @@ class VuerApp:
             await sleep(0.016 * 2)
 
         self.logger.info("WebSocket closed, exiting image processing loop")
+
+    @property
+    def head_matrix(self):
+        return np.array(self.head_matrix_shared).reshape((4, 4)).transpose(1, 0)
 
     @property
     def hand_left(self):
