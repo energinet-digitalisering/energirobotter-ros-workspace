@@ -64,15 +64,15 @@ class VuerTransformer:
             @ self.fast_mat_inv(self.grd_yup2grd_zup)
         )
 
-        right_wrist_mat = (
-            self.grd_yup2grd_zup
-            @ self.vuer_right_wrist_mat
-            @ self.fast_mat_inv(self.grd_yup2grd_zup)
-        )
-
         left_wrist_mat = (
             self.grd_yup2grd_zup
             @ self.vuer_left_wrist_mat
+            @ self.fast_mat_inv(self.grd_yup2grd_zup)
+        )
+
+        right_wrist_mat = (
+            self.grd_yup2grd_zup
+            @ self.vuer_right_wrist_mat
             @ self.fast_mat_inv(self.grd_yup2grd_zup)
         )
 
