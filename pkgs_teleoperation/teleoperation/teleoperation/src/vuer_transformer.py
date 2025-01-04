@@ -31,10 +31,6 @@ class VuerTransformer:
             ]
         )
 
-    def flat_to_nested_matricies(self, array, rows):
-        reshaped_arrays = np.array(array).reshape((rows, 4, 4)).transpose(0, 2, 1)
-        return np.array(reshaped_arrays)
-
     def mat_update(self, prev_mat, mat):
         if np.linalg.det(mat) == 0:
             return prev_mat
