@@ -5,6 +5,8 @@ JOINT_ID_WRIST = 0
 
 class VuerTransformer:
     def __init__(self):
+
+        # Init poses
         self.vuer_head_mat = np.array(
             [[1, 0, 0, 0], [0, 1, 0, 1.5], [0, 0, 1, -0.2], [0, 0, 0, 1]]
         )
@@ -15,6 +17,7 @@ class VuerTransformer:
             [[1, 0, 0, -0.5], [0, 1, 0, 1], [0, 0, 1, -0.5], [0, 0, 0, 1]]
         )
 
+        # Transform constants
         self.hand2gripper = np.array(
             [[0, -1, 0, 0], [0, 0, -1, 0], [1, 0, 0, 0], [0, 0, 0, 1]]
         )
@@ -40,7 +43,9 @@ class VuerTransformer:
         return ret
 
     def process(self, vuer_app):
-        # self.vuer_head_mat = self.mat_update(self.vuer_head_mat, tv.head_matrix.copy())
+        self.vuer_head_mat = self.mat_update(
+            self.vuer_head_mat, vuer_app.head_matrix.copy()
+        )
 
         self.vuer_right_wrist_mat = self.mat_update(
             self.vuer_right_wrist_mat, vuer_app.hand_right[JOINT_ID_WRIST].copy()
@@ -52,11 +57,11 @@ class VuerTransformer:
 
         # change of basis
 
-        # head_mat = (
-        #     self.grd_yup2grd_zup
-        #     @ self.vuer_head_mat
-        #     @ self.fast_mat_inv(self.grd_yup2grd_zup)
-        # )
+        head_mat = (
+            self.grd_yup2grd_zup
+            @ self.vuer_head_mat
+            @ self.fast_mat_inv(self.grd_yup2grd_zup)
+        )
 
         right_wrist_mat = (
             self.grd_yup2grd_zup
@@ -71,11 +76,9 @@ class VuerTransformer:
         )
 
         rel_left_wrist_mat = left_wrist_mat @ self.hand2gripper
-        # rel_left_wrist_mat[0:3, 3] = rel_left_wrist_mat[0:3, 3] - head_mat[0:3, 3]
+        rel_left_wrist_mat[0:3, 3] = rel_left_wrist_mat[0:3, 3] - head_mat[0:3, 3]
 
         rel_right_wrist_mat = right_wrist_mat @ self.hand2gripper  # wTr = wTh @ hTr
-        # rel_right_wrist_mat[0:3, 3] = rel_right_wrist_mat[0:3, 3] - head_mat[0:3, 3]
-
-        head_mat = None
+        rel_right_wrist_mat[0:3, 3] = rel_right_wrist_mat[0:3, 3] - head_mat[0:3, 3]
 
         return head_mat, rel_left_wrist_mat, rel_right_wrist_mat
