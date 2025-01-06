@@ -1,5 +1,7 @@
 # Elrik KDL Kinematics
 
+[Original package](https://github.com/pollen-robotics/reachy_2023/tree/develop/reachy_kdl_kinematics) made by Pollen Robotics.
+
 ## Getting started
 
 It is automatically loaded by the bringup launch files.
