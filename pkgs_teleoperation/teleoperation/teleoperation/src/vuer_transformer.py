@@ -40,6 +40,22 @@ class VuerTransformer:
             ]
         )
 
+        self.fixed_rotation_left = np.array(
+            [
+                [0, 0, 1],
+                [0, -1, 0],
+                [1, 0, 0],
+            ]
+        )
+
+        self.fixed_rotation_right = np.array(
+            [
+                [0, 0, -1],
+                [0, -1, 0],
+                [-1, 0, 0],
+            ]
+        )
+
     def mat_update(self, prev_mat, mat):
         if np.linalg.det(mat) == 0:
             return prev_mat
@@ -85,14 +101,20 @@ class VuerTransformer:
             @ self.fast_mat_inv(self.grd_yup2grd_zup)
         )
 
-        rel_left_wrist_mat = left_wrist_mat @ self.hand2gripper
+        rel_left_wrist_mat = left_wrist_mat
+        # rel_left_wrist_mat = left_wrist_mat @ self.hand2gripper
         rel_left_wrist_mat[0:3, 3] = (
             rel_left_wrist_mat[0:3, 3] - head_mat[0:3, 3] + self.torso2head[0:3, 3]
         )
 
-        rel_right_wrist_mat = right_wrist_mat @ self.hand2gripper  # wTr = wTh @ hTr
+        rel_right_wrist_mat = right_wrist_mat
+        # rel_right_wrist_mat = right_wrist_mat @ self.hand2gripper  # wTr = wTh @ hTr
         rel_right_wrist_mat[0:3, 3] = (
             rel_right_wrist_mat[0:3, 3] - head_mat[0:3, 3] + self.torso2head[0:3, 3]
         )
+
+        # Override rotation matrix
+        rel_left_wrist_mat[0:3, 0:3] = self.fixed_rotation_left
+        rel_right_wrist_mat[0:3, 0:3] = self.fixed_rotation_right
 
         return head_mat, rel_left_wrist_mat, rel_right_wrist_mat
