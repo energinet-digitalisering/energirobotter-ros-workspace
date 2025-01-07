@@ -180,8 +180,8 @@ class ServoControl:
 
     def reach_angle(self, t_d, angle, angle_speed_desired=(-1)):
         """Reach desired angle (deg)"""
-        angle_gain_p = 10.0
-        error = (angle - self.angle) * angle_gain_p
+        error = angle - self.angle
+
         return self.compute_control(t_d, error, angle_speed_desired)
 
     def reset_position(self, t_d):
