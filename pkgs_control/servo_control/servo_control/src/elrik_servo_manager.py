@@ -63,15 +63,20 @@ class ElrikServoManager:
 
         for name in self.servos.keys():
 
-            angle_target = command_dict[name] + self.servos[name].default_position
-            update_flag = self.servos[name].angle != angle_target
+            if name in command_dict:
 
-            angle_cmd, pwm_cmd = self.servos[name].reach_angle(
-                self.control_frequency, angle_target
-            )
+                angle_target = command_dict[name] + self.servos[name].default_position
+                update_flag = self.servos[name].angle != angle_target
 
-            if update_flag:
-                self._send_command(self.servos[name], pwm_cmd)
+                angle_cmd, pwm_cmd = self.servos[name].reach_angle(
+                    self.control_frequency, angle_target
+                )
+
+                if update_flag:
+                    self._send_command(self.servos[name], pwm_cmd)
+
+            else:
+                self.logger.warning(f"Failed to set command for servo: {name}")
 
     def update_feedback(self):
         if not self.coms_active:
@@ -165,7 +170,9 @@ class ElrikServoManager:
             )
             return
 
-        # self.logger.info(f"Stopping pwm of: {pwm}, angle of: {int(np.round(angle))}")
+        # self.logger.info(
+        #     f"Servo: {servo.servo_id}. Stopping pwm of: {pwm}, angle of: {int(np.round(angle))}"
+        # )
         # return
 
         scs_comm_result, scs_error = self.packet_handler.WritePosEx(
