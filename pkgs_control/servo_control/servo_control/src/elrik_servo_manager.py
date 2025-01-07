@@ -170,7 +170,9 @@ class ElrikServoManager:
             )
             return
 
-        # self.logger.info(f"Stopping pwm of: {pwm}, angle of: {int(np.round(angle))}")
+        # self.logger.info(
+        #     f"Servo: {servo.servo_id}. Stopping pwm of: {pwm}, angle of: {int(np.round(angle))}"
+        # )
         # return
 
         scs_comm_result, scs_error = self.packet_handler.WritePosEx(
