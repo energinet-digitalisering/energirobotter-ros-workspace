@@ -175,13 +175,13 @@ class ElrikServoManager:
             )
 
         if angle < servo.angle_software_min:
-            self.logger.warning(
+            self.logger.debug(
                 f"Servo {servo.servo_id} - Stopping pwm of {pwm}, that would result in angle of {angle}, which is below limit of {servo.angle_software_min}"
             )
             return
 
         if angle > servo.angle_software_max:
-            self.logger.warning(
+            self.logger.debug(
                 f"Servo {servo.servo_id} - Stopping pwm of {pwm}, that would result in angle of {angle}, which is beyond limit of {servo.angle_software_max}"
             )
             return
