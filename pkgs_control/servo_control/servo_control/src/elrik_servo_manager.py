@@ -94,7 +94,7 @@ class ElrikServoManager:
         command_dict = {}
 
         for name, servo in self.servos.items():
-            command_dict[name] = servo.default_position
+            command_dict[name] = 0.0
 
         return command_dict
 
