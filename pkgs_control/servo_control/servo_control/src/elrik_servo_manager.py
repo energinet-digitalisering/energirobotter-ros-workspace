@@ -3,7 +3,6 @@ import logging
 import numpy as np
 
 from .SCServo_Python.scservo_sdk import PortHandler, sms_sts, scservo_def
-
 from .utils import interval_map
 from servo_control.src.servo_control import ServoControl
 
@@ -37,11 +36,11 @@ class ElrikServoManager:
                 self.logger.error("Failed to set baud rate")
                 self.coms_active = False
 
-            self.logger.info("Serial communication succesful")
+            self.logger.info("Serial communication successful")
             self.coms_active = True
 
-        except:
-            self.logger.error("Failed to open port")
+        except Exception as e:
+            self.logger.error(f"Failed to open port: {e}")
             self.coms_active = False
 
         # Load and process each JSON file
@@ -122,27 +121,21 @@ class ElrikServoManager:
             self.logger.info(f"Added servo: {name}")
 
     def _send_command(self, servo, pwm):
-
         if not self.coms_active:
             return
 
-        # Extra safety checks
-        # Raw PWM check
-        if pwm is None:
-            self.logger.warning("pwm is None")
-            return
-
-        if not isinstance(pwm, (int, float)):
-            self.logger.warning(f"Invalid type: {pwm} is not a number.")
-            return False
-
+        # Validate PWM
         pwm_min = 0
         pwm_max = 4095
-        if not pwm_min <= pwm <= pwm_max:
-            print(f"Out of range: {pwm} is not between {pwm_min} and {pwm_max}.")
-            return False
+        if (
+            pwm is None
+            or not isinstance(pwm, (int, float))
+            or not (pwm_min <= pwm <= pwm_max)
+        ):
+            self.logger.warning(f"Invalid PWM: {pwm}")
+            return
 
-        # Angle limits check
+        # Validate angle
         angle = servo.pwm_2_angle(pwm)
 
         # Apply gear ratio
