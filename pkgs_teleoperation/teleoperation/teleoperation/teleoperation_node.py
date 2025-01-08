@@ -20,7 +20,7 @@ class TeleoperationNode(Node):
         self.declare_parameter("fps", 30)
         self.fps = self.get_parameter("fps").get_parameter_value().integer_value
 
-        self.declare_parameter("camera_enabled", False)
+        self.declare_parameter("camera_enabled", True)
         self.camera_enabled = (
             self.get_parameter("camera_enabled").get_parameter_value().bool_value
         )
