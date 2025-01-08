@@ -1,5 +1,7 @@
 import json
 import logging
+import threading
+from concurrent.futures import ThreadPoolExecutor
 import numpy as np
 
 from .SCServo_Python.scservo_sdk import PortHandler, sms_sts, scservo_def
@@ -22,6 +24,7 @@ class ElrikServoManager:
 
         self.servos = {}
         self.coms_active = False
+        self.lock = threading.Lock()  # For thread-safe communication
 
         # Driver Setup
         self.logger.info("Initializing serial communication with Waveshare...")
@@ -58,38 +61,6 @@ class ElrikServoManager:
                 servo_config = json.load(file)
                 self._add_servos(servo_config)
 
-    def command_servos(self, command_dict: dict):
-        if not self.coms_active:
-            return
-
-        for name in self.servos.keys():
-
-            if name in command_dict:
-
-                angle_target = command_dict[name] + self.servos[name].default_position
-                update_flag = self.servos[name].angle != angle_target
-
-                angle_cmd, pwm_cmd = self.servos[name].reach_angle(
-                    self.control_frequency, angle_target
-                )
-
-                if update_flag:
-                    self._send_command(self.servos[name], pwm_cmd)
-
-            else:
-                self.logger.warning(f"Failed to set command for servo: {name}")
-
-    def update_feedback(self):
-        if not self.coms_active:
-            return
-
-        for name in self.servos.keys():
-            if not self.servos[name].feedback_enabled:
-                continue
-
-            feedback_pwm = self.packet_handler.ReadPos(self.servos[name].servo_id)[0]
-            self.servos[name].set_feedback_pwm(feedback_pwm)
-
     def get_default_servo_commands(self):
         command_dict = {}
 
@@ -97,6 +68,58 @@ class ElrikServoManager:
             command_dict[name] = 0.0
 
         return command_dict
+
+    def command_servos(self, command_dict: dict):
+        if not self.coms_active:
+            return
+
+        with ThreadPoolExecutor() as executor:
+            futures = [
+                executor.submit(self._command_servo, name, command_dict[name])
+                for name in self.servos.keys()
+                if name in command_dict
+            ]
+            for future in futures:
+                try:
+                    future.result()
+                except Exception as e:
+                    self.logger.error(f"Error commanding servo: {e}")
+
+    def _command_servo(self, name, command):
+        servo = self.servos[name]
+        angle_target = command + servo.default_position
+        update_flag = servo.angle != angle_target
+
+        self.logger.error(
+            f"Command: {command}, angle target: {angle_target}, current angle: {servo.angle}"
+        )
+
+        angle_cmd, pwm_cmd = servo.reach_angle(self.control_frequency, angle_target)
+
+        if update_flag:
+            self._send_command(servo, pwm_cmd)
+
+    def update_feedback(self):
+        if not self.coms_active:
+            return
+
+        with ThreadPoolExecutor() as executor:
+            futures = [
+                executor.submit(self._update_servo_feedback, name)
+                for name in self.servos.keys()
+                if self.servos[name].feedback_enabled
+            ]
+            for future in futures:
+                try:
+                    future.result()
+                except Exception as e:
+                    self.logger.error(f"Error updating feedback: {e}")
+
+    def _update_servo_feedback(self, name):
+        servo = self.servos[name]
+        with self.lock:  # Ensure thread-safe communication
+            feedback_pwm = self.packet_handler.ReadPos(servo.servo_id)[0]
+        servo.set_feedback_pwm(feedback_pwm)
 
     def _add_servos(self, servo_config):
         """Helper method to add servos from a configuration dict."""
@@ -139,8 +162,6 @@ class ElrikServoManager:
 
         # Validate angle
         angle = servo.pwm_2_angle(pwm)
-
-        # Apply gear ratio
         angle = servo.gearing_in(angle, servo.gear_ratio)
 
         # Flip angle if direction is flipped
@@ -165,21 +186,17 @@ class ElrikServoManager:
             )
             return
 
-        # self.logger.info(
-        #     f"Servo: {servo.servo_id}. Stopping pwm of: {pwm}, angle of: {int(np.round(angle))}"
-        # )
-        # return
+        # Thread-safe communication
+        with self.lock:
+            # self.logger.info(
+            #     f"Servo: {servo.servo_id}. Stopping pwm of: {pwm}, angle of: {int(np.round(angle))}"
+            # )
+            # return
 
-        scs_comm_result, scs_error = self.packet_handler.WritePosEx(
-            servo.servo_id, pwm, SCS_MOVING_SPEED := 1000, SCS_MOVING_ACC := 255
-        )
-
-        # if scs_comm_result != scservo_def.COMM_SUCCESS:
-        #     self.get_logger().error(
-        #         f"Error in servo communication for servo id {msg.servo_id}: {scs_comm_result}"
-        #     )
-
-        # if scs_comm_result != scservo_def.COMM_SUCCESS:
-        #     print("%s" % self.packet_handler.getTxRxResult(scs_comm_result))
-        # elif scs_error != 0:
-        #     print("%s" % self.packet_handler.getRxPacketError(scs_error))
+            scs_comm_result, scs_error = self.packet_handler.WritePosEx(
+                servo.servo_id, pwm, SCS_MOVING_SPEED := 1000, SCS_MOVING_ACC := 255
+            )
+            if scs_comm_result != scservo_def.COMM_SUCCESS:
+                self.logger.error(f"Communication error: {scs_comm_result}")
+            elif scs_error != 0:
+                self.logger.error(f"Servo error: {scs_error}")
