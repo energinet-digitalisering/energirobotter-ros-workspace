@@ -88,7 +88,7 @@ class ElrikServoManager:
     def _command_servo(self, name, command):
         servo = self.servos[name]
         angle_target = command + servo.default_position
-        update_flag = servo.angle != angle_target
+        update_flag = int(servo.angle) != int(angle_target)
 
         self.logger.error(
             f"Command: {command}, angle target: {angle_target}, current angle: {servo.angle}"
