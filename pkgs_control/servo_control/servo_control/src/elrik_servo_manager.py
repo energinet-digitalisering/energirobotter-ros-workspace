@@ -45,8 +45,10 @@ class ElrikServoManager:
 
         # Load and process each JSON file
         json_files = [  # List of JSON configuration files
-            "servo_arm_left_params.json",
-            "servo_arm_right_params.json",
+            "servo_arm_left_nowrist_params.json",
+            "servo_arm_right_nowrist_params.json",
+            # "servo_arm_left_params.json",
+            # "servo_arm_right_params.json",
             # "servo_right_elbow_test.json",
             # "servo_test.json",
         ]
