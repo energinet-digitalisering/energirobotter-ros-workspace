@@ -88,13 +88,9 @@ class ElrikServoManager:
     def _command_servo(self, name, command):
         servo = self.servos[name]
         angle_target = command + servo.default_position
-        update_flag = servo.angle != angle_target
+        update_flag = int(servo.angle) != int(angle_target)
 
-        self.logger.error(
-            f"Command: {command}, angle target: {angle_target}, current angle: {servo.angle}"
-        )
-
-        angle_cmd, pwm_cmd = servo.reach_angle(self.control_frequency, angle_target)
+        angle_cmd, pwm_cmd = servo.reach_angle_direct(angle_target)
 
         if update_flag:
             self._send_command(servo, pwm_cmd)
@@ -196,7 +192,8 @@ class ElrikServoManager:
             scs_comm_result, scs_error = self.packet_handler.WritePosEx(
                 servo.servo_id, pwm, SCS_MOVING_SPEED := 1000, SCS_MOVING_ACC := 255
             )
-            if scs_comm_result != scservo_def.COMM_SUCCESS:
-                self.logger.error(f"Communication error: {scs_comm_result}")
-            elif scs_error != 0:
-                self.logger.error(f"Servo error: {scs_error}")
+
+            # if scs_comm_result != scservo_def.COMM_SUCCESS:
+            #     self.logger.error(f"Communication error: {scs_comm_result}")
+            # elif scs_error != 0:
+            #     self.logger.error(f"Servo error: {scs_error}")
