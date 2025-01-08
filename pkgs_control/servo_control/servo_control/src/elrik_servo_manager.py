@@ -94,7 +94,7 @@ class ElrikServoManager:
             f"Command: {command}, angle target: {angle_target}, current angle: {servo.angle}"
         )
 
-        angle_cmd, pwm_cmd = servo.reach_angle(self.control_frequency, angle_target)
+        angle_cmd, pwm_cmd = servo.reach_angle_direct(angle_target)
 
         if update_flag:
             self._send_command(servo, pwm_cmd)
