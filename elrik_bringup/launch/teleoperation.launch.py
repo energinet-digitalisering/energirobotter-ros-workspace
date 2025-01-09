@@ -4,6 +4,7 @@ from launch.actions import (
     IncludeLaunchDescription,
     OpaqueFunction,
 )
+from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
@@ -13,6 +14,7 @@ package_name = "elrik_bringup"
 
 
 def launch_setup(context, *args, **kwargs):
+    rviz = LaunchConfiguration("rviz")
     camera_enabled = LaunchConfiguration("camera_enabled")
 
     camera_model = "zedm"
@@ -21,15 +23,21 @@ def launch_setup(context, *args, **kwargs):
 
     zed_camera_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            [FindPackageShare("zed_wrapper"), "/launch", "/zed_camera.launch.py"]
+            [
+                FindPackageShare("zed_wrapper"),
+                "/launch",
+                "/zed_camera.launch.py",
+            ]
         ),
         launch_arguments={"camera_model": camera_model}.items(),
+        condition=IfCondition(camera_enabled),
     )
 
     ik_control_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             [FindPackageShare(package_name), "/launch", "/ik_control.launch.py"]
-        )
+        ),
+        launch_arguments={"rviz": rviz}.items(),
     )
 
     teleoperation_node = Node(
@@ -53,13 +61,18 @@ def launch_setup(context, *args, **kwargs):
 
 
 def generate_launch_description():
-
     return LaunchDescription(
         [
             DeclareLaunchArgument(
-                "camera_enabled",
+                "rviz",
                 default_value="true",
-                description="Run teleoperation with ot without camera.",
+                description="Start RViz2 automatically with this launch file.",
+                choices=["true", "false"],
+            ),
+            DeclareLaunchArgument(
+                "camera_enabled",
+                default_value="false",
+                description="Run teleoperation with or without camera.",
                 choices=["true", "false"],
             ),
             OpaqueFunction(function=launch_setup),
