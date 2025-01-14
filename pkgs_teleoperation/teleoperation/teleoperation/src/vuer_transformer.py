@@ -68,6 +68,20 @@ class VuerTransformer:
         ret[:3, 3] = -mat[:3, :3].T @ mat[:3, 3]
         return ret
 
+    def transform_grd_yup2grd_zup(self, matrix):
+        return self.grd_yup2grd_zup @ matrix @ self.fast_mat_inv(self.grd_yup2grd_zup)
+
+    def translate_vr2robot(self, matrix, haed_matrix):
+
+        rel_matrix = matrix
+
+        # Relative to head z-axis
+        rel_matrix[2, 3] = rel_matrix[2, 3] - haed_matrix[2, 3]
+        # Move origin of tracking to head
+        rel_matrix[0:3, 3] = rel_matrix[0:3, 3] + self.torso2head[0:3, 3]
+
+        return rel_matrix
+
     def process(self, vuer_app):
         self.vuer_head_mat = self.mat_update(
             self.vuer_head_mat, vuer_app.head_matrix.copy()
@@ -82,45 +96,13 @@ class VuerTransformer:
         )
 
         # change of basis
+        head_mat = self.transform_grd_yup2grd_zup(self.vuer_head_mat)
+        left_wrist_mat = self.transform_grd_yup2grd_zup(self.vuer_left_wrist_mat)
+        right_wrist_mat = self.transform_grd_yup2grd_zup(self.vuer_right_wrist_mat)
 
-        head_mat = (
-            self.grd_yup2grd_zup
-            @ self.vuer_head_mat
-            @ self.fast_mat_inv(self.grd_yup2grd_zup)
-        )
-
-        left_wrist_mat = (
-            self.grd_yup2grd_zup
-            @ self.vuer_left_wrist_mat
-            @ self.fast_mat_inv(self.grd_yup2grd_zup)
-        )
-
-        right_wrist_mat = (
-            self.grd_yup2grd_zup
-            @ self.vuer_right_wrist_mat
-            @ self.fast_mat_inv(self.grd_yup2grd_zup)
-        )
-
-        rel_left_wrist_mat = left_wrist_mat
-        # rel_left_wrist_mat = left_wrist_mat @ self.hand2gripper
-
-        # Relative to head z-axis
-        rel_left_wrist_mat[2, 3] = rel_left_wrist_mat[2, 3] - head_mat[2, 3]
-        # Move origin of tracking to head
-        rel_left_wrist_mat[0:3, 3] = (
-            rel_left_wrist_mat[0:3, 3] + self.torso2head[0:3, 3]
-        )
-
-        rel_right_wrist_mat = right_wrist_mat
-        # rel_right_wrist_mat = right_wrist_mat @ self.hand2gripper  # wTr = wTh @ hTr
-
-        # Relative to head z-axis
-        rel_right_wrist_mat[2, 3] = rel_right_wrist_mat[2, 3] - head_mat[2, 3]
-        #
-        # Move origin of tracking to head
-        rel_right_wrist_mat[0:3, 3] = (
-            rel_right_wrist_mat[0:3, 3] + self.torso2head[0:3, 3]
-        )
+        # Translation
+        rel_left_wrist_mat = self.translate_vr2robot(left_wrist_mat, head_mat)
+        rel_right_wrist_mat = self.translate_vr2robot(right_wrist_mat, head_mat)
 
         # Override rotation matrix
         rel_left_wrist_mat[0:3, 0:3] = self.fixed_rotation_left
