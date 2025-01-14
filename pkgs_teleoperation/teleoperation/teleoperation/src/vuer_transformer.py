@@ -103,14 +103,23 @@ class VuerTransformer:
 
         rel_left_wrist_mat = left_wrist_mat
         # rel_left_wrist_mat = left_wrist_mat @ self.hand2gripper
+
+        # Relative to head z-axis
+        rel_left_wrist_mat[2, 3] = rel_left_wrist_mat[2, 3] - head_mat[2, 3]
+        # Move origin of tracking to head
         rel_left_wrist_mat[0:3, 3] = (
-            rel_left_wrist_mat[0:3, 3] - head_mat[0:3, 3] + self.torso2head[0:3, 3]
+            rel_left_wrist_mat[0:3, 3] + self.torso2head[0:3, 3]
         )
 
         rel_right_wrist_mat = right_wrist_mat
         # rel_right_wrist_mat = right_wrist_mat @ self.hand2gripper  # wTr = wTh @ hTr
+
+        # Relative to head z-axis
+        rel_right_wrist_mat[2, 3] = rel_right_wrist_mat[2, 3] - head_mat[2, 3]
+        #
+        # Move origin of tracking to head
         rel_right_wrist_mat[0:3, 3] = (
-            rel_right_wrist_mat[0:3, 3] - head_mat[0:3, 3] + self.torso2head[0:3, 3]
+            rel_right_wrist_mat[0:3, 3] + self.torso2head[0:3, 3]
         )
 
         # Override rotation matrix
