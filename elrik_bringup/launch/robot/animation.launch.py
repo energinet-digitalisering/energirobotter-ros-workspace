@@ -16,10 +16,6 @@ def launch_setup(context, *args, **kwargs):
     package_share_dir = get_package_share_directory(package_name)
     animation_file_path = os.path.join(package_share_dir, "animations", "recording.csv")
 
-    lifecycle_nodes = [
-        "animation_player_node",
-    ]
-
     animation_player_node = Node(
         package="animation_player",
         executable="animation_player_node",
@@ -29,18 +25,8 @@ def launch_setup(context, *args, **kwargs):
         ],
     )
 
-    behaviour_manager_node = Node(
-        package="behaviour_manager",
-        executable="behaviour_manager",
-        output="screen",
-        parameters=[
-            {"node_names": lifecycle_nodes},
-        ],
-    )
-
     return [
         animation_player_node,
-        behaviour_manager_node,
     ]
 
 

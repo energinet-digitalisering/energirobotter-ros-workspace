@@ -17,21 +17,8 @@ def launch_setup(context, *args, **kwargs):
     rviz = LaunchConfiguration("rviz")
     camera_enabled = LaunchConfiguration("camera_enabled")
 
-    camera_model = "zedm"
     image_topic_left = "/zed/zed_node/left/image_rect_color/compressed"
     image_topic_right = "/zed/zed_node/right/image_rect_color/compressed"
-
-    zed_camera_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            [
-                FindPackageShare("zed_wrapper"),
-                "/launch",
-                "/zed_camera.launch.py",
-            ]
-        ),
-        launch_arguments={"camera_model": camera_model}.items(),
-        condition=IfCondition(camera_enabled),
-    )
 
     ik_control_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -54,7 +41,6 @@ def launch_setup(context, *args, **kwargs):
     )
 
     return [
-        zed_camera_launch,
         ik_control_launch,
         teleoperation_node,
     ]
