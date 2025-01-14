@@ -2,6 +2,9 @@
 
 Bringup package for Elrik, with different launch scripts for each mode/feature.
 
+This package contains lots of launch files that implements different behaviours/modes, like face following or teleoperation.
+The `launch` folder is divided into two folders, for launch files that should be run directly on the robot micorcomputer, and those to be run on a "server", aka. a development computer connected to the same subnet. 
+
 ## Teleoperation
 
 ### Setup VR Headset
