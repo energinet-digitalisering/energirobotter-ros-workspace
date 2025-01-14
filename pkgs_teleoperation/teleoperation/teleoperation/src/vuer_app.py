@@ -122,7 +122,7 @@ class VuerApp:
 
     async def session_manager(self, session: VuerSession):
         """Process image frames and send them to Vuer, as well as retrieving hand-tracking data."""
-        self.logger.info("Processing images")
+        self.logger.info("Session initialised")
 
         # Ensure the WebSocket is active
         if len(self.app.ws) == 0:
