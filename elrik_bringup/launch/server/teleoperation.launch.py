@@ -22,7 +22,12 @@ def launch_setup(context, *args, **kwargs):
 
     ik_control_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            [FindPackageShare(package_name), "/launch", "/ik_control.launch.py"]
+            [
+                FindPackageShare(package_name),
+                "/launch",
+                "/server",
+                "/ik_control.launch.py",
+            ]
         ),
         launch_arguments={"rviz": rviz}.items(),
     )
