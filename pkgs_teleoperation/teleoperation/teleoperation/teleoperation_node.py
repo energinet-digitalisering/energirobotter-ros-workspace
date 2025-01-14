@@ -20,6 +20,11 @@ class TeleoperationNode(Node):
         self.declare_parameter("fps", 30)
         self.fps = self.get_parameter("fps").get_parameter_value().integer_value
 
+        self.declare_parameter("camera_enabled", True)
+        self.camera_enabled = (
+            self.get_parameter("camera_enabled").get_parameter_value().bool_value
+        )
+
         # Subscribers
         self.subscription_image_left = self.create_subscription(
             CompressedImage, "/image_left", self.callback_image_left, 1
@@ -47,7 +52,7 @@ class TeleoperationNode(Node):
 
         self.cv_bridge = CvBridge()
 
-        self.vuer_app = VuerApp()
+        self.vuer_app = VuerApp(self.camera_enabled)
         self.vuer_transformer = VuerTransformer()
 
     def callback_image_left(self, msg):

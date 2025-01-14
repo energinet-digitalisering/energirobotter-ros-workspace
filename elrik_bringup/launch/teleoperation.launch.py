@@ -1,9 +1,12 @@
 from launch import LaunchDescription
 from launch.actions import (
+    DeclareLaunchArgument,
     IncludeLaunchDescription,
     OpaqueFunction,
 )
+from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
@@ -11,6 +14,8 @@ package_name = "elrik_bringup"
 
 
 def launch_setup(context, *args, **kwargs):
+    rviz = LaunchConfiguration("rviz")
+    camera_enabled = LaunchConfiguration("camera_enabled")
 
     camera_model = "zedm"
     image_topic_left = "/zed/zed_node/left/image_rect_color/compressed"
@@ -18,16 +23,21 @@ def launch_setup(context, *args, **kwargs):
 
     zed_camera_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            [FindPackageShare("zed_wrapper"), "/launch", "/zed_camera.launch.py"]
+            [
+                FindPackageShare("zed_wrapper"),
+                "/launch",
+                "/zed_camera.launch.py",
+            ]
         ),
         launch_arguments={"camera_model": camera_model}.items(),
+        condition=IfCondition(camera_enabled),
     )
 
     ik_control_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             [FindPackageShare(package_name), "/launch", "/ik_control.launch.py"]
         ),
-        launch_arguments={"camera_model": camera_model}.items(),
+        launch_arguments={"rviz": rviz}.items(),
     )
 
     teleoperation_node = Node(
@@ -37,6 +47,9 @@ def launch_setup(context, *args, **kwargs):
         remappings=[
             ("/image_left", image_topic_left),
             ("/image_right", image_topic_right),
+        ],
+        parameters=[
+            {"camera_enabled": camera_enabled},
         ],
     )
 
@@ -48,9 +61,20 @@ def launch_setup(context, *args, **kwargs):
 
 
 def generate_launch_description():
-
     return LaunchDescription(
         [
+            DeclareLaunchArgument(
+                "rviz",
+                default_value="true",
+                description="Start RViz2 automatically with this launch file.",
+                choices=["true", "false"],
+            ),
+            DeclareLaunchArgument(
+                "camera_enabled",
+                default_value="false",
+                description="Run teleoperation with or without camera.",
+                choices=["true", "false"],
+            ),
             OpaqueFunction(function=launch_setup),
         ]
     )

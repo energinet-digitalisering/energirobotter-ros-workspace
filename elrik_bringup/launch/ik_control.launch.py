@@ -27,9 +27,10 @@ def launch_setup(context, *args, **kwargs):
 
     rviz_config_file = PathJoinSubstitution(
         [
-            FindPackageShare("elrik_description"),
+            FindPackageShare(package_name),
+            "config",
             "rviz",
-            "elrik_display.rviz",
+            "teleoperation.rviz",
         ]
     )
 

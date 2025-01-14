@@ -91,6 +91,9 @@ class ElrikKdlKinematics(Node):
         """
         Publish the joint states based on the IK solution.
         """
+        names = []
+        positions = []
+
         for end_effector in self.end_effectors:
 
             if end_effector != self.end_effectors[2]:  # Skip head
@@ -103,13 +106,16 @@ class ElrikKdlKinematics(Node):
             else:
                 q_solution = self.q_init[end_effector]
 
-            joint_state_msg = JointState()
-            joint_state_msg.header.stamp = self.get_clock().now().to_msg()
-            joint_state_msg.name = self.get_chain_joints_name(self.chain[end_effector])
-            joint_state_msg.position = [float(pos) for pos in q_solution]
+            names.extend(self.get_chain_joints_name(self.chain[end_effector]))
+            positions.extend([float(pos) for pos in q_solution])
 
-            # Publish the joint state message
-            self.joint_state_pub.publish(joint_state_msg)
+        joint_state_msg = JointState()
+        joint_state_msg.header.stamp = self.get_clock().now().to_msg()
+        joint_state_msg.name = names
+        joint_state_msg.position = positions
+
+        # Publish the joint state message
+        self.joint_state_pub.publish(joint_state_msg)
 
     def get_current_position(self, chain) -> List[float]:
         joints = self.get_chain_joints_name(chain)

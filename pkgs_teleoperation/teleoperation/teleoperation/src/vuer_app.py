@@ -14,10 +14,12 @@ TF_MATRIX_SIZE = 16
 
 
 class VuerApp:
-    def __init__(self):
+    def __init__(self, camera_enabled=True):
         # Initialize logging
         self.logger = logging.getLogger("VuerApp")
         logging.basicConfig(level=logging.INFO)
+
+        self.camera_enabled = camera_enabled
 
         # Initialize the Vuer app
         self.app = Vuer()
@@ -136,46 +138,56 @@ class VuerApp:
         # Session loop
         while len(self.app.ws) > 0:
 
-            # Handle image queue
-            if self.queue_image_left.empty() or self.queue_image_right.empty():
-                self.logger.debug("Empty image found, skipping frame update")
-                continue
+            if self.camera_enabled:
+                # Handle image queue
+                if self.queue_image_left.empty():
+                    self.logger.info("Left image empty, skipping frame update")
+                    continue
 
-            image_left = self.queue_image_left.get(block=True)
-            image_right = self.queue_image_right.get(block=True)
+                image_left = self.queue_image_left.get(block=True)
 
-            if image_left is None or image_right is None:
-                self.logger.debug("Image is None, skipping frame update")
-                continue
+                if image_left is None:
+                    self.logger.info("Left image is None, skipping frame update")
+                    continue
 
-            # Session content
-            session.upsert(
-                [
-                    ImageBackground(
-                        image_left,
-                        aspect=1.778,
-                        height=1,
-                        distanceToCamera=1,
-                        layers=1,
-                        format="jpeg",
-                        quality=90,
-                        key="background-left",
-                        interpolate=True,
-                    ),
-                    ImageBackground(
-                        image_right,
-                        aspect=1.778,
-                        height=1,
-                        distanceToCamera=1,
-                        layers=2,
-                        format="jpeg",
-                        quality=90,
-                        key="background-right",
-                        interpolate=True,
-                    ),
-                ],
-                to="bgChildren",
-            )
+                # if self.queue_image_right.empty():
+                #     self.logger.debug("Right image empty, skipping frame update")
+                #     continue
+
+                # image_right = self.queue_image_right.get(block=True)
+
+                # if image_right is None:
+                #     self.logger.debug("Right image is None, skipping frame update")
+                #     continue
+
+                # Session content
+                session.upsert(
+                    [
+                        ImageBackground(
+                            image_left,
+                            aspect=1.778,
+                            height=1,
+                            distanceToCamera=1,
+                            layers=1,
+                            format="jpeg",
+                            quality=90,
+                            key="background-left",
+                            interpolate=True,
+                        ),
+                        ImageBackground(
+                            image_left,
+                            aspect=1.778,
+                            height=1,
+                            distanceToCamera=1,
+                            layers=2,
+                            format="jpeg",
+                            quality=90,
+                            key="background-right",
+                            interpolate=True,
+                        ),
+                    ],
+                    to="bgChildren",
+                )
 
             # 'jpeg' encoding should give you about 30fps with a 16ms wait in-between.
             await sleep(0.016 * 2)
