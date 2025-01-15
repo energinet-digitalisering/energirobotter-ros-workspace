@@ -1,5 +1,5 @@
 """
-Storing attributes and managin control of a single servo.
+Storing attributes and managing control of a single servo.
 """
 
 import logging
