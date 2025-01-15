@@ -4,7 +4,7 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
 
-from servo_control.src.elrik_servo_manager import ElrikServoManager
+from servo_control.src.elrik_driver_arms import ElrikDriverArms
 
 
 class ServoManagerNode(Node):
@@ -31,11 +31,9 @@ class ServoManagerNode(Node):
         # Node variables
         config_folder_path = "install/elrik_bringup/share/elrik_bringup/config/servos"
 
-        self.servo_manager = ElrikServoManager(
-            config_folder_path, self.control_frequency
-        )
+        self.driver_arms = ElrikDriverArms(config_folder_path, self.control_frequency)
 
-        self.servo_commands = self.servo_manager.get_default_servo_commands()
+        self.servo_commands = self.driver_arms.get_default_servo_commands()
 
     def callback_joint_states(self, msg):
         self.servo_commands = dict(zip(msg.name, np.rad2deg(msg.position)))
@@ -43,8 +41,8 @@ class ServoManagerNode(Node):
         # self.get_logger().info(f"Updated joint positions: {joint_positions}")
 
     def callback_timer(self):
-        self.servo_manager.update_feedback()
-        self.servo_manager.command_servos(self.servo_commands)
+        self.driver_arms.update_feedback()
+        self.driver_arms.command_servos(self.servo_commands)
 
 
 def main(args=None):

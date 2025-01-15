@@ -1,3 +1,7 @@
+"""
+Servo driver/manager of Elrik arms, which are Waveshare servos. 
+"""
+
 import json
 import logging
 import threading
@@ -12,11 +16,11 @@ PORT = "/dev/ttyUSB0"
 BAUDRATE = 115200
 
 
-class ElrikServoManager:
+class ElrikDriverArms:
 
     def __init__(self, config_folder_path, control_frequency):
 
-        self.logger = logging.getLogger("ElrikServoManager")
+        self.logger = logging.getLogger("ElrikDriverArms")
         logging.basicConfig(level=logging.INFO)
 
         self.config_folder_path = config_folder_path
@@ -47,13 +51,9 @@ class ElrikServoManager:
             self.coms_active = False
 
         # Load and process each JSON file
-        json_files = [  # List of JSON configuration files
-            "servo_arm_left_nowrist_params.json",
-            "servo_arm_right_nowrist_params.json",
-            # "servo_arm_left_params.json",
-            # "servo_arm_right_params.json",
-            # "servo_right_elbow_test.json",
-            # "servo_test.json",
+        json_files = [
+            "servo_arm_left_params.json",
+            "servo_arm_right_params.json",
         ]
 
         for json_file in json_files:
