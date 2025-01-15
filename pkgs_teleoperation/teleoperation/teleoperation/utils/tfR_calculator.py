@@ -75,4 +75,4 @@ if __name__ == "__main__":
 
     # Rotate 90 degrees around the x-axis
     rotated_matrix = rotate_matrix(matrix, 180, "y")
-    print("Rotated matrixs:\n", rotated_matrix)
+    print("Rotated matrix:\n", rotated_matrix)
