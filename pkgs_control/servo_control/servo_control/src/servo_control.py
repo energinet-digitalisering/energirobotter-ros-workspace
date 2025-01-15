@@ -1,3 +1,7 @@
+"""
+Storing attributes and managin control of a single servo.
+"""
+
 import logging
 import numpy as np
 

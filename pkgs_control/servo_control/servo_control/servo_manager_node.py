@@ -1,3 +1,7 @@
+"""
+Managing ROS communication for all servos in Elrik
+"""
+
 import numpy as np
 
 import rclpy
