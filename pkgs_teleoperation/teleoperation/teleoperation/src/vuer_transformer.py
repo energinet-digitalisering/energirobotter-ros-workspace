@@ -71,14 +71,14 @@ class VuerTransformer:
         return rel_matrix
 
     def process(self, vuer_app):
+
+        # Check valid matrix
         self.vuer_head_mat = self.mat_update(
             self.vuer_head_mat, vuer_app.head_matrix.copy()
         )
-
         self.vuer_right_wrist_mat = self.mat_update(
             self.vuer_right_wrist_mat, vuer_app.hand_right[JOINT_ID_WRIST].copy()
         )
-
         self.vuer_left_wrist_mat = self.mat_update(
             self.vuer_left_wrist_mat, vuer_app.hand_left[JOINT_ID_WRIST].copy()
         )

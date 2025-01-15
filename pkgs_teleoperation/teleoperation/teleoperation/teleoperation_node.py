@@ -9,6 +9,7 @@ from std_msgs.msg import Header
 
 from teleoperation.src.vuer_app import VuerApp
 from teleoperation.src.vuer_transformer import VuerTransformer
+from teleoperation.src.vuer_collision_avoidance import VuerCollisionAvoidance
 
 
 class TeleoperationNode(Node):
@@ -54,6 +55,7 @@ class TeleoperationNode(Node):
 
         self.vuer_app = VuerApp(self.camera_enabled)
         self.vuer_transformer = VuerTransformer()
+        self.vuer_collision_avoidance = VuerCollisionAvoidance()
 
     def callback_image_left(self, msg):
         self.image_left = self.cv_bridge.compressed_imgmsg_to_cv2(
@@ -86,8 +88,12 @@ class TeleoperationNode(Node):
 
     def callback_timer(self):
         self.vuer_app.update_frames(self.image_left, self.image_right)
+
         head_mat, left_wrist_mat, right_wrist_mat = self.vuer_transformer.process(
             self.vuer_app
+        )
+        left_wrist_mat, right_wrist_mat = self.vuer_collision_avoidance.process(
+            left_wrist_mat, right_wrist_mat
         )
 
         msg_pose_left = self.tf_matrix_to_msg(left_wrist_mat)
