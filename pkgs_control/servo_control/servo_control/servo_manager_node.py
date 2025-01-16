@@ -9,6 +9,7 @@ from rclpy.node import Node
 from sensor_msgs.msg import JointState
 
 from servo_control.src.elrik_driver_arms import ElrikDriverArms
+from servo_control.src.elrik_driver_hands import ElrikDriverHands
 
 
 class ServoManagerNode(Node):
@@ -26,6 +27,8 @@ class ServoManagerNode(Node):
         self.sub_joints_arms = self.create_subscription(
             JointState, "/joint_states", self.callback_joints_arms, 1
         )
+        self.sub_joints_hands = self.create_subscription(
+            JointState, "/joint_states_hands", self.callback_joints_hands, 1
         )
 
         # Publishers
@@ -44,15 +47,28 @@ class ServoManagerNode(Node):
         self.driver_arms = ElrikDriverArms(json_files_arms, self.control_frequency)
         self.servo_commands_arms = self.driver_arms.get_default_servo_commands()
 
+        # Configure hands servo manager
+        json_files_hands = [
+            f"{config_folder_path}/servo_hand_left_params.json",
+            f"{config_folder_path}/servo_hand_right_params.json",
+        ]
+        self.driver_hands = ElrikDriverHands(json_files_hands, self.control_frequency)
+        self.servo_commands_hands = self.driver_hands.get_default_servo_commands()
 
     def callback_joints_arms(self, msg):
         self.servo_commands_arms = dict(zip(msg.name, np.rad2deg(msg.position)))
 
         # self.get_logger().info(f"Updated joint positions: {joint_positions}")
 
+    def callback_joints_hands(self, msg):
+        self.servo_commands_hands = dict(zip(msg.name, np.rad2deg(msg.position)))
+
     def callback_timer(self):
         self.driver_arms.update_feedback()
         self.driver_arms.command_servos(self.servo_commands_arms)
+
+        self.driver_hands.update_feedback()
+        self.driver_hands.command_servos(self.servo_commands_hands)
 
 
 def main(args=None):
