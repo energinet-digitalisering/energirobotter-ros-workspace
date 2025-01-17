@@ -58,8 +58,6 @@ class ServoManagerNode(Node):
     def callback_joints_arms(self, msg):
         self.servo_commands_arms = dict(zip(msg.name, np.rad2deg(msg.position)))
 
-        # self.get_logger().info(f"Updated joint positions: {joint_positions}")
-
     def callback_joints_hands(self, msg):
         self.servo_commands_hands = dict(zip(msg.name, np.rad2deg(msg.position)))
 

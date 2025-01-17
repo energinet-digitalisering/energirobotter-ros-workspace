@@ -2,6 +2,8 @@
 Servo driver/manager of Elrik arms, which are servos controlled by a Waveshare driver. 
 """
 
+import numpy as np
+
 from .SCServo_Python.scservo_sdk import PortHandler, sms_sts, scservo_def
 from servo_control.src.elrik_driver_servos import ElrikDriverServos
 from servo_control.src.servo_control import ServoControl
@@ -36,9 +38,7 @@ class ElrikDriverArms(ElrikDriverServos):
             return None
 
     def send_command(self, servo: ServoControl, pwm):
-        # self.logger.info(
-        #     f"Servo: {servo.servo_id}. Stopping pwm of: {pwm}, angle of: {int(np.round(angle))}"
-        # )
+        # self.logger.info(f"Servo: {servo.servo_id}. Stopping pwm of: {pwm}")
         # return
 
         scs_comm_result, scs_error = self.driver_object.WritePosEx(
