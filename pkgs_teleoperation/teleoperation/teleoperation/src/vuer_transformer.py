@@ -1,10 +1,15 @@
 import numpy as np
+import logging
+
 
 JOINT_ID_WRIST = 0
 
 
 class VuerTransformer:
     def __init__(self):
+
+        self.logger = logging.getLogger(self.__class__.__name__)
+        logging.basicConfig(level=logging.INFO)
 
         # Init poses
         self.vuer_head_mat = np.array(
