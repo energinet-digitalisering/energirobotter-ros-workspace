@@ -3,6 +3,12 @@ import logging
 
 
 JOINT_ID_WRIST = 0
+JOINT_ID_THUMB_X = 1
+JOINT_ID_THUMB = 2
+JOINT_ID_INDEX = 6
+JOINT_ID_MIDDLE = 11
+JOINT_ID_RING = 16
+JOINT_ID_PINKY = 21
 
 
 class VuerTransformer:
@@ -48,6 +54,16 @@ class VuerTransformer:
                 [0, 0, 0, 1],
             ]
         )
+
+        # Dictionary
+        self.hand_joints = {
+            "thumb_x": JOINT_ID_THUMB_X,
+            "thumb": JOINT_ID_THUMB,
+            "index": JOINT_ID_INDEX,
+            "middle": JOINT_ID_MIDDLE,
+            "ring": JOINT_ID_RING,
+            "pinky": JOINT_ID_PINKY,
+        }
 
     def mat_update(self, prev_mat, mat):
         if np.linalg.det(mat) == 0:
