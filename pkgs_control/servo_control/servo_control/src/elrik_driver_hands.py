@@ -30,5 +30,5 @@ class ElrikDriverHands(ElrikDriverServos):
     def send_command(self, servo: ServoControl, pwm):
         self.driver_object.channels[servo.servo_id].duty_cycle = pwm
 
-    def read_feedback(self):
+    def read_feedback(self, servo: ServoControl):
         pass

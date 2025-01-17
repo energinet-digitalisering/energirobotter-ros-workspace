@@ -91,10 +91,13 @@ class ElrikDriverServos(ABC):
         pass
 
     @abstractmethod
-    def read_feedback(self):
+    def read_feedback(self, servo: ServoControl):
         """
         Abstract method to read feedback from the servos.
         Must return a feedback PWM value.
+
+        Args:
+            servo (ServoControl): Servo object containing servo attributes.
         """
         pass
 
@@ -226,5 +229,5 @@ class ElrikDriverServos(ABC):
             name (str): Name of the servo to update feedback for.
         """
         with self.lock:  # Ensure thread-safe communication
-            feedback_pwm = self.read_feedback()
+            feedback_pwm = self.read_feedback(self.servos[name])
         self.servos[name].set_feedback_pwm(feedback_pwm)
