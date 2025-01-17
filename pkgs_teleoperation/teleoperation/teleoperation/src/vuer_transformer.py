@@ -91,6 +91,73 @@ class VuerTransformer:
 
         return rel_matrix
 
+    def rotation_angle_3d(self, T1, T2):
+        """
+        Computes the rotation difference between T1 and T2.
+
+        Args:
+            T1: A 4x4 transformation matrix (reference frame).
+            T2: A 4x4 transformation matrix (rotated frame).
+
+        Returns:
+            The angle of rotation in radians.
+        """
+        # Extract rotation matrices
+        R1 = T1[:3, :3]
+        R2 = T2[:3, :3]
+
+        # Compute relative rotation
+        R_relative = R2 @ R1.T
+
+        # Compute the angle (in radians)
+        trace = np.trace(R_relative)
+        angle = np.arccos(np.clip((trace - 1) / 2, -1, 1))
+        return angle  # In radians
+
+    def rotation_difference_axis(self, T1, T2, axis="x"):
+        """
+        Computes the rotation difference around a specified axis of T1.
+
+        Args:
+            T1: A 4x4 transformation matrix (reference frame).
+            T2: A 4x4 transformation matrix (rotated frame).
+            axis: A string specifying the axis ("x", "y", or "z").
+
+        Returns:
+            The angle of rotation around the specified axis of T1 in radians.
+        """
+        # Extract rotation matrices
+        R1 = T1[:3, :3]
+        R2 = T2[:3, :3]
+
+        # Compute relative rotation
+        R_relative = R2 @ R1.T
+
+        # Select the axis
+        axis_dict = {"x": 0, "y": 1, "z": 2}
+        if axis not in axis_dict:
+            raise ValueError("Invalid axis. Choose 'x', 'y', or 'z'.")
+
+        # Get the corresponding axis vector from T1
+        axis_index = axis_dict[axis]
+        axis_vector = R1[:, axis_index]
+
+        # Transform the axis vector using the relative rotation
+        transformed_axis = R_relative @ axis_vector
+
+        # Compute the angle (in radians)
+        cos_theta = np.dot(axis_vector, transformed_axis) / (
+            np.linalg.norm(axis_vector) * np.linalg.norm(transformed_axis)
+        )
+        theta = np.arccos(np.clip(cos_theta, -1, 1))
+
+        # Determine sign using the cross product
+        cross = np.cross(axis_vector, transformed_axis)
+        if cross[axis_index] < 0:  # Adjust sign based on the selected axis
+            theta = -theta
+
+        return theta  # In radians
+
     def process(self, vuer_app):
 
         # Check valid matrix
