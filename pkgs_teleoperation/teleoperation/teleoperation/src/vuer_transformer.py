@@ -184,4 +184,30 @@ class VuerTransformer:
         rel_left_wrist_mat = rel_left_wrist_mat @ self.hand2gripper_left
         rel_right_wrist_mat = rel_right_wrist_mat @ self.hand2gripper_right
 
-        return head_mat, rel_left_wrist_mat, rel_right_wrist_mat
+        # Hand/finger joints
+        hand_joint_angles = {}
+        for joint_name, idx in self.hand_joints.items():
+
+            vuer_left_mat = vuer_app.hand_left[idx].copy()
+            vuer_right_mat = vuer_app.hand_right[idx].copy()
+
+            left_mat = self.transform_grd_yup2grd_zup(vuer_left_mat)
+            right_mat = self.transform_grd_yup2grd_zup(vuer_right_mat)
+
+            rel_left_mat = self.translate_vr2robot(left_mat, head_mat)
+            rel_right_mat = self.translate_vr2robot(right_mat, head_mat)
+
+            rel_left_mat = rel_left_mat @ self.hand2gripper_left
+            rel_right_mat = rel_right_mat @ self.hand2gripper_left
+
+            angle_left = np.rad2deg(
+                self.rotation_difference_axis(rel_left_wrist_mat, rel_left_mat, "y")
+            )
+            angle_right = np.rad2deg(
+                self.rotation_difference_axis(rel_right_wrist_mat, rel_right_mat, "y")
+            )
+
+            hand_joint_angles["hand_left_" + joint_name] = angle_left
+            hand_joint_angles["hand_right_" + joint_name] = angle_right
+
+        return (head_mat, rel_left_wrist_mat, rel_right_wrist_mat, hand_joint_angles)
