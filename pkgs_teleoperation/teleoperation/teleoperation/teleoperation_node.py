@@ -89,9 +89,12 @@ class TeleoperationNode(Node):
     def callback_timer(self):
         self.vuer_app.update_frames(self.image_left, self.image_right)
 
+        # Transform tracking to robot frame
         _, left_wrist_mat, right_wrist_mat, hand_angles = self.vuer_transformer.process(
             self.vuer_app
         )
+
+        # Avoid hand collision
         left_wrist_mat, right_wrist_mat = self.vuer_collision_avoidance.process(
             left_wrist_mat, right_wrist_mat
         )

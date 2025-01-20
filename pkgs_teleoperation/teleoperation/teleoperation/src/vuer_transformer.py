@@ -1,120 +1,141 @@
 import numpy as np
 import logging
 
-
-JOINT_ID_WRIST = 0
-JOINT_ID_THUMB_X = 1
-JOINT_ID_THUMB = 2
-JOINT_ID_INDEX = 6
-JOINT_ID_MIDDLE = 11
-JOINT_ID_RING = 16
-JOINT_ID_PINKY = 21
+# Joint identifiers
+JOINT_IDS = {
+    "wrist": 0,
+    "thumb_x": 1,
+    "thumb": 2,
+    "index": 6,
+    "middle": 11,
+    "ring": 16,
+    "pinky": 21,
+}
 
 
 class VuerTransformer:
     def __init__(self):
-
         self.logger = logging.getLogger(self.__class__.__name__)
         logging.basicConfig(level=logging.INFO)
 
-        # Init poses
-        self.vuer_head_mat = np.array(
-            [[1, 0, 0, 0], [0, 1, 0, 1.5], [0, 0, 1, 0], [0, 0, 0, 1]]
-        )
-        self.vuer_left_wrist_mat = np.array(
-            [[1, 0, 0, -0.3], [0, 1, 0, 1], [0, 0, 1, -0.2], [0, 0, 0, 1]]
-        )
-        self.vuer_right_wrist_mat = np.array(
-            [[1, 0, 0, 0.3], [0, 1, 0, 1], [0, 0, 1, -0.2], [0, 0, 0, 1]]
-        )
+        # Initialize poses
+        self.vuer_head_mat = self._create_matrix(translation=(0, 1.5, 0))
+        self.vuer_left_wrist_mat = self._create_matrix(translation=(-0.3, 1, -0.2))
+        self.vuer_right_wrist_mat = self._create_matrix(translation=(0.3, 1, -0.2))
 
-        # Transform constants
+        # # Transform constants
+        self.hand2gripper_left = self._create_matrix(rotation=(0, -90, 180))
+        self.hand2gripper_right = self._create_matrix(rotation=(0, 90, 180))
 
-        self.hand2gripper_left = np.array(
-            [[0, 0, 1, 0], [0, -1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 1]]
-        )
-        self.hand2gripper_right = np.array(
-            [[0, 0, -1, 0], [0, -1, 0, 0], [-1, 0, 0, 0], [0, 0, 0, 1]]
-        )
+        self.grd_yup2grd_zup = self._create_matrix(rotation=(90, 0, 0))
+        self.torso2head = self._create_matrix(translation=(0, 0.25, 0.374605))
 
-        self.grd_yup2grd_zup = np.array(
-            [
-                [1, 0, 0, 0],  # Map X (VR) -> X (Robot)
-                [0, 0, -1, 0],  # Map Z (VR) -> Y (Robot)
-                [0, 1, 0, 0],  # Map Y (VR) -> Z (Robot)
-                [0, 0, 0, 1],
-            ]
-        )
+        # Hand joints dictionary
+        self.hand_joints = {k: JOINT_IDS[k] for k in JOINT_IDS if k != "wrist"}
 
-        self.torso2head = np.array(
-            [
-                [1, 0, 0, 0],
-                [0, 1, 0, 0.25],
-                [0, 0, 1, 0.374605],
-                [0, 0, 0, 1],
-            ]
-        )
-
-        # Dictionary
-        self.hand_joints = {
-            "thumb_x": JOINT_ID_THUMB_X,
-            "thumb": JOINT_ID_THUMB,
-            "index": JOINT_ID_INDEX,
-            "middle": JOINT_ID_MIDDLE,
-            "ring": JOINT_ID_RING,
-            "pinky": JOINT_ID_PINKY,
-        }
-
-    def mat_update(self, prev_mat, mat):
-        if np.linalg.det(mat) == 0:
-            return prev_mat
-        else:
-            return mat
-
-    def fast_mat_inv(self, mat):
-        ret = np.eye(4)
-        ret[:3, :3] = mat[:3, :3].T
-        ret[:3, 3] = -mat[:3, :3].T @ mat[:3, 3]
-        return ret
-
-    def transform_grd_yup2grd_zup(self, matrix):
-        return self.grd_yup2grd_zup @ matrix @ self.fast_mat_inv(self.grd_yup2grd_zup)
-
-    def translate_vr2robot(self, matrix, haed_matrix):
-
-        rel_matrix = matrix
-
-        # Relative to head z-axis
-        rel_matrix[2, 3] = rel_matrix[2, 3] - haed_matrix[2, 3]
-        # Move origin of tracking to head
-        rel_matrix[0:3, 3] = rel_matrix[0:3, 3] + self.torso2head[0:3, 3]
-
-        return rel_matrix
-
-    def rotation_angle_3d(self, T1, T2):
+    @staticmethod
+    def _create_matrix(rotation=(0, 0, 0), translation=(0, 0, 0)):
         """
-        Computes the rotation difference between T1 and T2.
+        Create a 4x4 transformation matrix from rotation (degrees) and translation.
 
         Args:
-            T1: A 4x4 transformation matrix (reference frame).
-            T2: A 4x4 transformation matrix (rotated frame).
+            rotation (tuple): Rotation angles (rx, ry, rz) in degrees.
+            translation (tuple): Translation (tx, ty, tz).
 
         Returns:
-            The angle of rotation in radians.
+            np.ndarray: A 4x4 transformation matrix.
         """
-        # Extract rotation matrices
-        R1 = T1[:3, :3]
-        R2 = T2[:3, :3]
+        rx, ry, rz = np.radians(rotation)  # Convert to radians
+        tx, ty, tz = translation
 
-        # Compute relative rotation
-        R_relative = R2 @ R1.T
+        # Create individual rotation matrices
+        R_x = np.array(
+            [[1, 0, 0], [0, np.cos(rx), -np.sin(rx)], [0, np.sin(rx), np.cos(rx)]]
+        )
 
-        # Compute the angle (in radians)
-        trace = np.trace(R_relative)
-        angle = np.arccos(np.clip((trace - 1) / 2, -1, 1))
-        return angle  # In radians
+        R_y = np.array(
+            [[np.cos(ry), 0, np.sin(ry)], [0, 1, 0], [-np.sin(ry), 0, np.cos(ry)]]
+        )
 
-    def rotation_difference_axis(self, T1, T2, axis="x"):
+        R_z = np.array(
+            [[np.cos(rz), -np.sin(rz), 0], [np.sin(rz), np.cos(rz), 0], [0, 0, 1]]
+        )
+
+        # Combine rotations in ZYX order
+        R = R_z @ R_y @ R_x
+
+        # Construct the full transformation matrix
+        transformation_matrix = np.eye(4)
+        transformation_matrix[:3, :3] = R
+        transformation_matrix[:3, 3] = [tx, ty, tz]
+
+        return transformation_matrix
+
+    @staticmethod
+    def _fast_inverse(matrix):
+        """
+        Computes the inverse of a 4x4 transformation matrix efficiently.
+        """
+        ret = np.eye(4)
+        ret[:3, :3] = matrix[:3, :3].T
+        ret[:3, 3] = -matrix[:3, :3].T @ matrix[:3, 3]
+        return ret
+
+    def _transform_basis(self, matrix):
+        """
+        Transforms a matrix using the GRD_YUP to GRD_ZUP convention.
+        """
+        return self.grd_yup2grd_zup @ matrix @ self._fast_inverse(self.grd_yup2grd_zup)
+
+    def _update_matrix(self, previous, current):
+        """
+        Updates the matrix if the determinant of the current one is non-zero.
+        """
+        return current if np.linalg.det(current) != 0 else previous
+
+    def _translate_to_robot(self, matrix, head_matrix):
+        """
+        Translates a VR matrix to the robot coordinate system relative to the head.
+        """
+        rel_matrix = matrix.copy()
+        rel_matrix[2, 3] -= head_matrix[2, 3]  # Adjust z-axis relative to the head
+        rel_matrix[:3, 3] += self.torso2head[:3, 3]  # Adjust origin to head
+        return rel_matrix
+
+    def _compute_hand_angles(self, vuer_app, head_matrix, rel_wrist_matrices):
+        """
+        Computes the joint angles for each finger.
+        """
+        hand_angles = {}
+        for joint_name, idx in self.hand_joints.items():
+            mat_left = self._transform_basis(vuer_app.hand_left[idx].copy())
+            mat_right = self._transform_basis(vuer_app.hand_right[idx].copy())
+
+            rel_left = (
+                self._translate_to_robot(mat_left, head_matrix) @ self.hand2gripper_left
+            )
+            rel_right = (
+                self._translate_to_robot(mat_right, head_matrix)
+                @ self.hand2gripper_right
+            )
+
+            angle_left = np.rad2deg(
+                self._rotation_difference_axis(
+                    rel_wrist_matrices["left"], rel_left, "y"
+                )
+            )
+            angle_right = np.rad2deg(
+                self._rotation_difference_axis(
+                    rel_wrist_matrices["right"], rel_right, "y"
+                )
+            )
+
+            hand_angles[f"hand_left_{joint_name}"] = angle_left
+            hand_angles[f"hand_right_{joint_name}"] = angle_right
+
+        return hand_angles
+
+    def _rotation_difference_axis(self, T1, T2, axis="x"):
         """
         Computes the rotation difference around a specified axis of T1.
 
@@ -126,6 +147,11 @@ class VuerTransformer:
         Returns:
             The angle of rotation around the specified axis of T1 in radians.
         """
+        axis_dict = {"x": 0, "y": 1, "z": 2}
+        if axis not in axis_dict:
+            raise ValueError("Invalid axis. Choose 'x', 'y', or 'z'.")
+        axis_index = axis_dict[axis]
+
         # Extract rotation matrices
         R1 = T1[:3, :3]
         R2 = T2[:3, :3]
@@ -133,13 +159,7 @@ class VuerTransformer:
         # Compute relative rotation
         R_relative = R2 @ R1.T
 
-        # Select the axis
-        axis_dict = {"x": 0, "y": 1, "z": 2}
-        if axis not in axis_dict:
-            raise ValueError("Invalid axis. Choose 'x', 'y', or 'z'.")
-
         # Get the corresponding axis vector from T1
-        axis_index = axis_dict[axis]
         axis_vector = R1[:, axis_index]
 
         # Transform the axis vector using the relative rotation
@@ -159,55 +179,39 @@ class VuerTransformer:
         return theta  # In radians
 
     def process(self, vuer_app):
-
-        # Check valid matrix
-        self.vuer_head_mat = self.mat_update(
+        """
+        Processes the matrices and computes the transformations and joint angles.
+        """
+        # Update matrices
+        self.vuer_head_mat = self._update_matrix(
             self.vuer_head_mat, vuer_app.head_matrix.copy()
         )
-        self.vuer_right_wrist_mat = self.mat_update(
-            self.vuer_right_wrist_mat, vuer_app.hand_right[JOINT_ID_WRIST].copy()
+        self.vuer_left_wrist_mat = self._update_matrix(
+            self.vuer_left_wrist_mat, vuer_app.hand_left[JOINT_IDS["wrist"]].copy()
         )
-        self.vuer_left_wrist_mat = self.mat_update(
-            self.vuer_left_wrist_mat, vuer_app.hand_left[JOINT_ID_WRIST].copy()
+        self.vuer_right_wrist_mat = self._update_matrix(
+            self.vuer_right_wrist_mat, vuer_app.hand_right[JOINT_IDS["wrist"]].copy()
         )
 
-        # change of basis
-        head_mat = self.transform_grd_yup2grd_zup(self.vuer_head_mat)
-        left_wrist_mat = self.transform_grd_yup2grd_zup(self.vuer_left_wrist_mat)
-        right_wrist_mat = self.transform_grd_yup2grd_zup(self.vuer_right_wrist_mat)
+        # Transform and translate
+        head_matrix = self._transform_basis(self.vuer_head_mat)
 
-        # Translation
-        rel_left_wrist_mat = self.translate_vr2robot(left_wrist_mat, head_mat)
-        rel_right_wrist_mat = self.translate_vr2robot(right_wrist_mat, head_mat)
+        rel_left_wrist = self._translate_to_robot(
+            self._transform_basis(self.vuer_left_wrist_mat), head_matrix
+        )
+        rel_right_wrist = self._translate_to_robot(
+            self._transform_basis(self.vuer_right_wrist_mat), head_matrix
+        )
 
-        # Rotation
-        rel_left_wrist_mat = rel_left_wrist_mat @ self.hand2gripper_left
-        rel_right_wrist_mat = rel_right_wrist_mat @ self.hand2gripper_right
+        # Apply rotation adjustments
+        rel_left_wrist = rel_left_wrist @ self.hand2gripper_left
+        rel_right_wrist = rel_right_wrist @ self.hand2gripper_right
 
-        # Hand/finger joints
-        hand_joint_angles = {}
-        for joint_name, idx in self.hand_joints.items():
+        # Compute joint angles
+        hand_angles = self._compute_hand_angles(
+            vuer_app,
+            head_matrix,
+            {"left": rel_left_wrist, "right": rel_right_wrist},
+        )
 
-            vuer_left_mat = vuer_app.hand_left[idx].copy()
-            vuer_right_mat = vuer_app.hand_right[idx].copy()
-
-            left_mat = self.transform_grd_yup2grd_zup(vuer_left_mat)
-            right_mat = self.transform_grd_yup2grd_zup(vuer_right_mat)
-
-            rel_left_mat = self.translate_vr2robot(left_mat, head_mat)
-            rel_right_mat = self.translate_vr2robot(right_mat, head_mat)
-
-            rel_left_mat = rel_left_mat @ self.hand2gripper_left
-            rel_right_mat = rel_right_mat @ self.hand2gripper_left
-
-            angle_left = np.rad2deg(
-                self.rotation_difference_axis(rel_left_wrist_mat, rel_left_mat, "y")
-            )
-            angle_right = np.rad2deg(
-                self.rotation_difference_axis(rel_right_wrist_mat, rel_right_mat, "y")
-            )
-
-            hand_joint_angles["hand_left_" + joint_name] = angle_left
-            hand_joint_angles["hand_right_" + joint_name] = angle_right
-
-        return (head_mat, rel_left_wrist_mat, rel_right_wrist_mat, hand_joint_angles)
+        return head_matrix, rel_left_wrist, rel_right_wrist, hand_angles
