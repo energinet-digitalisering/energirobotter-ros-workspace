@@ -174,6 +174,12 @@ class VuerTransformer:
                 )
             )
 
+            # Cap values between 0-90 degrees, and use absolute values
+            angle_left = abs(np.clip(angle_left, 0, 90))
+            angle_right = -angle_right  # Flip the sign for right-hand angles
+            angle_right = abs(np.clip(angle_right, 0, 90))
+
+            # Add to dict
             hand_angles[f"hand_left_{joint_name}"] = angle_left
             hand_angles[f"hand_right_{joint_name}"] = angle_right
 
