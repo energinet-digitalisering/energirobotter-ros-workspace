@@ -51,4 +51,8 @@ class ElrikDriverArms(ElrikDriverServos):
         #     self.logger.error(f"Servo error: {scs_error}")
 
     def read_feedback(self, servo: ServoControl):
-        self.driver_object.ReadPos(servo.servo_id)[0]
+        try:
+            return self.driver_object.ReadPos(servo.servo_id)[0]
+        except Exception as e:
+            self.logger.error(f"Failed to read feedback: {e}")
+            return None
