@@ -230,4 +230,5 @@ class ElrikDriverServos(ABC):
         """
         with self.lock:  # Ensure thread-safe communication
             feedback_pwm = self.read_feedback(self.servos[name])
-        self.servos[name].set_feedback_pwm(feedback_pwm)
+        if feedback_pwm is not None:
+            self.servos[name].set_feedback_pwm(feedback_pwm)
