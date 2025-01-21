@@ -82,6 +82,13 @@ class VuerTransformer:
         return transformation_matrix
 
     @staticmethod
+    def _update_matrix(previous, current):
+        """
+        Updates the matrix if the determinant of the current one is non-zero.
+        """
+        return current if np.linalg.det(current) != 0 else previous
+
+    @staticmethod
     def _fast_inverse(matrix):
         """
         Computes the inverse of a 4x4 transformation matrix efficiently.
@@ -96,12 +103,6 @@ class VuerTransformer:
         Transforms a matrix using the GRD_YUP to GRD_ZUP convention.
         """
         return self.grd_yup2grd_zup @ matrix @ self._fast_inverse(self.grd_yup2grd_zup)
-
-    def _update_matrix(self, previous, current):
-        """
-        Updates the matrix if the determinant of the current one is non-zero.
-        """
-        return current if np.linalg.det(current) != 0 else previous
 
     def _translate_to_robot(self, matrix, head_matrix):
         """
