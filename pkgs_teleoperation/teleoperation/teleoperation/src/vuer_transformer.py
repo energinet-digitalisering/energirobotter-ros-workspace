@@ -12,6 +12,16 @@ JOINT_IDS = {
     "pinky": 21,
 }
 
+JOINT_ROT_AXIS = {
+    "wrist": "",
+    "thumb_x": "x",
+    "thumb": "x",
+    "index": "y",
+    "middle": "y",
+    "ring": "y",
+    "pinky": "y",
+}
+
 
 class VuerTransformer:
     def __init__(self):
@@ -128,25 +138,38 @@ class VuerTransformer:
         """
         hand_angles = {}
         for joint_name, idx in self.hand_joints.items():
-            mat_left = self._transform_basis(vuer_app.hand_left[idx].copy())
-            mat_right = self._transform_basis(vuer_app.hand_right[idx].copy())
 
-            rel_left = (
-                self._translate_to_robot(mat_left, head_matrix) @ self.hand2gripper_left
+            # Retrieve and transform tracking data for metacarpal and proximal finger joints, for both hands
+            rel_metacarpal_left = self._transform_matrix(
+                vuer_app.hand_left[idx - 1].copy(),
+                head_matrix,
+                self.hand2gripper_left,
             )
-            rel_right = (
-                self._translate_to_robot(mat_right, head_matrix)
-                @ self.hand2gripper_right
+            rel_proximal_left = self._transform_matrix(
+                vuer_app.hand_left[idx].copy(),
+                head_matrix,
+                self.hand2gripper_left,
+            )
+            rel_metacarpal_right = self._transform_matrix(
+                vuer_app.hand_right[idx - 1].copy(),
+                head_matrix,
+                self.hand2gripper_right,
+            )
+            rel_proximal_right = self._transform_matrix(
+                vuer_app.hand_right[idx].copy(),
+                head_matrix,
+                self.hand2gripper_right,
             )
 
+            # Compute relative angle between metacarpal and proximal joint
             angle_left = np.rad2deg(
                 self._rotation_difference_axis(
-                    rel_wrist_matrices["left"], rel_left, "y"
+                    rel_metacarpal_left, rel_proximal_left, JOINT_ROT_AXIS[joint_name]
                 )
             )
             angle_right = np.rad2deg(
                 self._rotation_difference_axis(
-                    rel_wrist_matrices["right"], rel_right, "y"
+                    rel_metacarpal_right, rel_proximal_right, JOINT_ROT_AXIS[joint_name]
                 )
             )
 
@@ -224,10 +247,6 @@ class VuerTransformer:
         )
 
         # Compute joint angles
-        hand_angles = self._compute_hand_angles(
-            vuer_app,
-            head_matrix,
-            {"left": rel_left_wrist, "right": rel_right_wrist},
-        )
+        hand_angles = self._compute_hand_angles(vuer_app, head_matrix)
 
         return head_matrix, rel_left_wrist, rel_right_wrist, hand_angles
