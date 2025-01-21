@@ -102,7 +102,27 @@ class VuerTransformer:
         rel_matrix[:3, 3] += self.torso2head[:3, 3]  # Adjust origin to head
         return rel_matrix
 
-    def _compute_hand_angles(self, vuer_app, head_matrix, rel_wrist_matrices):
+    def _transform_matrix(self, matrix, head_matrix, rotation):
+        """
+        Transforms a given matrix into the robot's coordinate system by applying
+        head-relative translation and a specified rotation.
+
+        Args:
+            matrix: A 4x4 transformation matrix to be transformed.
+            head_matrix: A 4x4 transformation matrix representing the head's position
+                        and orientation in the VR coordinate system.
+            rotation: A 4x4 rotation matrix to apply to the transformed matrix.
+
+        Returns:
+            A 4x4 transformation matrix in the robot's coordinate system.
+        """
+        mat_rel = (
+            self._translate_to_robot(self._transform_basis(matrix), head_matrix)
+            @ rotation
+        )
+        return mat_rel
+
+    def _compute_hand_angles(self, vuer_app, head_matrix):
         """
         Computes the joint angles for each finger.
         """
@@ -193,19 +213,15 @@ class VuerTransformer:
             self.vuer_right_wrist_mat, vuer_app.hand_right[JOINT_IDS["wrist"]].copy()
         )
 
-        # Transform and translate
+        # Transform
         head_matrix = self._transform_basis(self.vuer_head_mat)
 
-        rel_left_wrist = self._translate_to_robot(
-            self._transform_basis(self.vuer_left_wrist_mat), head_matrix
+        rel_left_wrist = self._transform_matrix(
+            self.vuer_left_wrist_mat, head_matrix, self.hand2gripper_left
         )
-        rel_right_wrist = self._translate_to_robot(
-            self._transform_basis(self.vuer_right_wrist_mat), head_matrix
+        rel_right_wrist = self._transform_matrix(
+            self.vuer_right_wrist_mat, head_matrix, self.hand2gripper_right
         )
-
-        # Apply rotation adjustments
-        rel_left_wrist = rel_left_wrist @ self.hand2gripper_left
-        rel_right_wrist = rel_right_wrist @ self.hand2gripper_right
 
         # Compute joint angles
         hand_angles = self._compute_hand_angles(
