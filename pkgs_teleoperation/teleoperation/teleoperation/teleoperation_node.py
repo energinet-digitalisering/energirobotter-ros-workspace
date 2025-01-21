@@ -6,6 +6,7 @@ from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped, Pose, Point, Quaternion
 from sensor_msgs.msg import CompressedImage
 from std_msgs.msg import Header
+from sensor_msgs.msg import JointState
 
 from teleoperation.src.vuer_app import VuerApp
 from teleoperation.src.vuer_transformer import VuerTransformer
@@ -42,6 +43,10 @@ class TeleoperationNode(Node):
 
         self.pose_right_pub = self.create_publisher(
             PoseStamped, "/link_right_hand/target_pose", 1
+        )
+
+        self.joint_state_hands_pub = self.create_publisher(
+            JointState, "/joint_states_hands", 1
         )
 
         # Timers
@@ -86,6 +91,17 @@ class TeleoperationNode(Node):
 
         return msg
 
+    def dict_to_joint_state_msg(self, dict):
+        names = list(dict.keys())
+        positions = list(dict.values())
+
+        joint_state_msg = JointState()
+        joint_state_msg.header.stamp = self.get_clock().now().to_msg()
+        joint_state_msg.name = names
+        joint_state_msg.position = positions
+
+        return joint_state_msg
+
     def callback_timer(self):
         self.vuer_app.update_frames(self.image_left, self.image_right)
 
@@ -104,6 +120,9 @@ class TeleoperationNode(Node):
 
         msg_pose_right = self.tf_matrix_to_msg(right_wrist_mat)
         self.pose_right_pub.publish(msg_pose_right)
+
+        joint_state_msg = self.dict_to_joint_state_msg(hand_angles)
+        self.joint_state_hands_pub.publish(joint_state_msg)
 
 
 def main(args=None):
