@@ -1,3 +1,7 @@
+"""
+Node to test servos connected to a PCA9685.
+"""
+
 from adafruit_pca9685 import PCA9685
 import board
 
@@ -14,7 +18,7 @@ class ServoDriverPCA9685(Node):
 
         # Subscriptions
         self.subscription = self.create_subscription(
-            ServoCommand, "pca9685/servo_command", self.callback_servo_command, 10
+            ServoCommand, "/pca9685/servo_command", self.callback_servo_command, 10
         )
 
         # Port Setup
