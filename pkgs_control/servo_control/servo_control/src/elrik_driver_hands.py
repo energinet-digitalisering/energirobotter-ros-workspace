@@ -28,6 +28,9 @@ class ElrikDriverHands(ElrikDriverServos):
             return None
 
     def send_command(self, servo: ServoControl, pwm):
+        # self.logger.info(f"Servo: {servo.servo_id}. Stopping pwm of: {pwm}")
+        # return
+
         self.driver_object.channels[servo.servo_id].duty_cycle = pwm
 
     def read_feedback(self, servo: ServoControl):
