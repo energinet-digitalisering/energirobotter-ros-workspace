@@ -10,7 +10,7 @@
         "angle_software_min": 50,
         "angle_software_max": 90,
         "angle_speed_max": 100,
-        "default_position": 550,
+        "default_position": 50,
         "feedback_enabled": false,
         "gain_P": 1.0,
         "gain_I": 0.0,
