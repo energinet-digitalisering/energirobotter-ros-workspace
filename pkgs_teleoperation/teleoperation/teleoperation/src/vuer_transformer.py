@@ -133,6 +133,49 @@ class VuerTransformer:
         )
         return mat_rel
 
+    def _rotation_difference_axis(self, T1, T2, axis="x"):
+        """
+        Computes the rotation difference around a specified axis of T1.
+
+        Args:
+            T1: A 4x4 transformation matrix (reference frame).
+            T2: A 4x4 transformation matrix (rotated frame).
+            axis: A string specifying the axis ("x", "y", or "z").
+
+        Returns:
+            The angle of rotation around the specified axis of T1 in radians.
+        """
+        axis_dict = {"x": 0, "y": 1, "z": 2}
+        if axis not in axis_dict:
+            raise ValueError("Invalid axis. Choose 'x', 'y', or 'z'.")
+        axis_index = axis_dict[axis]
+
+        # Extract rotation matrices
+        R1 = T1[:3, :3]
+        R2 = T2[:3, :3]
+
+        # Compute relative rotation
+        R_relative = R2 @ R1.T
+
+        # Get the corresponding axis vector from T1
+        axis_vector = R1[:, axis_index]
+
+        # Transform the axis vector using the relative rotation
+        transformed_axis = R_relative @ axis_vector
+
+        # Compute the angle (in radians)
+        cos_theta = np.dot(axis_vector, transformed_axis) / (
+            np.linalg.norm(axis_vector) * np.linalg.norm(transformed_axis)
+        )
+        theta = np.arccos(np.clip(cos_theta, -1, 1))
+
+        # Determine sign using the cross product
+        cross = np.cross(axis_vector, transformed_axis)
+        if cross[axis_index] < 0:  # Adjust sign based on the selected axis
+            theta = -theta
+
+        return theta  # In radians
+
     def _compute_hand_angles(self, vuer_app, head_matrix):
         """
         Computes the joint angles for each finger.
@@ -188,49 +231,6 @@ class VuerTransformer:
             hand_angles[f"hand_right_{joint_name}"] = angle_right
 
         return hand_angles
-
-    def _rotation_difference_axis(self, T1, T2, axis="x"):
-        """
-        Computes the rotation difference around a specified axis of T1.
-
-        Args:
-            T1: A 4x4 transformation matrix (reference frame).
-            T2: A 4x4 transformation matrix (rotated frame).
-            axis: A string specifying the axis ("x", "y", or "z").
-
-        Returns:
-            The angle of rotation around the specified axis of T1 in radians.
-        """
-        axis_dict = {"x": 0, "y": 1, "z": 2}
-        if axis not in axis_dict:
-            raise ValueError("Invalid axis. Choose 'x', 'y', or 'z'.")
-        axis_index = axis_dict[axis]
-
-        # Extract rotation matrices
-        R1 = T1[:3, :3]
-        R2 = T2[:3, :3]
-
-        # Compute relative rotation
-        R_relative = R2 @ R1.T
-
-        # Get the corresponding axis vector from T1
-        axis_vector = R1[:, axis_index]
-
-        # Transform the axis vector using the relative rotation
-        transformed_axis = R_relative @ axis_vector
-
-        # Compute the angle (in radians)
-        cos_theta = np.dot(axis_vector, transformed_axis) / (
-            np.linalg.norm(axis_vector) * np.linalg.norm(transformed_axis)
-        )
-        theta = np.arccos(np.clip(cos_theta, -1, 1))
-
-        # Determine sign using the cross product
-        cross = np.cross(axis_vector, transformed_axis)
-        if cross[axis_index] < 0:  # Adjust sign based on the selected axis
-            theta = -theta
-
-        return theta  # In radians
 
     def process(self, vuer_app):
         """
