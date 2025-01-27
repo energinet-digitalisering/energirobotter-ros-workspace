@@ -15,7 +15,7 @@ JOINT_IDS = {
 JOINT_ROT_AXIS = {
     "wrist": "",
     "thumb_x": "x",
-    "thumb": "x",
+    "thumb": "y",
     "index": "y",
     "middle": "y",
     "ring": "y",
