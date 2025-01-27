@@ -79,6 +79,11 @@ class ServoManagerNode(Node):
     def callback_joints_hands(self, msg):
         self.servo_commands_hands = dict(zip(msg.name, np.rad2deg(msg.position)))
 
+        for servo_name, servo in self.driver_hands.servos.items():
+            command = self.servo_commands_hands[servo_name]
+            angle_mapped = self.driver_hands.map_finger_to_servo(servo, command)
+            self.servo_commands_hands[servo_name] = angle_mapped
+
     def callback_timer_arms(self):
         self.driver_arms.update_feedback()
         self.driver_arms.command_servos(self.servo_commands_arms)
