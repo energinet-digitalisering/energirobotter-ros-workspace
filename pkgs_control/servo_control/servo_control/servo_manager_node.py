@@ -18,9 +18,18 @@ class ServoManagerNode(Node):
         super().__init__("servo_manager_node")
 
         # Parameters
-        self.declare_parameter("control_frequency", 0.5)
-        self.control_frequency = (
-            self.get_parameter("control_frequency").get_parameter_value().double_value
+        self.declare_parameter("control_frequency_arms", 0.5)
+        self.control_frequency_arms = (
+            self.get_parameter("control_frequency_arms")
+            .get_parameter_value()
+            .double_value
+        )
+
+        self.declare_parameter("control_frequency_hands", 0.01)
+        self.control_frequency_hands = (
+            self.get_parameter("control_frequency_hands")
+            .get_parameter_value()
+            .double_value
         )
 
         # Subscriptions
@@ -34,7 +43,13 @@ class ServoManagerNode(Node):
         # Publishers
 
         # Timers
-        self.timer = self.create_timer(self.control_frequency, self.callback_timer)
+        self.timer_arms = self.create_timer(
+            self.control_frequency_arms, self.callback_timer_arms
+        )
+
+        self.timer_hands = self.create_timer(
+            self.control_frequency_hands, self.callback_timer_hands
+        )
 
         # Node variables
         config_folder_path = "install/elrik_bringup/share/elrik_bringup/config/servos"
@@ -44,7 +59,7 @@ class ServoManagerNode(Node):
             f"{config_folder_path}/servo_arm_left_params.json",
             f"{config_folder_path}/servo_arm_right_params.json",
         ]
-        self.driver_arms = ElrikDriverArms(json_files_arms, self.control_frequency)
+        self.driver_arms = ElrikDriverArms(json_files_arms, self.control_frequency_arms)
         self.servo_commands_arms = self.driver_arms.get_default_servo_commands()
 
         # Configure hands servo manager
@@ -53,7 +68,9 @@ class ServoManagerNode(Node):
             f"{config_folder_path}/servo_hand_right_params.json",
             # f"{config_folder_path}/servo_hand_right_params_test.json",
         ]
-        self.driver_hands = ElrikDriverHands(json_files_hands, self.control_frequency)
+        self.driver_hands = ElrikDriverHands(
+            json_files_hands, self.control_frequency_hands
+        )
         self.servo_commands_hands = self.driver_hands.get_default_servo_commands()
 
     def callback_joints_arms(self, msg):
@@ -62,10 +79,11 @@ class ServoManagerNode(Node):
     def callback_joints_hands(self, msg):
         self.servo_commands_hands = dict(zip(msg.name, np.rad2deg(msg.position)))
 
-    def callback_timer(self):
+    def callback_timer_arms(self):
         self.driver_arms.update_feedback()
         self.driver_arms.command_servos(self.servo_commands_arms)
 
+    def callback_timer_hands(self):
         self.driver_hands.update_feedback()
         self.driver_hands.command_servos(self.servo_commands_hands)
 
