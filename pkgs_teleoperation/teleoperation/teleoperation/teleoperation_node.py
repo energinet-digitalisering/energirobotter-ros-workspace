@@ -121,8 +121,8 @@ class TeleoperationNode(Node):
         msg_pose_right = self.tf_matrix_to_msg(right_wrist_mat)
         self.pose_right_pub.publish(msg_pose_right)
 
-        joint_state_msg = self.dict_to_joint_state_msg(hand_angles)
-        self.joint_state_hands_pub.publish(joint_state_msg)
+        msg_angles_hands = self.dict_to_joint_state_msg(hand_angles)
+        self.joint_state_hands_pub.publish(msg_angles_hands)
 
 
 def main(args=None):
