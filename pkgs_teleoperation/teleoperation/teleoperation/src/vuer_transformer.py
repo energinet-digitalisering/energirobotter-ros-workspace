@@ -179,6 +179,7 @@ class VuerTransformer:
     def _compute_hand_angles(self, vuer_app, head_matrix):
         """
         Computes the joint angles for each finger.
+        Tracking joint index lookup: https://docs.vuer.ai/en/latest/examples/19_hand_tracking.html
         """
         hand_angles = {}
         for joint_name, idx in self.hand_joints.items():
@@ -189,8 +190,8 @@ class VuerTransformer:
                 head_matrix,
                 self.hand2gripper_left,
             )
-            rel_proximal_left = self._transform_matrix(
-                vuer_app.hand_left[idx].copy(),
+            rel_intermediate_left = self._transform_matrix(
+                vuer_app.hand_left[idx + 1].copy(),
                 head_matrix,
                 self.hand2gripper_left,
             )
@@ -199,8 +200,8 @@ class VuerTransformer:
                 head_matrix,
                 self.hand2gripper_right,
             )
-            rel_proximal_right = self._transform_matrix(
-                vuer_app.hand_right[idx].copy(),
+            rel_intermediate_right = self._transform_matrix(
+                vuer_app.hand_right[idx + 1].copy(),
                 head_matrix,
                 self.hand2gripper_right,
             )
@@ -208,12 +209,16 @@ class VuerTransformer:
             # Compute relative angle between metacarpal and proximal joint
             angle_left = np.rad2deg(
                 self._rotation_difference_axis(
-                    rel_metacarpal_left, rel_proximal_left, JOINT_ROT_AXIS[joint_name]
+                    rel_metacarpal_left,
+                    rel_intermediate_left,
+                    JOINT_ROT_AXIS[joint_name],
                 )
             )
             angle_right = np.rad2deg(
                 self._rotation_difference_axis(
-                    rel_metacarpal_right, rel_proximal_right, JOINT_ROT_AXIS[joint_name]
+                    rel_metacarpal_right,
+                    rel_intermediate_right,
+                    JOINT_ROT_AXIS[joint_name],
                 )
             )
 
