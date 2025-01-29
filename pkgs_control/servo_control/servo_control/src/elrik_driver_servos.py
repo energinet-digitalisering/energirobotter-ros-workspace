@@ -5,6 +5,7 @@ Base class for servo driver/managers of Elrik.
 from abc import ABC, abstractmethod
 import json
 import logging
+import numpy as np
 import threading
 from concurrent.futures import ThreadPoolExecutor
 
@@ -19,12 +20,13 @@ class ElrikDriverServos(ABC):
     Subclasses must implement abstract methods to handle specific driver functionality.
     """
 
-    def __init__(self, config_files, control_frequency):
+    def __init__(self, config_files, control_frequency, synchronise_speed=False):
 
         self.logger = logging.getLogger(self.__class__.__name__)
         logging.basicConfig(level=logging.INFO)
 
         self.control_frequency = control_frequency
+        self.synchronise_speed = synchronise_speed
         self.servos = {}
         self.coms_active = False
         self.lock = threading.Lock()  # For thread-safe communication
@@ -41,6 +43,8 @@ class ElrikDriverServos(ABC):
             self.coms_active = True
         else:
             self.coms_active = False
+
+        self.max_speed = 100
 
     def _add_servos(self, servo_config):
         """
@@ -111,9 +115,13 @@ class ElrikDriverServos(ABC):
         if not self.coms_active:
             return
 
+        speeds = self._compute_relative_speeds(command_dict)
+
         with ThreadPoolExecutor() as executor:
             futures = [
-                executor.submit(self._command_servo, name, command_dict[name])
+                executor.submit(
+                    self._command_servo, name, command_dict[name], speeds[name]
+                )
                 for name in self.servos.keys()
                 if name in command_dict
             ]
@@ -152,7 +160,46 @@ class ElrikDriverServos(ABC):
         """
         return {name: 0.0 for name in self.servos}
 
-    def _command_servo(self, name, command):
+    def _compute_relative_speeds(self, command_dict):
+        """
+        Computes relative speed values for servos based on their target positions.
+
+        The function calculates the maximum angular distance any servo needs to move
+        and scales each servo's speed proportionally to ensure synchronized movement.
+
+        Args:
+            command_dict (dict): A dictionary mapping servo names to target angles.
+
+        Returns:
+            dict: A dictionary mapping servo names to their computed speed values,
+                  scaled relative to the longest movement required.
+        """
+
+        if not self.synchronise_speed:
+            speeds = {name: None for name in self.servos.keys()}
+            return speeds
+
+        longest_distance = max(
+            abs(command_dict[name] + servo.default_position - servo.angle)
+            for name, servo in self.servos.items()
+        )
+
+        speeds = {
+            name: (
+                (
+                    self.max_speed
+                    * (command_dict[name] + servo.default_position - servo.angle)
+                    / longest_distance
+                )
+                if longest_distance
+                else 0
+            )
+            for name, servo in self.servos.items()
+        }
+
+        return speeds
+
+    def _command_servo(self, name, command, speed=None):
         """
         Send a command to a single servo.
 
@@ -167,7 +214,7 @@ class ElrikDriverServos(ABC):
         if not update_flag:
             return
 
-        angle_cmd, pwm_cmd = servo.reach_angle_direct(angle_target)
+        angle_cmd, pwm_cmd = servo.reach_angle_direct(angle_target, speed)
 
         if not self._validate_command(servo, pwm_cmd):
             return
