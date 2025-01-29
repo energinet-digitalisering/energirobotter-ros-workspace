@@ -79,7 +79,27 @@ class ServoControl:
 
         return kP + kI + kD
 
-    def compute_command(self, angle_cmd):
+    def limit_speed(self, speed, speed_max):
+
+        # Clamp values between desired min and max speed
+        speed = np.clip(
+            speed,
+            speed_max * (-1),
+            speed_max,
+        )
+
+        # Respect each servos individual speed limit
+        speed = np.clip(
+            speed,
+            self.angle_speed_max * (-1),
+            self.angle_speed_max,
+        )
+
+        return speed
+
+    def compute_command(self, angle, speed_max=None):
+
+        angle_cmd = angle
 
         # Clamp values between min and max angle
         angle_cmd = np.clip(
@@ -146,11 +166,7 @@ class ServoControl:
         # angle_speed_max *= self.gear_ratio  # Increase speeds at higher gear ratios
 
         # Clamp values between min and max speed
-        vel_control = np.clip(
-            vel_control,
-            angle_speed_max * (-1),
-            angle_speed_max,
-        )
+        vel_control = self.limit_speed(vel_control, angle_speed_max)
 
         # Apply control to angle position
         angle_cmd = self.angle
