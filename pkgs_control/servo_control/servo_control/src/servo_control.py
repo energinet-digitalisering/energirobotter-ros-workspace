@@ -137,7 +137,7 @@ class ServoControl:
 
         return int(angle_cmd_geared), int(pwm_cmd_geared)
 
-    def compute_control(self, t_d, error, angle_speed_desired=(-1)):
+    def compute_control(self, t_d, error, speed_max=None):
 
         # Compute PID control
         self.error_acc += error
@@ -154,13 +154,9 @@ class ServoControl:
         self.error_prev = error
 
         # Process desired speed
-        angle_speed_desired = (
-            self.angle_speed_max if angle_speed_desired == (-1) else angle_speed_desired
-        )
+        speed_max = self.angle_speed_max if speed_max == None else speed_max
         angle_speed_max = (
-            angle_speed_desired
-            if angle_speed_desired < self.angle_speed_max
-            else self.angle_speed_max
+            speed_max if speed_max < self.angle_speed_max else self.angle_speed_max
         )
 
         # angle_speed_max *= self.gear_ratio  # Increase speeds at higher gear ratios
@@ -206,11 +202,11 @@ class ServoControl:
         """Reach desired angle (deg)"""
         return self.compute_command(angle)
 
-    def reach_angle(self, t_d, angle, angle_speed_desired=(-1)):
+    def reach_angle(self, t_d, angle, speed=None):
         """Reach desired angle (deg)"""
         error = angle - self.angle
 
-        return self.compute_control(t_d, error, angle_speed_desired)
+        return self.compute_control(t_d, error, speed)
 
     def reset_position(self, t_d):
         return self.reach_angle(t_d, self.angle_init)
