@@ -59,7 +59,9 @@ class ServoManagerNode(Node):
             f"{config_folder_path}/servo_arm_left_params.json",
             f"{config_folder_path}/servo_arm_right_params.json",
         ]
-        self.driver_arms = ElrikDriverArms(json_files_arms, self.control_frequency_arms)
+        self.driver_arms = ElrikDriverArms(
+            json_files_arms, self.control_frequency_arms, synchronise_speed=True
+        )
         self.servo_commands_arms = self.driver_arms.get_default_servo_commands()
 
         # Configure hands servo manager
@@ -69,7 +71,7 @@ class ServoManagerNode(Node):
             # f"{config_folder_path}/servo_hand_right_params_test.json",
         ]
         self.driver_hands = ElrikDriverHands(
-            json_files_hands, self.control_frequency_hands
+            json_files_hands, self.control_frequency_hands, synchronise_speed=False
         )
         self.servo_commands_hands = self.driver_hands.get_default_servo_commands()
 
