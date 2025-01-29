@@ -207,6 +207,9 @@ class ElrikDriverServos(ABC):
             name (str): Name of the servo.
             command (float): Desired command value (e.g., target angle).
         """
+        if np.isnan(command):
+            return
+
         servo = self.servos[name]
         angle_target = command + servo.default_position
         update_flag = int(servo.angle) != int(angle_target)
