@@ -101,6 +101,11 @@ class ServoControl:
 
         angle_cmd = angle
 
+        if speed_max:
+            speed = angle - self.angle
+            speed = self.limit_speed(speed, speed_max)
+            angle_cmd = self.angle + speed
+
         # Clamp values between min and max angle
         angle_cmd = np.clip(
             angle_cmd,
@@ -159,8 +164,6 @@ class ServoControl:
             speed_max if speed_max < self.angle_speed_max else self.angle_speed_max
         )
 
-        # angle_speed_max *= self.gear_ratio  # Increase speeds at higher gear ratios
-
         # Clamp values between min and max speed
         vel_control = self.limit_speed(vel_control, angle_speed_max)
 
@@ -198,9 +201,9 @@ class ServoControl:
         geared = self.zero_position + offset * gear_ratio
         return geared
 
-    def reach_angle_direct(self, angle):
+    def reach_angle_direct(self, angle, speed=None):
         """Reach desired angle (deg)"""
-        return self.compute_command(angle)
+        return self.compute_command(angle, speed)
 
     def reach_angle(self, t_d, angle, speed=None):
         """Reach desired angle (deg)"""
