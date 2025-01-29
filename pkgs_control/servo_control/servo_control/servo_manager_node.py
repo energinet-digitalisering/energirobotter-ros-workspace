@@ -18,7 +18,7 @@ class ServoManagerNode(Node):
         super().__init__("servo_manager_node")
 
         # Parameters
-        self.declare_parameter("control_frequency_arms", 0.5)
+        self.declare_parameter("control_frequency_arms", 0.1)
         self.control_frequency_arms = (
             self.get_parameter("control_frequency_arms")
             .get_parameter_value()

@@ -47,7 +47,7 @@ class ElrikKdlKinematics(Node):
         self.chain, self.fk_solver, self.ik_solver = {}, {}, {}
         self.target_sub = {}
 
-        self.timer = self.create_timer(0.5, self.callback_timer_publish_joint_states)
+        self.timer = self.create_timer(0.1, self.callback_timer_publish_joint_states)
 
         self.joint_state_pub = self.create_publisher(JointState, "/joint_states", 10)
 
