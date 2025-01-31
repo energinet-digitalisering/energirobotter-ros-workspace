@@ -212,10 +212,6 @@ class ElrikDriverServos(ABC):
 
         servo = self.servos[name]
         angle_target = command + servo.default_position
-        update_flag = int(servo.angle) != int(angle_target)
-
-        if not update_flag:
-            return
 
         angle_cmd, pwm_cmd = servo.reach_angle_direct(angle_target, speed)
 
