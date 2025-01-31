@@ -176,14 +176,12 @@ class ServoControl:
         if self.dir < 0:
             angle_cmd = interval_map(
                 angle_cmd,
-                self.angle_min,
-                self.angle_max,
-                self.angle_max,
-                self.angle_min,
+                self.angle_software_min,
+                self.angle_software_max,
+                self.angle_software_max,
+                self.angle_software_min,
             )
-            pwm_cmd = interval_map(
-                pwm_cmd, self.pwm_min, self.pwm_max, self.pwm_max, self.pwm_min
-            )
+            pwm_cmd = self.angle_2_pwm(angle_cmd)
 
         # Apply gearing ratio
         angle_cmd_geared = self.gearing_out(angle_cmd, self.gear_ratio)

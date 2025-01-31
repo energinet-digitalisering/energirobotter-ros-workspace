@@ -256,10 +256,10 @@ class ElrikDriverServos(ABC):
         if servo.dir < 0:
             angle = interval_map(
                 angle,
-                servo.angle_min,
-                servo.angle_max,
-                servo.angle_max,
-                servo.angle_min,
+                servo.angle_software_min,
+                servo.angle_software_max,
+                servo.angle_software_max,
+                servo.angle_software_min,
             )
 
         if angle < servo.angle_software_min or angle > servo.angle_software_max:
