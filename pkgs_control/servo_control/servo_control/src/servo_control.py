@@ -189,6 +189,36 @@ class ServoControl:
 
         return int(angle_cmd_geared), int(pwm_cmd_geared)
 
+    def compute_control(self, t_d, error, speed_max=None):
+
+        # Compute PID control
+        self.error_acc += error
+        self.error_acc = np.clip(self.error_acc, -1000, 1000)  # Anti-windup
+
+        vel_control = self.controller_PID(
+            error,
+            self.error_acc,
+            self.error_prev,
+            self.gain_P,
+            self.gain_I,
+            self.gain_D,
+        )
+        self.error_prev = error
+
+        # Process desired speed
+        speed_max = self.angle_speed_max if speed_max == None else speed_max
+        angle_speed_max = (
+            speed_max if speed_max < self.angle_speed_max else self.angle_speed_max
+        )
+        # Clamp values between min and max speed
+        vel_control = self.limit_speed(vel_control, angle_speed_max)
+
+        # Apply control to angle position
+        angle_cmd = self.angle
+        angle_cmd += vel_control * t_d
+
+        return self.compute_command(angle_cmd)
+
     def angle_2_pwm(self, angle):
         """
         Converts an angle to a corresponding PWM value.
