@@ -24,6 +24,7 @@ setup(
             "servo_driver_pca9685 = servo_control.servo_driver_pca9685:main",
             "servo_driver_waveshare = servo_control.servo_driver_waveshare:main",
             "servo_manager_node = servo_control.servo_manager_node:main",
+            "servo_reset_node = servo_control.servo_reset_node:main",
         ],
     },
 )

@@ -189,7 +189,7 @@ class VuerApp:
                     to="bgChildren",
                 )
 
-            # 'jpeg' encoding should give you about 30fps with a 16ms wait in-between.
+            # 'jpeg' encoding should give about 30fps with a 16ms wait in-between.
             await sleep(0.016 * 2)
 
         self.logger.info("WebSocket closed, exiting image processing loop")
