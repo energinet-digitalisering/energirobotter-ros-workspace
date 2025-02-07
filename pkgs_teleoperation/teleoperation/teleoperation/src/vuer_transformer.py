@@ -206,10 +206,9 @@ class VuerTransformer:
                 )
             )
 
-            # Cap values between 0-90 degrees, and use absolute values
-            angle_left = abs(np.clip(angle_left, 0, 90))
-            angle_right = -angle_right  # Flip the sign for right-hand angles
-            angle_right = abs(np.clip(angle_right, 0, 90))
+            # Cap angles between 0-90 degrees
+            angle_left = np.clip(abs(angle_left), 0, 90)
+            angle_right = np.clip(abs(angle_right), 0, 90)
 
             # Convert to rad
             angle_left = np.deg2rad(angle_left)
