@@ -18,5 +18,6 @@ setup(
     license="Apache-2.0",
     tests_require=["pytest"],
     entry_points={
+        "console_scripts": [f"send_camera_node = {package_name}.send_camera_node:main"],
     },
 )
