@@ -19,7 +19,7 @@ setup(
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [
-            "teleoperation_node = teleoperation.teleoperation_node:main"
+            "teleoperation_vuer_node = teleoperation.teleoperation_vuer_node:main"
         ],
     },
 )

@@ -23,15 +23,15 @@ JOINT_ROT_AXIS = {
 }
 
 
-class VuerTransformer:
+class TrackingTransformer:
     def __init__(self):
         self.logger = logging.getLogger(self.__class__.__name__)
         logging.basicConfig(level=logging.INFO)
 
         # Initialize poses
-        self.vuer_head_mat = self._create_matrix(translation=(0, 1.5, 0))
-        self.vuer_left_wrist_mat = self._create_matrix(translation=(-0.3, 1, -0.2))
-        self.vuer_right_wrist_mat = self._create_matrix(translation=(0.3, 1, -0.2))
+        self.tracking_head_mat = self._create_matrix(translation=(0, 1.5, 0))
+        self.tracking_left_wrist_mat = self._create_matrix(translation=(-0.3, 1, -0.2))
+        self.tracking_right_wrist_mat = self._create_matrix(translation=(0.3, 1, -0.2))
 
         # # Transform constants
         self.hand2gripper_left = self._create_matrix(rotation=(0, -90, 180))
@@ -176,7 +176,7 @@ class VuerTransformer:
 
         return theta  # In radians
 
-    def _compute_hand_angles(self, vuer_app):
+    def _compute_hand_angles(self, tracking_hand_left, tracking_hand_right):
         """
         Computes the joint angles for each finger.
         Tracking joint index lookup: https://docs.vuer.ai/en/latest/examples/19_hand_tracking.html
@@ -185,10 +185,10 @@ class VuerTransformer:
         for joint_name, idx in self.hand_joints.items():
 
             # Retrieve tracking data for metacarpal and proximal finger joints
-            T_metacarpal_left = vuer_app.hand_left[idx - 1].copy()
-            T_intermediate_left = vuer_app.hand_left[idx + 1].copy()
-            T_metacarpal_right = vuer_app.hand_right[idx - 1].copy()
-            T_intermediate_right = vuer_app.hand_right[idx + 1].copy()
+            T_metacarpal_left = tracking_hand_left[idx - 1].copy()
+            T_intermediate_left = tracking_hand_left[idx + 1].copy()
+            T_metacarpal_right = tracking_hand_right[idx - 1].copy()
+            T_intermediate_right = tracking_hand_right[idx + 1].copy()
 
             # Compute relative angle between metacarpal and proximal joint
             angle_left = np.rad2deg(
@@ -220,32 +220,33 @@ class VuerTransformer:
 
         return hand_angles
 
-    def process(self, vuer_app):
+    def process(self, tracking_head_matrix, tracking_hand_left, tracking_hand_right):
         """
         Processes the matrices and computes the transformations and joint angles.
         """
         # Update matrices
-        self.vuer_head_mat = self._update_matrix(
-            self.vuer_head_mat, vuer_app.head_matrix.copy()
+        self.tracking_head_mat = self._update_matrix(
+            self.tracking_head_mat, tracking_head_matrix.copy()
         )
-        self.vuer_left_wrist_mat = self._update_matrix(
-            self.vuer_left_wrist_mat, vuer_app.hand_left[JOINT_IDS["wrist"]].copy()
+        self.tracking_left_wrist_mat = self._update_matrix(
+            self.tracking_left_wrist_mat, tracking_hand_left[JOINT_IDS["wrist"]].copy()
         )
-        self.vuer_right_wrist_mat = self._update_matrix(
-            self.vuer_right_wrist_mat, vuer_app.hand_right[JOINT_IDS["wrist"]].copy()
+        self.tracking_right_wrist_mat = self._update_matrix(
+            self.tracking_right_wrist_mat,
+            tracking_hand_right[JOINT_IDS["wrist"]].copy(),
         )
 
         # Transform
-        head_matrix = self._transform_basis(self.vuer_head_mat)
+        head_matrix = self._transform_basis(self.tracking_head_mat)
 
         rel_left_wrist = self._transform_matrix(
-            self.vuer_left_wrist_mat, head_matrix, self.hand2gripper_left
+            self.tracking_left_wrist_mat, head_matrix, self.hand2gripper_left
         )
         rel_right_wrist = self._transform_matrix(
-            self.vuer_right_wrist_mat, head_matrix, self.hand2gripper_right
+            self.tracking_right_wrist_mat, head_matrix, self.hand2gripper_right
         )
 
         # Compute joint angles
-        hand_angles = self._compute_hand_angles(vuer_app)
+        hand_angles = self._compute_hand_angles(tracking_hand_left, tracking_hand_right)
 
         return head_matrix, rel_left_wrist, rel_right_wrist, hand_angles
