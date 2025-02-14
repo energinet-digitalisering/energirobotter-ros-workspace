@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class VuerCollisionAvoidance:
+class TrackingCollisionAvoidance:
     def __init__(self, safety_threshold=0.3):
 
         self.safety_threshold = safety_threshold
@@ -20,11 +20,11 @@ class VuerCollisionAvoidance:
         else:
             return mat
 
-    def process(self, vuer_left_mat, vuer_right_mat):
+    def process(self, tracked_left_mat, tracked_right_mat):
 
         # Check valid matrix
-        left_mat = self.mat_update(self.left_mat_prev, vuer_left_mat.copy())
-        right_mat = self.mat_update(self.right_mat_prev, vuer_right_mat.copy())
+        left_mat = self.mat_update(self.left_mat_prev, tracked_left_mat.copy())
+        right_mat = self.mat_update(self.right_mat_prev, tracked_right_mat.copy())
 
         left_pos = left_mat[0:3, 3]
         right_pos = right_mat[0:3, 3]
