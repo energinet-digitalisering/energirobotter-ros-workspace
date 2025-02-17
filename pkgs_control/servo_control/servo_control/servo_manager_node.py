@@ -68,7 +68,7 @@ class ServoManagerNode(Node):
         json_files_hands = [
             # f"{config_folder_path}/servo_hand_left_params.json",
             f"{config_folder_path}/servo_hand_right_params.json",
-            # f"{config_folder_path}/servo_hand_right_params_test.json",
+            # f"{config_folder_path}/servo_test.json",
         ]
         self.driver_hands = ElrikDriverHands(
             json_files_hands, self.control_frequency_hands, synchronise_speed=False
