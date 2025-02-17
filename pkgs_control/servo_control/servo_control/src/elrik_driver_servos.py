@@ -44,7 +44,9 @@ class ElrikDriverServos(ABC):
         else:
             self.coms_active = False
 
-        self.max_speed = 100
+        self.speed_multplier = 50
+        self.speed_min = 200.0
+        self.threshold_min = 10
 
     def _add_servos(self, servo_config):
         """
@@ -185,28 +187,31 @@ class ElrikDriverServos(ABC):
         """
 
         if not self.synchronise_speed:
-            speeds = {name: None for name in self.servos.keys()}
-            return speeds
+            speeds_allowed = {name: None for name in self.servos.keys()}
+            return speeds_allowed
 
         longest_distance = max(
             abs(command_dict[name] + servo.default_position - servo.angle)
             for name, servo in self.servos.items()
         )
 
-        speeds = {
-            name: (
-                (
-                    self.max_speed
-                    * (command_dict[name] + servo.default_position - servo.angle)
-                    / longest_distance
-                )
-                if longest_distance
-                else 0
-            )
-            for name, servo in self.servos.items()
-        }
+        if not longest_distance or longest_distance < self.threshold_min:
+            speeds_allowed = {name: self.speed_min for name in self.servos.keys()}
+            return speeds_allowed
 
-        return speeds
+        # Compute allowed speed based on distance to travel
+        speeds_allowed = {}
+        for name, servo in self.servos.items():
+            distance = abs(command_dict[name] + servo.default_position - servo.angle)
+            relative = distance / longest_distance
+            speed_allowed = distance * relative * self.speed_multplier
+
+            # Always allow a minimum speed
+            speed_allowed = max(speed_allowed, self.speed_min)
+
+            speeds_allowed[name] = speed_allowed
+
+        return speeds_allowed
 
     def _command_servo(self, name, command, speed=None):
         """
