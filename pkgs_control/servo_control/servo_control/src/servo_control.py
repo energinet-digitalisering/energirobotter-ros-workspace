@@ -167,9 +167,6 @@ class ServoControl:
             self.time_prev = time.time()
 
             speed = self.limit_speed(angle - self.angle, speed_max)
-
-            speed = speed if speed > 0.1 else 0.0
-
             angle_cmd = self.angle + speed * t_d
 
         angle_cmd = np.clip(angle_cmd, self.angle_software_min, self.angle_software_max)
