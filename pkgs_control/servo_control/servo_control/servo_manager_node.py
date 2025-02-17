@@ -42,6 +42,10 @@ class ServoManagerNode(Node):
 
         # Publishers
 
+        # DEBUG
+        self.pub_speeds = self.create_publisher(JointState, "/log_speeds", 10)
+        # DEBUG END
+
         # Timers
         self.timer_arms = self.create_timer(
             self.control_frequency_arms, self.callback_timer_arms
@@ -57,7 +61,7 @@ class ServoManagerNode(Node):
         # Configure arm servo manager
         json_files_arms = [
             f"{config_folder_path}/servo_arm_left_params.json",
-            f"{config_folder_path}/servo_arm_right_params.json",
+            # f"{config_folder_path}/servo_arm_right_params.json",
         ]
         self.driver_arms = ElrikDriverArms(
             json_files_arms, self.control_frequency_arms, synchronise_speed=True
@@ -89,6 +93,19 @@ class ServoManagerNode(Node):
     def callback_timer_arms(self):
         self.driver_arms.update_feedback()
         self.driver_arms.command_servos(self.servo_commands_arms)
+
+        # DEBUG
+        positions = self.driver_arms.get_servo_angles()
+        speeds = self.driver_arms._compute_relative_speeds(self.servo_commands_arms)
+
+        msg = JointState()
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.name = list(speeds.keys())
+        msg.position = list(positions.values())
+        msg.velocity = list(speeds.values())
+
+        self.pub_speeds.publish(msg)
+        # DEBUG END
 
     def callback_timer_hands(self):
         self.driver_hands.update_feedback()
