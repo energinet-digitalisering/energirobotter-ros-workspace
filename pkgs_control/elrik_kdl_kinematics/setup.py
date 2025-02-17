@@ -20,6 +20,7 @@ setup(
     entry_points={
         "console_scripts": [
             "elrik_kdl_kinematics_node = elrik_kdl_kinematics.elrik_kdl_kinematics_node:main",
+            "joint_state_plotter = elrik_kdl_kinematics.joint_state_plotter:main",
         ],
     },
 )
