@@ -16,6 +16,12 @@ class TeleoperationNode(Node):
         super().__init__("teleoperation_node")
 
         # Parameters
+        self.declare_parameter("ip_target", "*")
+        ip_target = self.get_parameter("ip_target").get_parameter_value().string_value
+
+        self.declare_parameter("socket", "*")
+        socket = self.get_parameter("socket").get_parameter_value().string_value
+
         self.declare_parameter("fps", 30)
         self.fps = self.get_parameter("fps").get_parameter_value().integer_value
 
