@@ -1,6 +1,7 @@
 import zmq
 import cv2
 from cv_bridge import CvBridge
+import struct
 
 import rclpy
 from rclpy.node import Node
@@ -47,10 +48,17 @@ class SendCameraNode(Node):
             image = self.cv_bridge.imgmsg_to_cv2(msg, desired_encoding="rgb8")
 
         # Convert to JPEG to reduce data size
-        _, buffer = cv2.imencode(".jpg", image, [cv2.IMWRITE_JPEG_QUALITY, 80])
+        # _, buffer = cv2.imencode(".jpg", image, [cv2.IMWRITE_JPEG_QUALITY, 80])
 
         # Send the image via ZeroMQ
-        self.socket.send(buffer.tobytes())
+        # self.socket.send(buffer.tobytes())
+
+        frame = cv2.resize(image, (640, 360))  # Ensure correct size
+        data = frame.tobytes()
+        size = len(data)
+
+        # Send header (image size) followed by the image data
+        self.socket.send(struct.pack("I", size) + data)
 
 
 def main(args=None):
