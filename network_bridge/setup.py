@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = "teleoperation"
+package_name = "network_bridge"
 
 setup(
     name=package_name,
@@ -14,12 +14,10 @@ setup(
     zip_safe=True,
     maintainer="Nicoline",
     maintainer_email="xnlth@energinet.dk",
-    description="Teleoperation capabilities for the robot Elrik, with Vuer.",
-    license="Energinet",
+    description="ROS alternative for network communication, to send and recieve data from Windows computers.",
+    license="Apache-2.0",
     tests_require=["pytest"],
     entry_points={
-        "console_scripts": [
-            "teleoperation_vuer_node = teleoperation.teleoperation_vuer_node:main"
-        ],
+        "console_scripts": [f"send_camera_node = {package_name}.send_camera_node:main"],
     },
 )

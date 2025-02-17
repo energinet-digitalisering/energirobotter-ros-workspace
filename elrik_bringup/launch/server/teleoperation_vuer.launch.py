@@ -32,9 +32,9 @@ def launch_setup(context, *args, **kwargs):
         launch_arguments={"rviz": rviz}.items(),
     )
 
-    teleoperation_node = Node(
+    teleoperation_vuer_node = Node(
         package="teleoperation",
-        executable="teleoperation_node",
+        executable="teleoperation_vuer_node",
         output="screen",
         remappings=[
             ("/image_left", image_topic_left),
@@ -47,7 +47,7 @@ def launch_setup(context, *args, **kwargs):
 
     return [
         ik_control_launch,
-        teleoperation_node,
+        teleoperation_vuer_node,
     ]
 
 
