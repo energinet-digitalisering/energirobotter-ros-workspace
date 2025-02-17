@@ -160,6 +160,15 @@ class ElrikDriverServos(ABC):
         """
         return {name: 0.0 for name in self.servos}
 
+    def get_servo_angles(self):
+        """
+        Generate a dictionary of current angles for all servos.
+
+        Returns:
+            dict: A dictionary mapping servo names to current angles.
+        """
+        return {name: float(self.servos[name].angle) for name in self.servos}
+
     def _compute_relative_speeds(self, command_dict):
         """
         Computes relative speed values for servos based on their target positions.
