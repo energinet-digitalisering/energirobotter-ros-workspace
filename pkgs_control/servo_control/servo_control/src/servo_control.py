@@ -160,8 +160,6 @@ class ServoControl:
         Returns:
             tuple: (angle_cmd, pwm_cmd) as integers.
         """
-        angle_cmd = angle
-
         if speed_max:
             t_d = time.time() - self.time_prev
             self.time_prev = time.time()
@@ -174,6 +172,10 @@ class ServoControl:
             # Ensure no overshoot
             if abs(angle_delta) < abs(speed) * t_d:
                 angle_cmd = angle_target
+
+        else:
+            angle_cmd = angle_target
+
         angle_cmd = np.clip(angle_cmd, self.angle_software_min, self.angle_software_max)
 
         if not self.feedback_enabled:
