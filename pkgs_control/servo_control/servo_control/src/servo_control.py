@@ -171,13 +171,11 @@ class ServoControl:
 
         angle_cmd = np.clip(angle_cmd, self.angle_software_min, self.angle_software_max)
 
-        pwm_cmd = self.angle_2_pwm(angle_cmd)
-
         if not self.feedback_enabled:
             self.angle = angle_cmd
-            self.pwm = pwm_cmd
+            self.pwm = self.angle_2_pwm(angle_cmd)
 
-        # Flip angle and pwm to send if direction is flipped
+        # Flip angle to send if direction is flipped
         if self.dir < 0:
             angle_cmd = interval_map(
                 angle_cmd,
@@ -186,7 +184,6 @@ class ServoControl:
                 self.angle_software_max,
                 self.angle_software_min,
             )
-            pwm_cmd = self.angle_2_pwm(angle_cmd)
 
         # Apply gearing ratio
         angle_cmd_geared = self.gearing_out(angle_cmd, self.gear_ratio)
