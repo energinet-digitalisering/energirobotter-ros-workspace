@@ -96,13 +96,11 @@ class ServoManagerNode(Node):
 
         # DEBUG
         positions = self.driver_arms.get_servo_angles()
-        speeds = self.driver_arms._compute_relative_speeds(self.servo_commands_arms)
 
         msg = JointState()
         msg.header.stamp = self.get_clock().now().to_msg()
-        msg.name = list(speeds.keys())
+        msg.name = list(positions.keys())
         msg.position = list(positions.values())
-        msg.velocity = list(speeds.values())
 
         self.pub_speeds.publish(msg)
         # DEBUG END
