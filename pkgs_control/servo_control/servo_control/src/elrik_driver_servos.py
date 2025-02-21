@@ -117,7 +117,17 @@ class ElrikDriverServos(ABC):
         if not self.coms_active:
             return
 
-        speeds = self._compute_relative_speeds(command_dict)
+        speeds = self._compute_relative_speeds(
+            command_dict,
+            ignored_keys=[
+                "joint_left_wrist_roll",
+                "joint_left_wrist_pitch",
+                "joint_left_forearm_yaw",
+                "joint_right_wrist_roll",
+                "joint_right_wrist_pitch",
+                "joint_right_forearm_yaw",
+            ],
+        )
 
         with ThreadPoolExecutor() as executor:
             futures = [
@@ -171,7 +181,7 @@ class ElrikDriverServos(ABC):
         """
         return {name: float(self.servos[name].angle) for name in self.servos}
 
-    def _compute_relative_speeds(self, command_dict):
+    def _compute_relative_speeds(self, command_dict, ignored_keys=[]):
         """
         Computes relative speed values for servos based on their target positions.
 
@@ -180,19 +190,31 @@ class ElrikDriverServos(ABC):
 
         Args:
             command_dict (dict): A dictionary mapping servo names to target angles.
+            ignored_keys (array): An array of servo names to exclude in speed computation.
 
         Returns:
             dict: A dictionary mapping servo names to their computed speed values,
                   scaled relative to the longest movement required.
         """
 
+        speeds_allowed = {name: None for name in self.servos.keys()}
+
         if not self.synchronise_speed:
-            speeds_allowed = {name: None for name in self.servos.keys()}
             return speeds_allowed
 
+        servos_affected = [
+            servo_name
+            for servo_name in self.servos.keys()
+            if servo_name not in ignored_keys
+        ]
+
         longest_distance = max(
-            abs(command_dict[name] + servo.default_position - servo.angle)
-            for name, servo in self.servos.items()
+            abs(
+                command_dict[name]
+                + self.servos[name].default_position
+                - self.servos[name].angle
+            )
+            for name in servos_affected
         )
 
         if not longest_distance or longest_distance < self.threshold_min:
@@ -200,8 +222,8 @@ class ElrikDriverServos(ABC):
             return speeds_allowed
 
         # Compute allowed speed based on distance to travel
-        speeds_allowed = {}
-        for name, servo in self.servos.items():
+        for name in servos_affected:
+            servo = self.servos[name]
             distance = abs(command_dict[name] + servo.default_position - servo.angle)
             relative = distance / longest_distance
             speed_allowed = distance * relative * self.speed_multplier
