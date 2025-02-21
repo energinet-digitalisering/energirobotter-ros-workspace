@@ -5,6 +5,7 @@ Base class for servo driver/managers of Elrik.
 from abc import ABC, abstractmethod
 import json
 import logging
+import numpy as np
 import threading
 from concurrent.futures import ThreadPoolExecutor
 
@@ -19,12 +20,13 @@ class ElrikDriverServos(ABC):
     Subclasses must implement abstract methods to handle specific driver functionality.
     """
 
-    def __init__(self, config_files, control_frequency):
+    def __init__(self, config_files, control_frequency, synchronise_speed=False):
 
         self.logger = logging.getLogger(self.__class__.__name__)
         logging.basicConfig(level=logging.INFO)
 
         self.control_frequency = control_frequency
+        self.synchronise_speed = synchronise_speed
         self.servos = {}
         self.coms_active = False
         self.lock = threading.Lock()  # For thread-safe communication
@@ -41,6 +43,10 @@ class ElrikDriverServos(ABC):
             self.coms_active = True
         else:
             self.coms_active = False
+
+        self.speed_multplier = 2
+        self.speed_min = 10.0
+        self.distance_threshold_min = 5
 
     def _add_servos(self, servo_config):
         """
@@ -111,9 +117,23 @@ class ElrikDriverServos(ABC):
         if not self.coms_active:
             return
 
+        speeds = self._compute_relative_speeds(
+            command_dict,
+            ignored_keys=[
+                "joint_left_wrist_roll",
+                "joint_left_wrist_pitch",
+                "joint_left_forearm_yaw",
+                "joint_right_wrist_roll",
+                "joint_right_wrist_pitch",
+                "joint_right_forearm_yaw",
+            ],
+        )
+
         with ThreadPoolExecutor() as executor:
             futures = [
-                executor.submit(self._command_servo, name, command_dict[name])
+                executor.submit(
+                    self._command_servo, name, command_dict[name], speeds[name]
+                )
                 for name in self.servos.keys()
                 if name in command_dict
             ]
@@ -152,7 +172,70 @@ class ElrikDriverServos(ABC):
         """
         return {name: 0.0 for name in self.servos}
 
-    def _command_servo(self, name, command):
+    def get_servo_angles(self):
+        """
+        Generate a dictionary of current angles for all servos.
+
+        Returns:
+            dict: A dictionary mapping servo names to current angles.
+        """
+        return {name: float(self.servos[name].angle) for name in self.servos}
+
+    def _compute_relative_speeds(self, command_dict, ignored_keys=[]):
+        """
+        Computes relative speed values for servos based on their target positions.
+
+        The function calculates the maximum angular distance any servo needs to move
+        and scales each servo's speed proportionally to ensure synchronized movement.
+
+        Args:
+            command_dict (dict): A dictionary mapping servo names to target angles.
+            ignored_keys (array): An array of servo names to exclude in speed computation.
+
+        Returns:
+            dict: A dictionary mapping servo names to their computed speed values,
+                  scaled relative to the longest movement required.
+        """
+
+        speeds_allowed = {name: None for name in self.servos.keys()}
+
+        if not self.synchronise_speed:
+            return speeds_allowed
+
+        servos_affected = [
+            servo_name
+            for servo_name in self.servos.keys()
+            if servo_name not in ignored_keys
+        ]
+
+        longest_distance = max(
+            abs(
+                command_dict[name]
+                + self.servos[name].default_position
+                - self.servos[name].angle
+            )
+            for name in servos_affected
+        )
+
+        if not longest_distance or longest_distance < self.distance_threshold_min:
+            speeds_allowed = {name: self.speed_min for name in self.servos.keys()}
+            return speeds_allowed
+
+        # Compute allowed speed based on distance to travel
+        for name in servos_affected:
+            servo = self.servos[name]
+            distance = abs(command_dict[name] + servo.default_position - servo.angle)
+            relative = distance / longest_distance
+            speed_allowed = distance * relative * self.speed_multplier
+
+            # Always allow a minimum speed
+            speed_allowed = max(speed_allowed, self.speed_min)
+
+            speeds_allowed[name] = speed_allowed
+
+        return speeds_allowed
+
+    def _command_servo(self, name, command, speed=None):
         """
         Send a command to a single servo.
 
@@ -160,14 +243,13 @@ class ElrikDriverServos(ABC):
             name (str): Name of the servo.
             command (float): Desired command value (e.g., target angle).
         """
-        servo = self.servos[name]
-        angle_target = command + servo.default_position
-        update_flag = int(servo.angle) != int(angle_target)
-
-        if not update_flag:
+        if np.isnan(command):
             return
 
-        angle_cmd, pwm_cmd = servo.reach_angle_direct(angle_target)
+        servo = self.servos[name]
+        angle_target = command + servo.default_position
+
+        angle_cmd, pwm_cmd = servo.reach_angle_direct(angle_target, speed)
 
         if not self._validate_command(servo, pwm_cmd):
             return

@@ -42,7 +42,7 @@ class ElrikDriverArms(ElrikDriverServos):
         # return
 
         scs_comm_result, scs_error = self.driver_object.WritePosEx(
-            servo.servo_id, pwm, SCS_MOVING_SPEED := 1000, SCS_MOVING_ACC := 255
+            servo.servo_id, pwm, SCS_MOVING_SPEED := 2000, SCS_MOVING_ACC := 64
         )
 
         # if scs_comm_result != scservo_def.COMM_SUCCESS:

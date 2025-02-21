@@ -18,7 +18,7 @@ class ServoManagerNode(Node):
         super().__init__("servo_manager_node")
 
         # Parameters
-        self.declare_parameter("control_frequency_arms", 0.5)
+        self.declare_parameter("control_frequency_arms", 0.1)
         self.control_frequency_arms = (
             self.get_parameter("control_frequency_arms")
             .get_parameter_value()
@@ -42,6 +42,10 @@ class ServoManagerNode(Node):
 
         # Publishers
 
+        # DEBUG
+        self.pub_speeds = self.create_publisher(JointState, "/log_speeds", 10)
+        # DEBUG END
+
         # Timers
         self.timer_arms = self.create_timer(
             self.control_frequency_arms, self.callback_timer_arms
@@ -57,9 +61,11 @@ class ServoManagerNode(Node):
         # Configure arm servo manager
         json_files_arms = [
             f"{config_folder_path}/servo_arm_left_params.json",
-            f"{config_folder_path}/servo_arm_right_params.json",
+            # f"{config_folder_path}/servo_arm_right_params.json",
         ]
-        self.driver_arms = ElrikDriverArms(json_files_arms, self.control_frequency_arms)
+        self.driver_arms = ElrikDriverArms(
+            json_files_arms, self.control_frequency_arms, synchronise_speed=True
+        )
         self.servo_commands_arms = self.driver_arms.get_default_servo_commands()
 
         # Configure hands servo manager
@@ -69,7 +75,7 @@ class ServoManagerNode(Node):
             # f"{config_folder_path}/servo_test.json",
         ]
         self.driver_hands = ElrikDriverHands(
-            json_files_hands, self.control_frequency_hands
+            json_files_hands, self.control_frequency_hands, synchronise_speed=False
         )
         self.servo_commands_hands = self.driver_hands.get_default_servo_commands()
 
@@ -87,6 +93,17 @@ class ServoManagerNode(Node):
     def callback_timer_arms(self):
         self.driver_arms.update_feedback()
         self.driver_arms.command_servos(self.servo_commands_arms)
+
+        # DEBUG
+        positions = self.driver_arms.get_servo_angles()
+
+        msg = JointState()
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.name = list(positions.keys())
+        msg.position = list(positions.values())
+
+        self.pub_speeds.publish(msg)
+        # DEBUG END
 
     def callback_timer_hands(self):
         self.driver_hands.update_feedback()
