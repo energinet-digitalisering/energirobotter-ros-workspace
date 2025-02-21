@@ -44,9 +44,9 @@ class ElrikDriverServos(ABC):
         else:
             self.coms_active = False
 
-        self.speed_multplier = 50
-        self.speed_min = 200.0
-        self.threshold_min = 10
+        self.speed_multplier = 2
+        self.speed_min = 10.0
+        self.distance_threshold_min = 5
 
     def _add_servos(self, servo_config):
         """
@@ -217,7 +217,7 @@ class ElrikDriverServos(ABC):
             for name in servos_affected
         )
 
-        if not longest_distance or longest_distance < self.threshold_min:
+        if not longest_distance or longest_distance < self.distance_threshold_min:
             speeds_allowed = {name: self.speed_min for name in self.servos.keys()}
             return speeds_allowed
 
