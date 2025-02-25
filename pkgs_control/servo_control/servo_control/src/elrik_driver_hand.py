@@ -10,7 +10,7 @@ from servo_control.src.elrik_driver_servos import ElrikDriverServos
 from servo_control.src.servo_control import ServoControl
 
 
-class ElrikDriverHands(ElrikDriverServos):
+class ElrikDriverHand(ElrikDriverServos):
 
     def setup_driver(self):
 
