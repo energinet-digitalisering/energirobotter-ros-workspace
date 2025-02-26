@@ -10,6 +10,7 @@ from sensor_msgs.msg import JointState
 
 from teleoperation.src.vuer_app import VuerApp
 from teleoperation.src.tracking_transformer import TrackingTransformer
+from teleoperation.src.tracking_filter import TrackingFilter
 from teleoperation.src.tracking_collision_avoidance import TrackingCollisionAvoidance
 
 
@@ -60,6 +61,8 @@ class TeleoperationVuerNode(Node):
 
         self.vuer_app = VuerApp(self.camera_enabled)
         self.tracking_transformer = TrackingTransformer()
+        self.tracking_filter_left = TrackingFilter()
+        self.tracking_filter_right = TrackingFilter()
         self.tracking_collision_avoidance = TrackingCollisionAvoidance()
 
     def callback_image_left(self, msg):
@@ -113,6 +116,10 @@ class TeleoperationVuerNode(Node):
                 self.vuer_app.hand_right,
             )
         )
+
+        # # Filter raw tracking
+        left_wrist_mat = self.tracking_filter_left.low_pass(left_wrist_mat)
+        right_wrist_mat = self.tracking_filter_right.low_pass(right_wrist_mat)
 
         # Avoid hand collision
         left_wrist_mat, right_wrist_mat = self.tracking_collision_avoidance.process(
