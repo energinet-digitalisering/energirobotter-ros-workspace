@@ -117,7 +117,7 @@ class TeleoperationVuerNode(Node):
             )
         )
 
-        # # Filter raw tracking
+        # Filter raw tracking
         left_wrist_mat = self.tracking_filter_left.low_pass(left_wrist_mat)
         right_wrist_mat = self.tracking_filter_right.low_pass(right_wrist_mat)
 
