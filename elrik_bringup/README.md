@@ -27,7 +27,7 @@ The `launch` folder is divided into two folders, for launch files that should be
    ```
 2. In another terminal, run teleoperation (and IK but no camera) with:
    ```
-   ros2 launch elrik_bringup teleoperation_vuer.launch.py camera_enabled:=false rviz:=false
+   ros2 launch elrik_bringup teleoperation_vuer.launch.py ik_enabled:=true camera_enabled:=false rviz:=false
    ```
 3. In the headset's browser, go to the adress: `127.0.0.1:8012`
 
