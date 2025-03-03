@@ -22,7 +22,7 @@ class VuerApp:
         self.camera_enabled = camera_enabled
 
         # Initialize the Vuer app
-        self.app = Vuer()
+        self.app = Vuer(free_port=True)
         self.app.add_handler("CAMERA_MOVE")(self.on_camera_move)
         self.app.add_handler("HAND_MOVE")(self.on_hand_move)
         self.app.spawn(start=False)(self.session_manager)
