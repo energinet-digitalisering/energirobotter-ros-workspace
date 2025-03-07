@@ -228,13 +228,13 @@ class TrackingTransformer:
 
         return hand_angles
 
-    def process(self, tracking_head_matrix, tracking_hand_left, tracking_hand_right):
+    def process(self, tracking_head, tracking_hand_left, tracking_hand_right):
         """
         Processes the matrices and computes the transformations and joint angles.
         """
         # Update matrices
         self.tracking_head_mat = self._update_matrix(
-            self.tracking_head_mat, tracking_head_matrix.copy()
+            self.tracking_head_mat, tracking_head.copy()
         )
         self.tracking_left_wrist_mat = self._update_matrix(
             self.tracking_left_wrist_mat, tracking_hand_left[JOINT_IDS["wrist"]].copy()
