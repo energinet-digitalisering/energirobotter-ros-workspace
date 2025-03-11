@@ -163,10 +163,18 @@ class TrackingTransformer:
         # Transform the axis vector using the relative rotation
         transformed_axis = R_relative @ axis_vector
 
+        # Compute norms
+        norm_axis = np.linalg.norm(axis_vector)
+        norm_transformed = np.linalg.norm(transformed_axis)
+
+        if norm_axis == 0 or norm_transformed == 0:
+            return 0.0  # or another meaningful fallback value
+
         # Compute the angle (in radians)
         cos_theta = np.dot(axis_vector, transformed_axis) / (
-            np.linalg.norm(axis_vector) * np.linalg.norm(transformed_axis)
+            norm_axis * norm_transformed
         )
+
         theta = np.arccos(np.clip(cos_theta, -1, 1))
 
         # Determine sign using the cross product
@@ -220,13 +228,13 @@ class TrackingTransformer:
 
         return hand_angles
 
-    def process(self, tracking_head_matrix, tracking_hand_left, tracking_hand_right):
+    def process(self, tracking_head, tracking_hand_left, tracking_hand_right):
         """
         Processes the matrices and computes the transformations and joint angles.
         """
         # Update matrices
         self.tracking_head_mat = self._update_matrix(
-            self.tracking_head_mat, tracking_head_matrix.copy()
+            self.tracking_head_mat, tracking_head.copy()
         )
         self.tracking_left_wrist_mat = self._update_matrix(
             self.tracking_left_wrist_mat, tracking_hand_left[JOINT_IDS["wrist"]].copy()
