@@ -19,7 +19,8 @@ setup(
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [
-            f"joint_state_plotter = {package_name}.joint_state_plotter:main"
+            f"joint_state_plotter = {package_name}.joint_state_plotter:main",
+            f"pose_plotter = {package_name}.pose_plotter:main",
         ],
     },
 )

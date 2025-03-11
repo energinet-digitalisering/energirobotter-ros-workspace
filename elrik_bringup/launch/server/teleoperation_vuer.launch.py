@@ -16,6 +16,7 @@ package_name = "elrik_bringup"
 def launch_setup(context, *args, **kwargs):
     rviz = LaunchConfiguration("rviz")
     camera_enabled = LaunchConfiguration("camera_enabled")
+    ik_enabled = LaunchConfiguration("ik_enabled")
 
     image_topic_left = "/zed/zed_node/left/image_rect_color/compressed"
     image_topic_right = "/zed/zed_node/right/image_rect_color/compressed"
@@ -29,6 +30,7 @@ def launch_setup(context, *args, **kwargs):
                 "/ik_control.launch.py",
             ]
         ),
+        condition=IfCondition(ik_enabled),
         launch_arguments={"rviz": rviz}.items(),
     )
 
@@ -56,7 +58,7 @@ def generate_launch_description():
         [
             DeclareLaunchArgument(
                 "rviz",
-                default_value="true",
+                default_value="false",
                 description="Start RViz2 automatically with this launch file.",
                 choices=["true", "false"],
             ),
@@ -64,6 +66,12 @@ def generate_launch_description():
                 "camera_enabled",
                 default_value="false",
                 description="Run teleoperation with or without camera.",
+                choices=["true", "false"],
+            ),
+            DeclareLaunchArgument(
+                "ik_enabled",
+                default_value="false",
+                description="Run teleoperation with or without publishing IK.",
                 choices=["true", "false"],
             ),
             OpaqueFunction(function=launch_setup),
