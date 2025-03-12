@@ -30,7 +30,11 @@ class ReceiveTrackingNode(Node):
 
     def timer_poll_zmq(self):
         """Polls ZeroMQ for new messages and publishes to ROS."""
+        self.get_logger().info(f"Polling {self.ip_target}:{self.port}...", once=True)
+
         if self.subscriber.poll(0):  # Check if data is available
+            self.get_logger().info(f"Message received", once=True)
+
             tracking_data = self.subscriber.recv_string()
             self.tracking_pub.publish(String(data=tracking_data))
 
