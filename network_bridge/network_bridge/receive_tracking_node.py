@@ -18,8 +18,7 @@ class ReceiveTrackingNode(Node):
         self.port = self.get_parameter("port").get_parameter_value().integer_value
 
         # ZeroMQ setup
-        self.context = zmq.Context()
-        self.subscriber = self.context.socket(zmq.SUB)
+        self.subscriber = zmq.Context().socket(zmq.SUB)
         self.subscriber.connect(f"tcp://{self.ip_target}:{self.port}")
         self.subscriber.setsockopt_string(zmq.SUBSCRIBE, "")
 
@@ -27,13 +26,13 @@ class ReceiveTrackingNode(Node):
         self.tracking_pub = self.create_publisher(String, "/tracking_data", 1)
 
         # Timer for polling ZeroMQ
-        self.timer = self.create_timer(1.0 / 60, self.poll_zmq)  # 60Hz polling
+        self.timer = self.create_timer(1.0 / 50.0, self.timer_poll_zmq)  # 50Hz polling
 
-    def poll_zmq(self):
+    def timer_poll_zmq(self):
         """Polls ZeroMQ for new messages and publishes to ROS."""
         if self.subscriber.poll(0):  # Check if data is available
-            message = self.subscriber.recv_string()
-            self.tracking_pub.publish(String(data=message))
+            tracking_data = self.subscriber.recv_string()
+            self.tracking_pub.publish(String(data=tracking_data))
 
 
 def main(args=None):
