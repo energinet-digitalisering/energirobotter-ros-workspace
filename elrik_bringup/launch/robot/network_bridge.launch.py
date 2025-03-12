@@ -45,9 +45,20 @@ def launch_setup(context, *args, **kwargs):
         ],
     )
 
+    receive_tracking_node = Node(
+        package="network_bridge",
+        executable="receive_tracking_node",
+        output="screen",
+        parameters=[
+            {"ip_target": "192.168.20.251"},
+            {"port": "5557"},
+        ],
+    )
+
     return [
         camera_launch,
         send_camera_node,
+        receive_tracking_node,
     ]
 
 
