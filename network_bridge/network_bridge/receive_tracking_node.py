@@ -10,15 +10,17 @@ class ReceiveTrackingNode(Node):
 
         # Parameters
         self.declare_parameter("ip_target", "127.0.0.1")
-        ip_target = self.get_parameter("ip_target").get_parameter_value().string_value
+        self.ip_target = (
+            self.get_parameter("ip_target").get_parameter_value().string_value
+        )
 
-        self.declare_parameter("socket", "5555")
-        socket = self.get_parameter("socket").get_parameter_value().string_value
+        self.declare_parameter("port", 5557)
+        self.port = self.get_parameter("port").get_parameter_value().integer_value
 
         # ZeroMQ setup
         self.context = zmq.Context()
         self.subscriber = self.context.socket(zmq.SUB)
-        self.subscriber.connect(f"tcp://{ip_target}:{socket}")
+        self.subscriber.connect(f"tcp://{self.ip_target}:{self.port}")
         self.subscriber.setsockopt_string(zmq.SUBSCRIBE, "")
 
         # ROS Publisher
