@@ -26,7 +26,7 @@ class ServoManagerNode(Node):
             .double_value
         )
 
-        self.declare_parameter("control_frequency_hands", 0.01)
+        self.declare_parameter("control_frequency_hands", 1.0 / 30.0)
         self.control_frequency_hands = (
             self.get_parameter("control_frequency_hands")
             .get_parameter_value()
