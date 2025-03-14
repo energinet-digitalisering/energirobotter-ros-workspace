@@ -1,5 +1,5 @@
 """
-Servo driver/manager of Elrik fingers, which are servos controlled by a PCA9685. 
+Servo driver/manager of Elrik fingers, which are servos controlled by a PCA9685.
 """
 
 from adafruit_pca9685 import PCA9685
@@ -31,8 +31,13 @@ class ElrikDriverHand(ElrikDriverServos):
     @staticmethod
     def map_finger_to_servo(servo: ServoControl, angle_cmd):
 
-        offset = servo.angle_software_max - servo.angle_software_min
-        angle_mapped = interval_map(angle_cmd, 0, 90, 0, offset)
+        angle_mapped = interval_map(
+            angle_cmd,
+            0,
+            90,
+            servo.angle_software_min - servo.default_position,
+            servo.angle_software_max - servo.default_position,
+        )
 
         return angle_mapped
 
