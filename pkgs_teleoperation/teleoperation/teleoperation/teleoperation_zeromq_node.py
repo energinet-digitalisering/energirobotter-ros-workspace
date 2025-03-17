@@ -29,15 +29,15 @@ class TeleoperationNode(Node):
         # TODO: subscribe to tracking data through ZeroMQApp
 
         # Publishers
-        self.pose_left_pub = self.create_publisher(
+        self.pub_pose_left = self.create_publisher(
             PoseStamped, "/link_left_hand/target_pose", 1
         )
 
-        self.pose_right_pub = self.create_publisher(
+        self.pub_pose_right = self.create_publisher(
             PoseStamped, "/link_right_hand/target_pose", 1
         )
 
-        self.joint_state_hands_pub = self.create_publisher(
+        self.pub_joint_state_hands = self.create_publisher(
             JointState, "/joint_states_hands", 1
         )
 
