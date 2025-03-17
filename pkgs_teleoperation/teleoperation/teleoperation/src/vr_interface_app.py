@@ -2,8 +2,6 @@ from abc import ABC
 from multiprocessing import Array
 import numpy as np
 import logging
-import os
-import signal
 
 
 NR_OF_HAND_JOINTS = 25
@@ -29,17 +27,9 @@ class VRInterfaceApp(ABC):
             "d", (NR_OF_HAND_JOINTS * TF_MATRIX_SIZE), lock=True
         )
 
-        # Handle termination signals
-        signal.signal(signal.SIGINT, self.cleanup)
-        signal.signal(signal.SIGTERM, self.cleanup)
-
     def __del__(self):
         """Ensure cleanup on object deletion"""
-        self.cleanup()
-
-    def cleanup(self, signum=None, frame=None):
-        """Clean up resources and terminate process."""
-        self.logger.info(f"Cleaning up...")
+        self.logger.info("Cleaning up...")
 
         # Terminate the process if it's still running
         if hasattr(self, "process") and self.process.is_alive():
@@ -48,10 +38,6 @@ class VRInterfaceApp(ABC):
             self.process.join()
 
         self.logger.info("Cleanup complete. Exiting.")
-
-        # Explicitly exit when cleaning up from a signal
-        if signum is not None:
-            os._exit(0)
 
     @property
     def head_matrix(self):
