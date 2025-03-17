@@ -3,7 +3,7 @@ from scipy.spatial.transform import Rotation
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped, Pose, Point, Quaternion
-from std_msgs.msg import Header
+from std_msgs.msg import Header, String
 from sensor_msgs.msg import JointState
 
 from teleoperation.src.tracking_transformer import TrackingTransformer
@@ -26,7 +26,9 @@ class TeleoperationNode(Node):
         self.fps = self.get_parameter("fps").get_parameter_value().integer_value
 
         # Subscribers
-        # TODO: subscribe to tracking data through ZeroMQApp
+        self.sub_tracking = self.create_subscription(
+            String, "/tracking_data", self.callback_tracking, 1
+        )
 
         # Publishers
         self.pub_pose_left = self.create_publisher(
@@ -48,6 +50,9 @@ class TeleoperationNode(Node):
         self.tracking_transformer = TrackingTransformer()
         self.tracking_collision_avoidance = TrackingCollisionAvoidance()
 
+    def callback_tracking(self, msg):
+        pass
+    
     def tf_matrix_to_msg(self, tf_matrix):
         position = tf_matrix[0:3, 3]
 
