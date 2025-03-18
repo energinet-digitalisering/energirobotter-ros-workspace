@@ -41,6 +41,8 @@ def launch_setup(context, *args, **kwargs):
             ("/camera", image_topic),
         ],
         parameters=[
+            {"ip_target": "127.0.0.1"},
+            {"port": 5555},
             {"use_compressed": use_compressed},
         ],
     )
@@ -51,7 +53,7 @@ def launch_setup(context, *args, **kwargs):
         output="screen",
         parameters=[
             {"ip_target": "192.168.20.251"},
-            {"port": "5557"},
+            {"port": 5557},
         ],
     )
 

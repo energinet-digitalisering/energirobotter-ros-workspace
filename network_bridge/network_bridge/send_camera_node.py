@@ -15,6 +15,9 @@ class SendCameraNode(Node):
         self.declare_parameter("ip_target", "*")
         ip_target = self.get_parameter("ip_target").get_parameter_value().string_value
 
+        self.declare_parameter("port", 5555)
+        self.port = self.get_parameter("port").get_parameter_value().integer_value
+
         self.declare_parameter("use_compressed", True)
         self.use_compressed = (
             self.get_parameter("use_compressed").get_parameter_value().bool_value
@@ -33,7 +36,7 @@ class SendCameraNode(Node):
         # ZeroMQ Publisher
         context = zmq.Context()
         self.socket = context.socket(zmq.PUB)
-        self.socket.bind(f"tcp://{ip_target}:5555")
+        self.socket.bind(f"tcp://{ip_target}:{self.port}")
 
         # Node variables
         self.cv_bridge = CvBridge()
