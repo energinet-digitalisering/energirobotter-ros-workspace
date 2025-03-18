@@ -3,9 +3,7 @@ from multiprocessing import Array
 import numpy as np
 import logging
 
-
-NR_OF_HAND_JOINTS = 25
-TF_MATRIX_SIZE = 16
+from teleoperation.src.tracking_constants import TF_MATRIX_SIZE, NR_OF_HAND_JOINTS
 
 
 class VRInterfaceApp(ABC):
