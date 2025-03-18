@@ -1,3 +1,4 @@
+import json
 from scipy.spatial.transform import Rotation
 
 import rclpy
@@ -6,7 +7,9 @@ from geometry_msgs.msg import PoseStamped, Pose, Point, Quaternion
 from std_msgs.msg import Header, String
 from sensor_msgs.msg import JointState
 
+from teleoperation.src.zeromq_app import ZeroMQApp
 from teleoperation.src.tracking_transformer import TrackingTransformer
+from teleoperation.src.tracking_filter import TrackingFilter
 from teleoperation.src.tracking_collision_avoidance import TrackingCollisionAvoidance
 
 
@@ -41,12 +44,16 @@ class TeleoperationNode(Node):
         self.timer = self.create_timer(1.0 / self.fps, self.callback_timer)
 
         # Variables
+        self.zeromq_app = ZeroMQApp()
         self.tracking_transformer = TrackingTransformer()
+        self.tracking_filter_left = TrackingFilter()
+        self.tracking_filter_right = TrackingFilter()
         self.tracking_collision_avoidance = TrackingCollisionAvoidance()
 
     def callback_tracking(self, msg):
-        pass
-    
+        tracking_dict = json.loads(msg)
+        self.zeromq_app.update_tracking(tracking_dict)
+
     def tf_matrix_to_msg(self, tf_matrix):
         position = tf_matrix[0:3, 3]
 
@@ -78,30 +85,32 @@ class TeleoperationNode(Node):
         return joint_state_msg
 
     def callback_timer(self):
-        ...
+        # Transform tracking to robot frame
+        _, left_wrist_mat, right_wrist_mat, hand_angles = (
+            self.tracking_transformer.process(
+                self.zeromq_app.head_matrix,
+                self.zeromq_app.hand_left,
+                self.zeromq_app.hand_right,
+            )
+        )
 
-        # # Transform tracking to robot frame
-        # _, left_wrist_mat, right_wrist_mat, hand_angles = (
-        #     self.tracking_transformer.process(
-        #         self.head_matrix,
-        #         self.hand_left,
-        #         self.hand_right,
-        #     )
-        # )
+        # Filter raw tracking
+        left_wrist_mat = self.tracking_filter_left.low_pass(left_wrist_mat)
+        right_wrist_mat = self.tracking_filter_right.low_pass(right_wrist_mat)
 
-        # # Avoid hand collision
-        # left_wrist_mat, right_wrist_mat = self.tracking_collision_avoidance.process(
-        #     left_wrist_mat, right_wrist_mat
-        # )
+        # Avoid hand collision
+        left_wrist_mat, right_wrist_mat = self.tracking_collision_avoidance.process(
+            left_wrist_mat, right_wrist_mat
+        )
 
-        # msg_pose_left = self.tf_matrix_to_msg(left_wrist_mat)
-        # self.pose_left_pub.publish(msg_pose_left)
+        msg_pose_left = self.tf_matrix_to_msg(left_wrist_mat)
+        self.pub_pose_left.publish(msg_pose_left)
 
-        # msg_pose_right = self.tf_matrix_to_msg(right_wrist_mat)
-        # self.pose_right_pub.publish(msg_pose_right)
+        msg_pose_right = self.tf_matrix_to_msg(right_wrist_mat)
+        self.pub_pose_right.publish(msg_pose_right)
 
-        # msg_angles_hands = self.dict_to_joint_state_msg(hand_angles)
-        # self.joint_state_hands_pub.publish(msg_angles_hands)
+        msg_angles_hands = self.dict_to_joint_state_msg(hand_angles)
+        self.pub_joint_state_hands.publish(msg_angles_hands)
 
 
 def main(args=None):
