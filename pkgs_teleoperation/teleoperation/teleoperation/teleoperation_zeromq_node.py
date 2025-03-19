@@ -51,7 +51,7 @@ class TeleoperationNode(Node):
         self.tracking_collision_avoidance = TrackingCollisionAvoidance()
 
     def callback_tracking(self, msg):
-        tracking_dict = json.loads(msg)
+        tracking_dict = json.loads(msg.data)
         self.zeromq_app.update_tracking(tracking_dict)
 
     def tf_matrix_to_msg(self, tf_matrix):
