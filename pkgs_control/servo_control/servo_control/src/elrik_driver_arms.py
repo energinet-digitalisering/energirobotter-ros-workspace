@@ -1,5 +1,5 @@
 """
-Servo driver/manager of Elrik arms, which are servos controlled by a Waveshare driver. 
+Servo driver/manager of Elrik arms, which are servos controlled by a Waveshare driver.
 """
 
 import numpy as np

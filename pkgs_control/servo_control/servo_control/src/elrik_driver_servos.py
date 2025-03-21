@@ -1,5 +1,5 @@
 """
-Base class for servo driver/managers of Elrik. 
+Base class for servo driver/managers of Elrik.
 """
 
 from abc import ABC, abstractmethod
