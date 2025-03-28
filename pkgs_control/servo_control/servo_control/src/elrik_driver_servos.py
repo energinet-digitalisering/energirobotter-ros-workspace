@@ -38,11 +38,7 @@ class ElrikDriverServos(ABC):
                 self._add_servos(servo_config)
 
         self.driver_object = self.setup_driver()
-
-        if self.driver_object != None:
-            self.coms_active = True
-        else:
-            self.coms_active = False
+        self.coms_active = self.driver_object is not None
 
         self.speed_multplier = 2
         self.speed_min = 10.0
@@ -257,6 +253,18 @@ class ElrikDriverServos(ABC):
         with self.lock:
             self.send_command(servo, pwm_cmd)
 
+    def _update_servo_feedback(self, name):
+        """
+        Update feedback for a single servo.
+
+        Args:
+            name (str): Name of the servo to update feedback for.
+        """
+        feedback_pwm = self.read_feedback(self.servos[name])
+
+        if feedback_pwm is not None:
+            self.servos[name].set_feedback_pwm(feedback_pwm)
+
     def _validate_command(self, servo: ServoControl, pwm):
         """
         Validate a command before sending it to a servo.
@@ -302,15 +310,3 @@ class ElrikDriverServos(ABC):
             return False
 
         return True
-
-    def _update_servo_feedback(self, name):
-        """
-        Update feedback for a single servo.
-
-        Args:
-            name (str): Name of the servo to update feedback for.
-        """
-        with self.lock:  # Ensure thread-safe communication
-            feedback_pwm = self.read_feedback(self.servos[name])
-        if feedback_pwm is not None:
-            self.servos[name].set_feedback_pwm(feedback_pwm)
