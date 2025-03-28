@@ -6,8 +6,7 @@ from abc import ABC, abstractmethod
 import json
 import logging
 import numpy as np
-import threading
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor
 
 from .utils import interval_map
 from servo_control.src.servo_control import ServoControl
@@ -21,7 +20,6 @@ class ElrikDriverServos(ABC):
     """
 
     def __init__(self, config_files, control_frequency, synchronise_speed=False):
-
         self.logger = logging.getLogger(self.__class__.__name__)
         logging.basicConfig(level=logging.INFO)
 
@@ -29,7 +27,6 @@ class ElrikDriverServos(ABC):
         self.synchronise_speed = synchronise_speed
         self.servos = {}
         self.coms_active = False
-        self.lock = threading.Lock()  # For thread-safe communication
 
         # Load and process JSON files
         for json_file in config_files:
@@ -125,7 +122,7 @@ class ElrikDriverServos(ABC):
             ],
         )
 
-        with ThreadPoolExecutor() as executor:
+        with ProcessPoolExecutor() as executor:
             futures = [
                 executor.submit(
                     self._command_servo, name, command_dict[name], speeds[name]
@@ -147,7 +144,7 @@ class ElrikDriverServos(ABC):
         if not self.coms_active:
             return
 
-        with ThreadPoolExecutor() as executor:
+        with ProcessPoolExecutor() as executor:
             futures = [
                 executor.submit(self._update_servo_feedback, name)
                 for name in self.servos.keys()
@@ -250,8 +247,7 @@ class ElrikDriverServos(ABC):
         if not self._validate_command(servo, pwm_cmd):
             return
 
-        with self.lock:
-            self.send_command(servo, pwm_cmd)
+        self.send_command(servo, pwm_cmd)
 
     def _update_servo_feedback(self, name):
         """
