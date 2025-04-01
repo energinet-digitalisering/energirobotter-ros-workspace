@@ -6,7 +6,6 @@ import rclpy
 from rclpy.node import Node
 
 from servo_control.src.elrik_driver_arms import ElrikDriverArms
-from servo_control.src.elrik_driver_hands import ElrikDriverHands
 
 
 class ServoResetNode(Node):
@@ -37,17 +36,8 @@ class ServoResetNode(Node):
         for servo in self.driver_arms.get_default_servo_commands().keys():
             self.servo_commands_arms[servo] = 1
 
-        # Configure hands servo manager
-        json_files_hands = [
-            f"{config_folder_path}/servo_hand_left_params.json",
-            f"{config_folder_path}/servo_hand_right_params.json",
-        ]
-        self.driver_hands = ElrikDriverHands(json_files_hands, self.control_frequency)
-        self.servo_commands_hands = self.driver_hands.get_default_servo_commands()
-
     def callback_timer(self):
         self.driver_arms.command_servos(self.servo_commands_arms)
-        # self.driver_hands.command_servos(self.servo_commands_hands)
 
 
 def main(args=None):

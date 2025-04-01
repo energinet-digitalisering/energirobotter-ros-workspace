@@ -9,7 +9,8 @@ from rclpy.node import Node
 from sensor_msgs.msg import JointState
 
 from servo_control.src.elrik_driver_arms import ElrikDriverArms
-from servo_control.src.elrik_driver_hands import ElrikDriverHands
+from servo_control.src.elrik_driver_hand_left import ElrikDriverHandLeft
+from servo_control.src.elrik_driver_hand_right import ElrikDriverHandRight
 
 
 class ServoManagerNode(Node):
@@ -25,7 +26,7 @@ class ServoManagerNode(Node):
             .double_value
         )
 
-        self.declare_parameter("control_frequency_hands", 0.01)
+        self.declare_parameter("control_frequency_hands", 1.0 / 30.0)
         self.control_frequency_hands = (
             self.get_parameter("control_frequency_hands")
             .get_parameter_value()
@@ -68,16 +69,26 @@ class ServoManagerNode(Node):
         )
         self.servo_commands_arms = self.driver_arms.get_default_servo_commands()
 
-        # Configure hands servo manager
-        json_files_hands = [
-            # f"{config_folder_path}/servo_hand_left_params.json",
-            f"{config_folder_path}/servo_hand_right_params.json",
-            # f"{config_folder_path}/servo_test.json",
+        # Configure left hand servo manager
+        json_files_hand_left = [
+            f"{config_folder_path}/servo_hand_left_params.json",
         ]
-        self.driver_hands = ElrikDriverHands(
-            json_files_hands, self.control_frequency_hands, synchronise_speed=False
+        self.driver_hand_left = ElrikDriverHandLeft(
+            json_files_hand_left, self.control_frequency_hands, synchronise_speed=False
         )
-        self.servo_commands_hands = self.driver_hands.get_default_servo_commands()
+
+        # Configure right hand servo manager
+        json_files_hand_right = [
+            f"{config_folder_path}/servo_hand_right_params.json",
+        ]
+        self.driver_hand_right = ElrikDriverHandRight(
+            json_files_hand_right, self.control_frequency_hands, synchronise_speed=False
+        )
+
+        self.servo_commands_hands = (
+            self.driver_hand_left.get_default_servo_commands()
+            | self.driver_hand_right.get_default_servo_commands()
+        )
 
     def callback_joints_arms(self, msg):
         self.servo_commands_arms = dict(zip(msg.name, np.rad2deg(msg.position)))
@@ -85,9 +96,16 @@ class ServoManagerNode(Node):
     def callback_joints_hands(self, msg):
         self.servo_commands_hands = dict(zip(msg.name, np.rad2deg(msg.position)))
 
-        for servo_name, servo in self.driver_hands.servos.items():
+        # Left hand
+        for servo_name, servo in self.driver_hand_left.servos.items():
             command = self.servo_commands_hands[servo_name]
-            angle_mapped = self.driver_hands.map_finger_to_servo(servo, command)
+            angle_mapped = self.driver_hand_left.map_finger_to_servo(servo, command)
+            self.servo_commands_hands[servo_name] = angle_mapped
+
+        # Right hand
+        for servo_name, servo in self.driver_hand_right.servos.items():
+            command = self.servo_commands_hands[servo_name]
+            angle_mapped = self.driver_hand_right.map_finger_to_servo(servo, command)
             self.servo_commands_hands[servo_name] = angle_mapped
 
     def callback_timer_arms(self):
@@ -106,8 +124,11 @@ class ServoManagerNode(Node):
         # DEBUG END
 
     def callback_timer_hands(self):
-        self.driver_hands.update_feedback()
-        self.driver_hands.command_servos(self.servo_commands_hands)
+        self.driver_hand_left.update_feedback()
+        self.driver_hand_left.command_servos(self.servo_commands_hands)
+
+        self.driver_hand_right.update_feedback()
+        self.driver_hand_right.command_servos(self.servo_commands_hands)
 
 
 def main(args=None):

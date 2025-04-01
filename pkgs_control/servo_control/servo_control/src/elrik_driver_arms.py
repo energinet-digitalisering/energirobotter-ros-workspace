@@ -1,8 +1,8 @@
 """
-Servo driver/manager of Elrik arms, which are servos controlled by a Waveshare driver. 
+Servo driver/manager of Elrik arms, which are servos controlled by a Waveshare driver.
 """
 
-import numpy as np
+from threading import Lock
 
 from .SCServo_Python.scservo_sdk import PortHandler, sms_sts, scservo_def
 from servo_control.src.elrik_driver_servos import ElrikDriverServos
@@ -13,6 +13,12 @@ BAUDRATE = 115200
 
 
 class ElrikDriverArms(ElrikDriverServos):
+    def __init__(self, config_files, control_frequency, synchronise_speed=False):
+        ElrikDriverServos.__init__(
+            self, config_files, control_frequency, synchronise_speed=False
+        )
+
+        self.lock = Lock()
 
     def setup_driver(self):
 
@@ -41,9 +47,10 @@ class ElrikDriverArms(ElrikDriverServos):
         # self.logger.info(f"Servo: {servo.servo_id}. Stopping pwm of: {pwm}")
         # return
 
-        scs_comm_result, scs_error = self.driver_object.WritePosEx(
-            servo.servo_id, pwm, SCS_MOVING_SPEED := 2000, SCS_MOVING_ACC := 64
-        )
+        with self.lock:
+            scs_comm_result, scs_error = self.driver_object.WritePosEx(
+                servo.servo_id, pwm, SCS_MOVING_SPEED := 2000, SCS_MOVING_ACC := 64
+            )
 
         # if scs_comm_result != scservo_def.COMM_SUCCESS:
         #     self.logger.error(f"Communication error: {scs_comm_result}")

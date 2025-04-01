@@ -1,13 +1,12 @@
 """
-Base class for servo driver/managers of Elrik. 
+Base class for servo driver/managers of Elrik.
 """
 
 from abc import ABC, abstractmethod
+from concurrent.futures import ThreadPoolExecutor
 import json
 import logging
 import numpy as np
-import threading
-from concurrent.futures import ThreadPoolExecutor
 
 from .utils import interval_map
 from servo_control.src.servo_control import ServoControl
@@ -21,7 +20,6 @@ class ElrikDriverServos(ABC):
     """
 
     def __init__(self, config_files, control_frequency, synchronise_speed=False):
-
         self.logger = logging.getLogger(self.__class__.__name__)
         logging.basicConfig(level=logging.INFO)
 
@@ -29,7 +27,6 @@ class ElrikDriverServos(ABC):
         self.synchronise_speed = synchronise_speed
         self.servos = {}
         self.coms_active = False
-        self.lock = threading.Lock()  # For thread-safe communication
 
         # Load and process JSON files
         for json_file in config_files:
@@ -38,11 +35,7 @@ class ElrikDriverServos(ABC):
                 self._add_servos(servo_config)
 
         self.driver_object = self.setup_driver()
-
-        if self.driver_object != None:
-            self.coms_active = True
-        else:
-            self.coms_active = False
+        self.coms_active = self.driver_object is not None
 
         self.speed_multplier = 2
         self.speed_min = 10.0
@@ -254,8 +247,19 @@ class ElrikDriverServos(ABC):
         if not self._validate_command(servo, pwm_cmd):
             return
 
-        with self.lock:
-            self.send_command(servo, pwm_cmd)
+        self.send_command(servo, pwm_cmd)
+
+    def _update_servo_feedback(self, name):
+        """
+        Update feedback for a single servo.
+
+        Args:
+            name (str): Name of the servo to update feedback for.
+        """
+        feedback_pwm = self.read_feedback(self.servos[name])
+
+        if feedback_pwm is not None:
+            self.servos[name].set_feedback_pwm(feedback_pwm)
 
     def _validate_command(self, servo: ServoControl, pwm):
         """
@@ -302,15 +306,3 @@ class ElrikDriverServos(ABC):
             return False
 
         return True
-
-    def _update_servo_feedback(self, name):
-        """
-        Update feedback for a single servo.
-
-        Args:
-            name (str): Name of the servo to update feedback for.
-        """
-        with self.lock:  # Ensure thread-safe communication
-            feedback_pwm = self.read_feedback(self.servos[name])
-        if feedback_pwm is not None:
-            self.servos[name].set_feedback_pwm(feedback_pwm)
