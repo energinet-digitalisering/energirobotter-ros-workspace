@@ -3,10 +3,10 @@ Base class for servo driver/managers of Elrik.
 """
 
 from abc import ABC, abstractmethod
+from concurrent.futures import ThreadPoolExecutor
 import json
 import logging
 import numpy as np
-from concurrent.futures import ProcessPoolExecutor
 
 from .utils import interval_map
 from servo_control.src.servo_control import ServoControl
@@ -122,7 +122,7 @@ class ElrikDriverServos(ABC):
             ],
         )
 
-        with ProcessPoolExecutor() as executor:
+        with ThreadPoolExecutor() as executor:
             futures = [
                 executor.submit(
                     self._command_servo, name, command_dict[name], speeds[name]
@@ -144,7 +144,7 @@ class ElrikDriverServos(ABC):
         if not self.coms_active:
             return
 
-        with ProcessPoolExecutor() as executor:
+        with ThreadPoolExecutor() as executor:
             futures = [
                 executor.submit(self._update_servo_feedback, name)
                 for name in self.servos.keys()
