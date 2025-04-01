@@ -2,7 +2,6 @@
 Servo driver/manager of Elrik arms, which are servos controlled by a Waveshare driver.
 """
 
-import numpy as np
 
 from .SCServo_Python.scservo_sdk import PortHandler, sms_sts, scservo_def
 from servo_control.src.elrik_driver_servos import ElrikDriverServos
