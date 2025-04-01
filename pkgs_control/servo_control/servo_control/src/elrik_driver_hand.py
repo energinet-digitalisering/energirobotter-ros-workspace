@@ -59,7 +59,7 @@ class ElrikDriverHand(ElrikDriverServos):
         self.logger.info(f"Frequency (last 10s): {frequency:.2f} calls/sec")
 
         # self.logger.info(f"Servo: {servo.servo_id}. Stopping pwm of: {pwm}")
-        return
+        # return
 
         self.driver_object.channels[servo.servo_id].duty_cycle = pwm
 
