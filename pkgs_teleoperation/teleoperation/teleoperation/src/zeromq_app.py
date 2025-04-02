@@ -6,7 +6,10 @@ from teleoperation.src.vr_interface_app import VRInterfaceApp
 
 
 class ZeroMQApp(VRInterfaceApp):
-        return rotation_matrix_r
+    """
+    Class for VR interface and teleoperation based on data transmitted with the ZeroMQ library.
+    This class assumes data in a right handed coordinate frame, with y-up.
+    """
 
     def dict_to_tf_matrix(self, tf_dict):
         translation = np.array(tf_dict["position"])

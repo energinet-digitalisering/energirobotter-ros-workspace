@@ -9,7 +9,7 @@ from teleoperation.src.tracking_constants import TF_MATRIX_SIZE, NR_OF_HAND_JOIN
 class VRInterfaceApp(ABC):
     """
     Base class for VR interface apps for teleoperation.
-    Subclasses must implement abstract methods to handle specific app functionality.
+    Subclasses must implement methods to handle specific app functionality.
     """
 
     def __init__(self):
