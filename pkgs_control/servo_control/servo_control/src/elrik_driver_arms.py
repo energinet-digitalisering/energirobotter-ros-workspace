@@ -9,7 +9,7 @@ from servo_control.src.elrik_driver_servos import ElrikDriverServos
 from servo_control.src.servo_control import ServoControl
 
 PORT = "/dev/ttyUSB0"
-BAUDRATE = 115200
+BAUDRATE = 1000000
 
 
 class ElrikDriverArms(ElrikDriverServos):
