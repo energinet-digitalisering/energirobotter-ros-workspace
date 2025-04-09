@@ -6,23 +6,10 @@ from teleoperation.src.vr_interface_app import VRInterfaceApp
 
 
 class ZeroMQApp(VRInterfaceApp):
-
-    def lefthand2righthand(self, rotation_matrix_l):
-        """
-        Converts a rotation matrix from a left-handed to a right-handed coordinate system.
-
-        Parameters:
-            rotation_matrix (numpy.ndarray): A 3x3 rotation matrix in a left-handed coordinate system.
-
-        Returns:
-            numpy.ndarray: A new 3x3 rotation matrix transformed to a right-handed coordinate system.
-
-        Note:
-            - Assumes a column-major representation; for row-major, negate the third row instead.
-        """
-        rotation_matrix_r = rotation_matrix_l.copy()
-        rotation_matrix_r[:, 2] *= -1
-        return rotation_matrix_r
+    """
+    Class for VR interface and teleoperation based on data transmitted with the ZeroMQ library.
+    This class assumes data in a right handed coordinate frame, with y-up.
+    """
 
     def dict_to_tf_matrix(self, tf_dict):
         translation = np.array(tf_dict["position"])
@@ -44,7 +31,6 @@ class ZeroMQApp(VRInterfaceApp):
         # Convert quaternion to rotation matrix
         rotation = Rotation.from_quat(quaternion)
         rotation_matrix = rotation.as_matrix()
-        rotation_matrix = self.lefthand2righthand(rotation_matrix)
 
         # Construct a 4x4 transformation matrix
         tf_matrix = np.eye(4)  # Start with an identity matrix
