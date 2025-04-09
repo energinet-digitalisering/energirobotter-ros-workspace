@@ -30,7 +30,6 @@ class ElrikDriverArms(ElrikDriverServos):
 
     def __del__(self):
         self.running = False
-        self.loop_thread.join()
         self.port_handler.closePort()
 
     def setup_driver(self):
@@ -97,7 +96,9 @@ class ElrikDriverArms(ElrikDriverServos):
             )
 
             if scs_addparam_result != True:
-                print(f"groupSyncWrite addparam failed, servo ID: {servo.servo_id}")
+                self.logger.warning(
+                    f"groupSyncWrite addparam failed, servo ID: {servo.servo_id}"
+                )
 
     def read_feedback(self, servo: ServoControl):
         try:
