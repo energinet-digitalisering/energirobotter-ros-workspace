@@ -49,6 +49,8 @@ class SendCameraNode(Node):
         else:
             image = self.cv_bridge.imgmsg_to_cv2(msg, desired_encoding="rgb8")
 
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
         # Convert to JPEG to reduce data size
         _, buffer = cv2.imencode(".jpg", image, [cv2.IMWRITE_JPEG_QUALITY, 80])
 
