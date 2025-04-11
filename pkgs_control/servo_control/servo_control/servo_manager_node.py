@@ -19,14 +19,14 @@ class ServoManagerNode(Node):
         super().__init__("servo_manager_node")
 
         # Parameters
-        self.declare_parameter("control_frequency_arms", 0.1)
+        self.declare_parameter("control_frequency_arms", 10.0)
         self.control_frequency_arms = (
             self.get_parameter("control_frequency_arms")
             .get_parameter_value()
             .double_value
         )
 
-        self.declare_parameter("control_frequency_hands", 1.0 / 30.0)
+        self.declare_parameter("control_frequency_hands", 30.0)
         self.control_frequency_hands = (
             self.get_parameter("control_frequency_hands")
             .get_parameter_value()
@@ -49,11 +49,11 @@ class ServoManagerNode(Node):
 
         # Timers
         self.timer_arms = self.create_timer(
-            self.control_frequency_arms, self.callback_timer_arms
+            1.0 / self.control_frequency_arms, self.callback_timer_arms
         )
 
         self.timer_hands = self.create_timer(
-            self.control_frequency_hands, self.callback_timer_hands
+            1.0 / self.control_frequency_hands, self.callback_timer_hands
         )
 
         # Node variables
@@ -74,7 +74,9 @@ class ServoManagerNode(Node):
             f"{config_folder_path}/servo_hand_left_params.json",
         ]
         self.driver_hand_left = ElrikDriverHandLeft(
-            json_files_hand_left, self.control_frequency_hands, synchronise_speed=False
+            json_files_hand_left,
+            1.0 / self.control_frequency_hands,
+            synchronise_speed=False,
         )
 
         # Configure right hand servo manager
@@ -82,7 +84,9 @@ class ServoManagerNode(Node):
             f"{config_folder_path}/servo_hand_right_params.json",
         ]
         self.driver_hand_right = ElrikDriverHandRight(
-            json_files_hand_right, self.control_frequency_hands, synchronise_speed=False
+            json_files_hand_right,
+            1.0 / self.control_frequency_hands,
+            synchronise_speed=False,
         )
 
         self.servo_commands_hands = (
