@@ -26,7 +26,6 @@ class ElrikDriverServos(ABC):
         self.control_frequency = control_frequency
         self.synchronise_speed = synchronise_speed
         self.servos = {}
-        self.coms_active = False
 
         # Load and process JSON files
         for json_file in config_files:
