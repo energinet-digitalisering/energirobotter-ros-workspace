@@ -10,7 +10,7 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
-package_name = "elrik_bringup"
+package_name = "energirobotter_bringup"
 
 
 def launch_setup(context, *args, **kwargs):

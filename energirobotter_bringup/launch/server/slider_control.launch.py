@@ -8,7 +8,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.substitutions import FindPackageShare
 
 
-package_name = "elrik_bringup"
+package_name = "energirobotter_bringup"
 
 
 def launch_setup(context, *args, **kwargs):

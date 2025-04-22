@@ -10,16 +10,13 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
-package_name = "elrik_bringup"
+package_name = "energirobotter_bringup"
 
 
 def launch_setup(context, *args, **kwargs):
     rviz = LaunchConfiguration("rviz")
     camera_enabled = LaunchConfiguration("camera_enabled")
     ik_enabled = LaunchConfiguration("ik_enabled")
-
-    image_topic_left = "/zed/zed_node/left/image_rect_color/compressed"
-    image_topic_right = "/zed/zed_node/right/image_rect_color/compressed"
 
     ik_control_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -34,22 +31,28 @@ def launch_setup(context, *args, **kwargs):
         launch_arguments={"rviz": rviz}.items(),
     )
 
-    teleoperation_vuer_node = Node(
+    network_bridge_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            [
+                FindPackageShare(package_name),
+                "/launch",
+                "/robot",
+                "/network_bridge.launch.py",
+            ]
+        ),
+        launch_arguments={"camera_enabled": camera_enabled}.items(),
+    )
+
+    teleoperation_zeromq_node = Node(
         package="teleoperation",
-        executable="teleoperation_vuer_node",
+        executable="teleoperation_zeromq_node",
         output="screen",
-        remappings=[
-            ("/image_left", image_topic_left),
-            ("/image_right", image_topic_right),
-        ],
-        parameters=[
-            {"camera_enabled": camera_enabled},
-        ],
     )
 
     return [
         ik_control_launch,
-        teleoperation_vuer_node,
+        network_bridge_launch,
+        teleoperation_zeromq_node,
     ]
 
 
