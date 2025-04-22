@@ -11,7 +11,7 @@ from launch.substitutions import (
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
-package_name = "elrik_bringup"
+package_name = "energirobotter_bringup"
 
 
 def launch_setup(context, *args, **kwargs):
@@ -69,7 +69,7 @@ def generate_launch_description():
         [
             DeclareLaunchArgument(
                 "rviz",
-                default_value="false",
+                default_value="true",
                 description="Start RViz2 automatically with this launch file.",
                 choices=["true", "false"],
             ),

@@ -8,7 +8,7 @@ from launch.actions import OpaqueFunction
 from launch_ros.actions import Node
 
 
-package_name = "elrik_bringup"
+package_name = "energirobotter_bringup"
 
 
 def launch_setup(context, *args, **kwargs):
