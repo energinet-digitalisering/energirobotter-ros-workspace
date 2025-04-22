@@ -1,7 +1,7 @@
 {
-    "joint_right_shoulder_pitch": {
-        "servo_id": 17,
-        "dir": -1,
+    "joint_left_shoulder_pitch": {
+        "servo_id": 7,
+        "dir": 1,
         "gear_ratio": 3,
         "pwm_min": 0,
         "pwm_max": 4095,
@@ -16,8 +16,25 @@
         "gain_I": 0.0,
         "gain_D": 0.0
     },
-    "joint_right_shoulder_roll": {
-        "servo_id": 16,
+    "joint_left_shoulder_roll": {
+        "servo_id": 6,
+        "dir": -1,
+        "gear_ratio": 3,
+        "pwm_min": 0,
+        "pwm_max": 4095,
+        "angle_min": 0,
+        "angle_max": 360,
+        "angle_software_min": 120,
+        "angle_software_max": 230,
+        "angle_speed_max": 50,
+        "default_position": 180,
+        "feedback_enabled": false,
+        "gain_P": 1.0,
+        "gain_I": 0.0,
+        "gain_D": 0.0
+    },
+    "joint_left_arm_yaw": {
+        "servo_id": 5,
         "dir": 1,
         "gear_ratio": 3,
         "pwm_min": 0,
@@ -33,26 +50,9 @@
         "gain_I": 0.0,
         "gain_D": 0.0
     },
-    "joint_right_arm_yaw": {
-        "servo_id": 15,
-        "dir": -1,
-        "gear_ratio": 3,
-        "pwm_min": 0,
-        "pwm_max": 4095,
-        "angle_min": 0,
-        "angle_max": 360,
-        "angle_software_min": 120,
-        "angle_software_max": 230,
-        "angle_speed_max": 50,
-        "default_position": 180,
-        "feedback_enabled": false,
-        "gain_P": 1.0,
-        "gain_I": 0.0,
-        "gain_D": 0.0
-    },
-    "joint_right_elbow_pitch": {
-        "servo_id": 14,
-        "dir": -1,
+    "joint_left_elbow_pitch": {
+        "servo_id": 4,
+        "dir": 1,
         "gear_ratio": 3,
         "pwm_min": 0,
         "pwm_max": 4095,
@@ -67,42 +67,8 @@
         "gain_I": 0.0,
         "gain_D": 0.0
     },
-    "joint_right_forearm_yaw": {
-        "servo_id": 13,
-        "dir": -1,
-        "gear_ratio": 1,
-        "pwm_min": 0,
-        "pwm_max": 4095,
-        "angle_min": 0,
-        "angle_max": 360,
-        "angle_software_min": 120,
-        "angle_software_max": 270,
-        "angle_speed_max": 50,
-        "default_position": 180,
-        "feedback_enabled": false,
-        "gain_P": 1.0,
-        "gain_I": 0.0,
-        "gain_D": 0.0
-    },
-    "joint_right_wrist_pitch": {
-        "servo_id": 12,
-        "dir": -1,
-        "gear_ratio": 1,
-        "pwm_min": 0,
-        "pwm_max": 4095,
-        "angle_min": 0,
-        "angle_max": 360,
-        "angle_software_min": 120,
-        "angle_software_max": 230,
-        "angle_speed_max": 50,
-        "default_position": 180,
-        "feedback_enabled": false,
-        "gain_P": 1.0,
-        "gain_I": 0.0,
-        "gain_D": 0.0
-    },
-    "joint_right_wrist_roll": {
-        "servo_id": 11,
+    "joint_left_forearm_yaw": {
+        "servo_id": 3,
         "dir": 1,
         "gear_ratio": 1,
         "pwm_min": 0,
@@ -110,7 +76,7 @@
         "angle_min": 0,
         "angle_max": 360,
         "angle_software_min": 120,
-        "angle_software_max": 230,
+        "angle_software_max": 270,
         "angle_speed_max": 50,
         "default_position": 180,
         "feedback_enabled": false,

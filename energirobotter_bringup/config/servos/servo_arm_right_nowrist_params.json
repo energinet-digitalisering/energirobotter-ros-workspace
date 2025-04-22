@@ -83,39 +83,5 @@
         "gain_P": 1.0,
         "gain_I": 0.0,
         "gain_D": 0.0
-    },
-    "joint_right_wrist_pitch": {
-        "servo_id": 12,
-        "dir": -1,
-        "gear_ratio": 1,
-        "pwm_min": 0,
-        "pwm_max": 4095,
-        "angle_min": 0,
-        "angle_max": 360,
-        "angle_software_min": 120,
-        "angle_software_max": 230,
-        "angle_speed_max": 50,
-        "default_position": 180,
-        "feedback_enabled": false,
-        "gain_P": 1.0,
-        "gain_I": 0.0,
-        "gain_D": 0.0
-    },
-    "joint_right_wrist_roll": {
-        "servo_id": 11,
-        "dir": 1,
-        "gear_ratio": 1,
-        "pwm_min": 0,
-        "pwm_max": 4095,
-        "angle_min": 0,
-        "angle_max": 360,
-        "angle_software_min": 120,
-        "angle_software_max": 230,
-        "angle_speed_max": 50,
-        "default_position": 180,
-        "feedback_enabled": false,
-        "gain_P": 1.0,
-        "gain_I": 0.0,
-        "gain_D": 0.0
     }
 }
