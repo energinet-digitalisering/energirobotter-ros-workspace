@@ -56,7 +56,11 @@ def forward_kinematics(
 
 
 def inverse_kinematics(
-    ik_solver, q0: np.ndarray, target_pose: np.ndarray, nb_joints: int
+    ik_solver,
+    q0: np.ndarray,
+    target_pose: np.ndarray,
+    nb_joints: int,
+    locked_joints: dict = None,  # e.g., {2: 0.0}
 ) -> Tuple[float, np.ndarray]:
     """Compute the inverse kinematics of the given arm.
     The function assumes the number of joints is correct!
@@ -65,8 +69,11 @@ def inverse_kinematics(
     R = target_pose[:3, :3].flatten().tolist()
 
     _q0 = kdl.JntArray(nb_joints)
-    for i, q in enumerate(q0):
-        _q0[i] = q
+    for i in range(nb_joints):
+        if locked_joints and i in locked_joints:
+            _q0[i] = locked_joints[i]  # Set fixed value
+        else:
+            _q0[i] = q0[i]
 
     pose = kdl.Frame()
     pose.p = kdl.Vector(x, y, z)
@@ -75,6 +82,11 @@ def inverse_kinematics(
     sol = kdl.JntArray(nb_joints)
     res = ik_solver.CartToJnt(_q0, pose, sol)
     sol = list(sol)
+
+    # Reapply lock after solving
+    if locked_joints:
+        for i, val in locked_joints.items():
+            sol[i] = val
 
     return res, sol
 
