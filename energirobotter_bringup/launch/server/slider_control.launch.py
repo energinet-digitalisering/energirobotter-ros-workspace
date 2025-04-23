@@ -17,7 +17,7 @@ def launch_setup(context, *args, **kwargs):
         [
             FindPackageShare("elrik_description"),
             "urdf",
-            "phobos_generated_no_wrist_roll.urdf",
+            "phobos_generated.urdf",
         ]
     )
 
