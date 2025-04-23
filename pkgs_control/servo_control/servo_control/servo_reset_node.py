@@ -23,7 +23,9 @@ class ServoResetNode(Node):
         self.timer = self.create_timer(self.control_frequency, self.callback_timer)
 
         # Node variables
-        config_folder_path = "install/elrik_bringup/share/elrik_bringup/config/servos"
+        config_folder_path = (
+            "install/energirobotter_bringup/share/energirobotter_bringup/config/servos"
+        )
 
         # Configure arm servo manager
         json_files_arms = [
