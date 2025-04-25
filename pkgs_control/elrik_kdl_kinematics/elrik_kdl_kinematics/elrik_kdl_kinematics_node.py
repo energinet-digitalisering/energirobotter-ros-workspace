@@ -101,6 +101,7 @@ class ElrikKdlKinematics(Node):
                     q0=self.q_init[end_effector],
                     target_pose=self.target_pose[end_effector],
                     nb_joints=self.chain[end_effector].getNrOfJoints(),
+                    locked_joints={5: 0.0},
                 )
             else:
                 q_solution = self.q_init[end_effector]
