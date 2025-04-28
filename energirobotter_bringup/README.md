@@ -33,7 +33,7 @@ Have a screen connected to the Jetson of the robot, to verify tracking data sent
    ```
 3. In another terminal, run teleoperation with:
    ```
-   ros2 launch energirobotter_bringup teleoperation_zeromq.launch.py ik_enabled:=true camera_enabled:=true
+   ros2 launch energirobotter_bringup teleoperation_zeromq.launch.py ik_enabled:=true camera_enabled:=true ip_target:="192.168.1.102"
    ```
 4. On your phone, connect to the `ESP32_DEV` Wi-Fi network
 5. In browser, go to `192.168.4.1`

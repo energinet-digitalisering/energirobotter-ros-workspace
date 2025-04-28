@@ -17,6 +17,7 @@ def launch_setup(context, *args, **kwargs):
     camera_model = LaunchConfiguration("camera_model")
     camera_enabled = LaunchConfiguration("camera_enabled")
     use_compressed = LaunchConfiguration("use_compressed")
+    ip_target = LaunchConfiguration("ip_target")
 
     image_topic = "/zed/zed_node/left/image_rect_color/compressed"
 
@@ -56,7 +57,7 @@ def launch_setup(context, *args, **kwargs):
         executable="receive_tracking_node",
         output="screen",
         parameters=[
-            {"ip_target": "192.168.0.102"},
+            {"ip_target": ip_target},
             {"port": 5557},
         ],
     )
@@ -88,6 +89,11 @@ def generate_launch_description():
                 default_value="true",
                 description="Use compressed camera stream for faster performance.",
                 choices=["true", "false"],
+            ),
+            DeclareLaunchArgument(
+                "ip_target",
+                default_value="localhost",
+                description="IP Address of teleoperation device.",
             ),
             OpaqueFunction(function=launch_setup),
         ]
