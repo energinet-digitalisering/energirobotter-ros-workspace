@@ -118,16 +118,16 @@ class ServoManagerNode(Node):
         self.driver_arms.update_feedback()
         self.driver_arms.command_servos(self.servo_commands_arms)
 
-        # DEBUG
-        positions = self.driver_arms.get_servo_angles()
+        # # DEBUG
+        # positions = self.driver_arms.get_servo_angles()
 
-        msg = JointState()
-        msg.header.stamp = self.get_clock().now().to_msg()
-        msg.name = list(positions.keys())
-        msg.position = list(positions.values())
+        # msg = JointState()
+        # msg.header.stamp = self.get_clock().now().to_msg()
+        # msg.name = list(positions.keys())
+        # msg.position = list(positions.values())
 
-        self.pub_speeds.publish(msg)
-        # DEBUG END
+        # self.pub_speeds.publish(msg)
+        # # DEBUG END
 
     def callback_timer_hands(self):
         self.driver_hand_left.update_feedback()
