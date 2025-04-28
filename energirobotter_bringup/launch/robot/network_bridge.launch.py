@@ -56,7 +56,7 @@ def launch_setup(context, *args, **kwargs):
         executable="receive_tracking_node",
         output="screen",
         parameters=[
-            {"ip_target": "192.168.20.251"},
+            {"ip_target": "192.168.0.102"},
             {"port": 5557},
         ],
     )
