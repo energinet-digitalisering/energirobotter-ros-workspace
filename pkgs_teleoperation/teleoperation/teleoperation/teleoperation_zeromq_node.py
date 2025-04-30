@@ -50,10 +50,6 @@ class TeleoperationNode(Node):
         self.tracking_filter_right = TrackingFilter()
         self.tracking_collision_avoidance = TrackingCollisionAvoidance()
 
-    def callback_tracking(self, msg):
-        tracking_dict = json.loads(msg.data)
-        self.zeromq_app.update_tracking(tracking_dict)
-
     def tf_matrix_to_msg(self, tf_matrix):
         position = tf_matrix[0:3, 3]
 
@@ -83,6 +79,10 @@ class TeleoperationNode(Node):
         joint_state_msg.position = positions
 
         return joint_state_msg
+
+    def callback_tracking(self, msg):
+        tracking_dict = json.loads(msg.data)
+        self.zeromq_app.update_tracking(tracking_dict)
 
     def callback_timer(self):
         # Transform tracking to robot frame
