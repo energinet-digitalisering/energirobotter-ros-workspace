@@ -14,14 +14,26 @@ rosdep install --from-paths src -y --ignore-src
 
 ## Teleoperation Unity
 
-### Setup VR Headset
+### Setup VR Headset 
+
+Either you want to test an app directly from Unity, or you would directly run the app already built on the headset.
+
+#### Connected to computer with Unity
 
 1. Turn on headset
 2. Create a boundary
 3. Plug USB cable into headset and computer
 > If the "`USB-C Port Disabled, water and debris`" message pops up, restart the headset and try again. If that does not work, use the other end of the cable and try again.
-4. Enable Link
-5. In Unity, start the VR Interface app
+1. Enable Link
+> Do NOT click on the `USB Detected` pop-up, only enable the link. 
+1. In Unity, start the VR Interface app
+
+#### Only VR headset
+
+1. Turn on headset
+2. Create a boundary
+3. Start the VR Interface app
+
 
 ### Setup Robot
 Have a screen connected to the Jetson of the robot, to verify tracking data sent from Unity with RViz. 
