@@ -24,6 +24,13 @@ class ElrikKdlKinematics(Node):
 
         self.end_effectors = ["link_left_hand", "link_right_hand", "link_head_roll"]
 
+        self.chain_names = {
+            self.end_effectors[0]: "left",
+            self.end_effectors[1]: "right",
+            self.end_effectors[2]: "head",
+        }
+
+
         self.end_effector_callback_subs = {
             self.end_effectors[0]: self.callback_target_pos_left,
             self.end_effectors[1]: self.callback_target_pos_right,
@@ -62,7 +69,7 @@ class ElrikKdlKinematics(Node):
 
                 self.target_sub[end_effector] = self.create_subscription(
                     msg_type=PoseStamped,
-                    topic=f"/{end_effector}/target_pose",
+                    topic=f"/{self.chain_names[end_effector]}/target_pose",
                     qos_profile=5,
                     callback=self.end_effector_callback_subs[end_effector],
                 )
