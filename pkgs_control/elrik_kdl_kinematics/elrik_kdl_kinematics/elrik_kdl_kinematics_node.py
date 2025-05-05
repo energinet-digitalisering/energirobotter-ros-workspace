@@ -70,7 +70,9 @@ class ElrikKdlKinematics(Node):
 
             # We automatically loads the kinematics corresponding to the config
             if chain.getNrOfJoints():
-                self.get_logger().info(f'Found kinematics chain for "{end_effector}"!')
+                self.get_logger().info(
+                    f'Found kinematics chain for "{end_effector}"! Chain length: {chain.getNrOfJoints()}'
+                )
 
                 self.target_sub[end_effector] = self.create_subscription(
                     msg_type=PoseStamped,
