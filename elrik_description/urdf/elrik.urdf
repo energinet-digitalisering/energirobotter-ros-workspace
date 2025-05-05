@@ -11,7 +11,7 @@
   <link name="world"/>
 
   <xacro:include filename="$(find elrik_description)/urdf/phobos_generated.urdf"/>
-  <!-- NOTE: Change all relative paths "../" with "file://$(find elrik_description)/" -->
+  <!-- NOTE: Change all relative paths "../" with "package://elrik_description/" -->
   <!-- Add <dynamics damping="1.0" friction="1.0"/> to all joints -->
 
 </robot>
