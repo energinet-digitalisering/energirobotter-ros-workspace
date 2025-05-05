@@ -30,6 +30,11 @@ class ElrikKdlKinematics(Node):
             self.end_effectors[2]: "head",
         }
 
+        self.locked_joints = {
+            self.end_effectors[0]: {5: 0.0},
+            self.end_effectors[1]: {},
+            self.end_effectors[2]: {},
+        }
 
         self.end_effector_callback_subs = {
             self.end_effectors[0]: self.callback_target_pos_left,
@@ -108,7 +113,7 @@ class ElrikKdlKinematics(Node):
                     q0=self.q_init[end_effector],
                     target_pose=self.target_pose[end_effector],
                     nb_joints=self.chain[end_effector].getNrOfJoints(),
-                    locked_joints={5: 0.0},
+                    locked_joints=self.locked_joints[end_effector],
                 )
             else:
                 q_solution = self.q_init[end_effector]
