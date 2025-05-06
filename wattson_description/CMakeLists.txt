@@ -19,6 +19,7 @@ install(
   DIRECTORY  
     meshes
     rviz
+    servo_configs
     urdf
   DESTINATION share/${PROJECT_NAME}
 )
