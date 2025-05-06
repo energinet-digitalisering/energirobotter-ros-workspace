@@ -69,7 +69,7 @@ class ServoManagerNode(Node):
         # Configure arm servo manager
         json_files_arms = [
             f"{config_folder_path}/servo_arm_left_params.json",
-            # f"{config_folder_path}/servo_arm_right_params.json",
+            f"{config_folder_path}/servo_arm_right_params.json",
         ]
         self.driver_arms = ElrikDriverArms(
             json_files_arms, self.control_frequency_arms, synchronise_speed=True
