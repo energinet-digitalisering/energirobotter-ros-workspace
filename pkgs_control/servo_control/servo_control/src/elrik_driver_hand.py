@@ -56,7 +56,7 @@ class ElrikDriverHand(ElrikDriverServos):
             call_times.popleft()
 
         frequency = len(call_times) / 10  # Calls per second in the last 10 sec
-        self.logger.info(f"Frequency (last 10s): {frequency:.2f} calls/sec")
+        # self.logger.info(f"Frequency (last 10s): {frequency:.2f} calls/sec")
 
         # self.logger.info(f"Servo: {servo.servo_id}. Stopping pwm of: {pwm}")
         # return
