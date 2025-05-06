@@ -104,6 +104,20 @@
     <child link="link_right_shoulder_x"/>
     <axis xyz="0.00000 0.00000 1.00000"/>
   </joint>
+  <joint name="joint_right_wrist_pitch" type="revolute">
+    <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
+    <origin rpy="1.43744 -1.57080 1.70415" xyz="0.00000 -0.01442 0.15088"/>
+    <parent link="link_right_wrist"/>
+    <child link="link_right_wrist_x"/>
+    <axis xyz="0.00000 0.00000 1.00000"/>
+  </joint>
+  <joint name="joint_right_wrist_roll" type="revolute">
+    <limit lower="-3.14000" upper="3.14000" effort="0.00000" velocity="0.00000"/>
+    <origin rpy="1.57080 -1.57080 0.00000" xyz="-0.00000 0.02290 -0.00000"/>
+    <parent link="link_right_wrist_x"/>
+    <child link="link_right_hand"/>
+    <axis xyz="0.00000 0.00000 1.00000"/>
+  </joint>
   <link name="link_head_pitch">
     <visual name="head_pitch">
       <origin rpy="-0.00000 1.57080 0.00000" xyz="0.00000 0.00000 0.00000"/>
@@ -258,6 +272,7 @@
       </geometry>
     </visual>
   </link>
+  <link name="link_right_hand"/>
   <link name="link_right_shoulder">
     <collision name="right_shoulder_collision">
       <origin rpy="0.00000 0.00000 0.00000" xyz="0.00000 0.00000 0.07150"/>
@@ -310,6 +325,13 @@
         <cylinder radius="0.05250" length="0.10977"/>
       </geometry>
     </collision>
+    <visual name="Cone">
+      <origin rpy="-3.14159 -0.00000 -1.57080" xyz="0.00000 -0.00442 0.17388"/>
+      <material name="Right arrow"/>
+      <geometry>
+        <mesh filename="package://wattson_description/meshes/stl/Cone.stl" scale="0.01903 0.01903 0.04934"/>
+      </geometry>
+    </visual>
     <visual name="right_wrist">
       <origin rpy="3.14159 0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
       <material name="Plastic - Matte (White)"/>
@@ -318,6 +340,7 @@
       </geometry>
     </visual>
   </link>
+  <link name="link_right_wrist_x"/>
   <link name="link_torso">
     <collision name="torso_collision">
       <origin rpy="3.14159 0.00000 0.00000" xyz="-0.00000 -0.00510 0.06940"/>
@@ -353,6 +376,9 @@
   </material>
   <material name="Plastic - Texture - Random (Black Gloss)">
     <color rgba="0.18431 0.18431 0.18431 1.00000"/>
+  </material>
+  <material name="Right arrow">
+    <color rgba="0.00392 0.00000 0.80000 1.00000"/>
   </material>
   <material name="Stainless Steel - Satin">
     <color rgba="0.79608 0.79608 0.79608 1.00000"/>

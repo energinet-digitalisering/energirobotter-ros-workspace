@@ -22,7 +22,7 @@ class ElrikKdlKinematics(Node):
 
         self.urdf = self.retrieve_urdf()
 
-        self.end_effectors = ["link_left_hand", "link_right_hand", "link_head_roll"]
+        self.end_effectors = ["link_left_hand", "link_right_wrist", "link_head_roll"]
 
         self.chain_names = {
             self.end_effectors[0]: "left",
