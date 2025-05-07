@@ -10,6 +10,8 @@ In the generated URDF, change all relative paths `../` with `package://wattson_d
 
 If simulating physics, add a `<dynamics damping="1.0" friction="1.0"/>` tag to all joints.
 
+As a shortcut, run the `fetch_phobos_urdf.py` script in the `utils/` folder, to fetch the URDF generated from Phobos and change the needed lines. Change the paths in the `source_file` and `destination_file` variables. 
+
 
 ## Visualise URDF
 
