@@ -31,30 +31,30 @@ ros2 launch urdf_launch display.launch.py urdf_package:=wattson_description urdf
 
 The `servo_manager_node` loads `.json` files that describes all parameters for each servo in a chain. Parameters to set are seen in the table below.
 
-| Parameter name       | Description                                                                 | Datatype      |
-| -------------------- | --------------------------------------------------------------------------- | ------------- |
-| `servo_id`           | Unique identifier for the servo.                                            | `unsiged int` |
-| `dir`                | Direction configuration for upside-down placement (1 or -1). Defaults to 1. | `int`         |
-| `gear_ratio`         | Gear ratio for linked mechanisms. Defaults to 1.                            | `int`         |
-| `pwm_min`            | Minimum PWM value.                                                          | `int`         |
-| `pwm_max`            | Maximum PWM value.                                                          | `int`         |
-| `angle_min`          | Minimum physical angle of the servo.                                        | `float`       |
-| `angle_max`          | Maximum physical angle of the servo.                                        | `float`       |
-| `angle_software_min` | Minimum software-limited angle.                                             | `float`       |
-| `angle_software_max` | Maximum software-limited angle.                                             | `float`       |
-| `angle_speed_max`    | Maximum angular speed (degrees/second).                                     | `float`       |
-| `default_position`   | Default angle position. Defaults to 180.                                    | `float`       |
-| `feedback_enabled`   | Whether feedback control is enabled. Defaults to False.                     | `bool`        |
-| `gain_P`             | Proportional gain for PID control. Defaults to 1.0.                         | `float`       |
-| `gain_I`             | Integral gain for PID control. Defaults to 0.0.                             | `float`       |
-| `gain_D`             | Derivative gain for PID control. Defaults to 0.0.                           | `float`       |
+| Parameter name       | Description                                                                 | Datatype |
+| -------------------- | --------------------------------------------------------------------------- | -------- |
+| `servo_id`           | Unique identifier for the servo.                                            | `int`    |
+| `dir`                | Direction configuration for upside-down placement (1 or -1). Defaults to 1. | `int`    |
+| `gear_ratio`         | Gear ratio for linked mechanisms. Defaults to 1.                            | `int`    |
+| `pwm_min`            | Minimum PWM value.                                                          | `int`    |
+| `pwm_max`            | Maximum PWM value.                                                          | `int`    |
+| `angle_min`          | Minimum physical angle of the servo.                                        | `float`  |
+| `angle_max`          | Maximum physical angle of the servo.                                        | `float`  |
+| `angle_software_min` | Minimum software-limited angle.                                             | `float`  |
+| `angle_software_max` | Maximum software-limited angle.                                             | `float`  |
+| `angle_speed_max`    | Maximum angular speed (degrees/second).                                     | `float`  |
+| `default_position`   | Default angle position. Defaults to 180.                                    | `float`  |
+| `feedback_enabled`   | Whether feedback control is enabled. Defaults to False.                     | `bool`   |
+| `gain_P`             | Proportional gain for PID control. Defaults to 1.0.                         | `float`  |
+| `gain_I`             | Integral gain for PID control. Defaults to 0.0.                             | `float`  |
+| `gain_D`             | Derivative gain for PID control. Defaults to 0.0.                           | `float`  |
 
 
 
 
 ### Notes
 
-Waveshare servos can rotate from `0°` to `360°` and have a configurable **middle-point**, corresponding to `180°`. This middle-point acts as a reference around which the servo moves. Choosing the correct middle-point is especially important when the servo is **geared**, and its range of motion is reduced.
+Waveshare servos can rotate from `0°` to `360°` and have a configurable **middle-point**, corresponding to `180°`. This middle-point acts as a reference around which the servo moves. Choosing the correct middle-point is especially important when the servo is **geared**, and its range of motion is reduced. The middle-point of a servo is configured through the web-app hosted by the servo driver. 
 
 ---
 
