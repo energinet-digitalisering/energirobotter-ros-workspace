@@ -19,7 +19,8 @@ def launch_setup(context, *args, **kwargs):
     use_compressed = LaunchConfiguration("use_compressed")
     ip_target = LaunchConfiguration("ip_target")
 
-    image_topic = "/zed/zed_node/left/image_rect_color/compressed"
+    image_topic_left = "/zed/zed_node/left/image_rect_color/compressed"
+    image_topic_right = "/zed/zed_node/right/image_rect_color/compressed"
 
     camera_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -37,16 +38,33 @@ def launch_setup(context, *args, **kwargs):
         }.items(),
     )
 
-    send_camera_node = Node(
+    send_camera_node_left = Node(
         package="network_bridge",
         executable="send_camera_node",
         output="screen",
+        name="send_camera_left_node",
         remappings=[
-            ("/camera", image_topic),
+            ("/camera", image_topic_left),
         ],
         parameters=[
             {"ip_target": "0.0.0.0"},
             {"port": 5555},
+            {"use_compressed": use_compressed},
+        ],
+        condition=IfCondition(camera_enabled),
+    )
+
+    send_camera_right_node = Node(
+        package="network_bridge",
+        executable="send_camera_node",
+        output="screen",
+        name="send_camera_right_node",
+        remappings=[
+            ("/camera", image_topic_right),
+        ],
+        parameters=[
+            {"ip_target": "0.0.0.0"},
+            {"port": 5556},
             {"use_compressed": use_compressed},
         ],
         condition=IfCondition(camera_enabled),
@@ -64,7 +82,8 @@ def launch_setup(context, *args, **kwargs):
 
     return [
         camera_launch,
-        send_camera_node,
+        send_camera_node_left,
+        send_camera_right_node,
         receive_tracking_node,
     ]
 
