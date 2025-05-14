@@ -11,6 +11,23 @@ Install dependencies with:
 rosdep install --from-paths src -y --ignore-src
 ```
 
+- [Energirobotter Bringup](#energirobotter-bringup)
+  - [Teleoperation Unity](#teleoperation-unity)
+    - [Setup VR Headset](#setup-vr-headset)
+      - [Connected to computer with Unity](#connected-to-computer-with-unity)
+      - [Only VR headset](#only-vr-headset)
+    - [Setup Robot](#setup-robot)
+    - [Calibrate and Launch](#calibrate-and-launch)
+  - [Teleoperation Vuer](#teleoperation-vuer)
+    - [Setup VR Headset](#setup-vr-headset-1)
+    - [Setup Teleoperation](#setup-teleoperation)
+    - [Setup Robot](#setup-robot-1)
+    - [Calibrate and Launch](#calibrate-and-launch-1)
+    - [V1 Demo notes (Danish)](#v1-demo-notes-danish)
+  - [Face Following](#face-following)
+
+
+
 
 ## Teleoperation Unity
 
@@ -123,7 +140,7 @@ Have a screen connected to the Jetson of the robot, to verify tracking data sent
 
 ---
 
-### V1 Demo notes (Danish):
+### V1 Demo notes (Danish)
 
 Der er nogle ting vi skal gøre brugere opmærksomme på: 
 - Pas på ledningen!
@@ -142,3 +159,21 @@ Steps:
 - Start programmet! 
 - Vær klar til at stoppe, hvis der sker noget, eller de tager headset af for hurtigt
 
+
+## Face Following
+
+> **Deprecated**
+
+Use the `energirobotter_bringup` package's `vision.launch.py` to start the camera and face detection:
+
+```
+source install/setup.bash
+ros2 launch energirobotter_bringup vision.launch.py use_compressed:=true
+```
+
+If no camera is available, run example with:
+```
+ros2 launch energirobotter_bringup vision.launch.py use_mock_camera:=true
+```
+
+> Note: The first time `face_detection` is run `ultralytics` will install som extra packages, and require a restart of the node.
