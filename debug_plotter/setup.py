@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = "teleoperation"
+package_name = "debug_plotter"
 
 setup(
     name=package_name,
@@ -14,13 +14,13 @@ setup(
     zip_safe=True,
     maintainer="Nicoline",
     maintainer_email="xnlth@energinet.dk",
-    description="Teleoperation capabilities for the robot Elrik, with Vuer.",
-    license="Energinet",
+    description="Nodes and tools for plotting topics and data for debugging purposes.",
+    license="Apache-2.0",
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [
-            f"teleoperation_vuer_node = {package_name}.teleoperation_vuer_node:main",
-            f"teleoperation_zeromq_node = {package_name}.teleoperation_zeromq_node:main",
+            f"joint_state_plotter = {package_name}.joint_state_plotter:main",
+            f"pose_plotter = {package_name}.pose_plotter:main",
         ],
     },
 )

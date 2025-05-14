@@ -19,7 +19,6 @@ from .kdl_kinematics import (
 class ElrikKdlKinematics(Node):
     def __init__(self):
         super().__init__("elrik_kdl_kinematics_node")
-        self.logger = self.get_logger()
 
         self.urdf = self.retrieve_urdf()
 
@@ -47,7 +46,7 @@ class ElrikKdlKinematics(Node):
         self.chain, self.fk_solver, self.ik_solver = {}, {}, {}
         self.target_sub = {}
 
-        self.timer = self.create_timer(0.5, self.callback_timer_publish_joint_states)
+        self.timer = self.create_timer(0.1, self.callback_timer_publish_joint_states)
 
         self.joint_state_pub = self.create_publisher(JointState, "/joint_states", 10)
 
@@ -59,7 +58,7 @@ class ElrikKdlKinematics(Node):
 
             # We automatically loads the kinematics corresponding to the config
             if chain.getNrOfJoints():
-                self.logger.info(f'Found kinematics chain for "{end_effector}"!')
+                self.get_logger().info(f'Found kinematics chain for "{end_effector}"!')
 
                 self.target_sub[end_effector] = self.create_subscription(
                     msg_type=PoseStamped,
@@ -67,7 +66,7 @@ class ElrikKdlKinematics(Node):
                     qos_profile=5,
                     callback=self.end_effector_callback_subs[end_effector],
                 )
-                self.logger.info(
+                self.get_logger().info(
                     f'Added subscription on "{self.target_sub[end_effector].topic}"'
                 )
 
@@ -76,7 +75,7 @@ class ElrikKdlKinematics(Node):
                 self.fk_solver[end_effector] = fk_solver
                 self.ik_solver[end_effector] = ik_solver
 
-        self.logger.info(f"Kinematics node ready!")
+        self.get_logger().info(f"Kinematics node ready!")
 
     def callback_target_pos_left(self, msg: PoseStamped):
         self.target_pose[self.end_effectors[0]] = ros_pose_to_matrix(msg.pose)
@@ -102,6 +101,7 @@ class ElrikKdlKinematics(Node):
                     q0=self.q_init[end_effector],
                     target_pose=self.target_pose[end_effector],
                     nb_joints=self.chain[end_effector].getNrOfJoints(),
+                    locked_joints={5: 0.0},
                 )
             else:
                 q_solution = self.q_init[end_effector]
@@ -123,11 +123,11 @@ class ElrikKdlKinematics(Node):
 
     def wait_for_joint_state(self):
         while not self.joint_state_ready.is_set():
-            self.logger.info("Waiting for /joint_states...")
+            self.get_logger().info("Waiting for /joint_states...")
             rclpy.spin_once(self)
 
     def retrieve_urdf(self, timeout_sec: float = 15):
-        self.logger.info('Retrieving URDF from "/robot_description"...')
+        self.get_logger().info('Retrieving URDF from "/robot_description"...')
 
         qos_profile = QoSProfile(depth=1)
         qos_profile.durability = QoSDurabilityPolicy.TRANSIENT_LOCAL
@@ -146,10 +146,10 @@ class ElrikKdlKinematics(Node):
         rclpy.spin_once(self, timeout_sec=timeout_sec)
 
         if self.urdf is None:
-            self.logger.error("Could not retrieve the URDF!")
+            self.get_logger().error("Could not retrieve the URDF!")
             raise EnvironmentError("Could not retrieve the URDF!")
 
-        self.logger.info("Done!")
+        self.get_logger().info("Done!")
 
         return self.urdf
 
@@ -159,7 +159,7 @@ class ElrikKdlKinematics(Node):
             joints = [pos[j] for j in self.get_chain_joints_name(chain)]
             return joints
         except KeyError:
-            self.logger.warning(
+            self.get_logger().warning(
                 f"Incorrect joints found ({js.name} vs {self.get_chain_joints_name(chain)})"
             )
             raise

@@ -1,3 +1,9 @@
+"""
+Node that handles communication and control of one servo. 
+This script is deprecrated, but is still in use for some features. Will be removed in the future.
+`servo_manager_node` is the updated version.
+"""
+
 import rclpy
 from rclpy.node import Node
 import std_msgs.msg

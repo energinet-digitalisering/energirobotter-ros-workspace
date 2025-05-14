@@ -19,7 +19,7 @@ setup(
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [
-            "elrik_kdl_kinematics_node = elrik_kdl_kinematics.elrik_kdl_kinematics_node:main",
+            "elrik_kdl_kinematics_node = elrik_kdl_kinematics.elrik_kdl_kinematics_node:main"
         ],
     },
 )

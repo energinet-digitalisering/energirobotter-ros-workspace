@@ -1,82 +1,34 @@
 from asyncio import sleep
-import logging
-from multiprocessing import Array, Process, Queue
-import numpy as np
-import os
-import signal
+from multiprocessing import Process, Queue
 from vuer import Vuer, VuerSession
-from vuer.events import Set
 from vuer.schemas import DefaultScene, Hands, ImageBackground
 
-
-NR_OF_HAND_JOINTS = 25
-TF_MATRIX_SIZE = 16
+from teleoperation.src.vr_interface_app import VRInterfaceApp
 
 
-class VuerApp:
+class VuerApp(VRInterfaceApp):
     def __init__(self, camera_enabled=True):
-        # Initialize logging
-        self.logger = logging.getLogger("VuerApp")
-        logging.basicConfig(level=logging.INFO)
+        VRInterfaceApp.__init__(self)
 
         self.camera_enabled = camera_enabled
 
         # Initialize the Vuer app
-        self.app = Vuer()
+        self.app = Vuer(free_port=True)
         self.app.add_handler("CAMERA_MOVE")(self.on_camera_move)
         self.app.add_handler("HAND_MOVE")(self.on_hand_move)
         self.app.spawn(start=False)(self.session_manager)
-
-        # Member variables
-        self.queue_image_left = Queue(maxsize=2)
-        self.queue_image_right = Queue(maxsize=2)
-
-        self.head_matrix_shared = Array("d", (TF_MATRIX_SIZE), lock=True)
-        self.hand_left_shared = Array(
-            "d", (NR_OF_HAND_JOINTS * TF_MATRIX_SIZE), lock=True
-        )
-        self.hand_right_shared = Array(
-            "d", (NR_OF_HAND_JOINTS * TF_MATRIX_SIZE), lock=True
-        )
 
         # Start the Vuer app in a separate process
         self.process = Process(target=self.run)
         self.process.start()
 
-        # Handle termination signals
-        signal.signal(signal.SIGINT, self.cleanup)
-        signal.signal(signal.SIGTERM, self.cleanup)
-
-    def __del__(self):
-        """Ensure cleanup on object deletion"""
-        self.cleanup()
+        # Member variables
+        self.queue_image_left = Queue(maxsize=2)
+        self.queue_image_right = Queue(maxsize=2)
 
     def run(self):
         """Run the Vuer app"""
         self.app.run()
-
-    def cleanup(self, signum=None, frame=None):
-        """Clean up resources and terminate process."""
-        self.logger.info("Cleaning up VuerApp...")
-
-        # Terminate the process if it's still running
-        if hasattr(self, "process") and self.process.is_alive():
-            self.logger.info("Terminating subprocess...")
-            self.process.terminate()
-            self.process.join()
-
-        # Close the image queues
-        if not self.queue_image_left.empty():
-            self.queue_image_left.close()
-
-        if not self.queue_image_right.empty():
-            self.queue_image_right.close()
-
-        self.logger.info("Cleanup complete. Exiting.")
-
-        # Explicitly exit when cleaning up from a signal
-        if signum is not None:
-            os._exit(0)
 
     def update_frames(self, left, right):
         """Update the image queues with new frames."""
@@ -122,7 +74,7 @@ class VuerApp:
 
     async def session_manager(self, session: VuerSession):
         """Process image frames and send them to Vuer, as well as retrieving hand-tracking data."""
-        self.logger.info("Processing images")
+        self.logger.info("Session initialised")
 
         # Ensure the WebSocket is active
         if len(self.app.ws) == 0:
@@ -189,31 +141,10 @@ class VuerApp:
                     to="bgChildren",
                 )
 
-            # 'jpeg' encoding should give you about 30fps with a 16ms wait in-between.
+            # 'jpeg' encoding should give about 30fps with a 16ms wait in-between.
             await sleep(0.016 * 2)
 
         self.logger.info("WebSocket closed, exiting image processing loop")
-
-    @property
-    def head_matrix(self):
-        return np.array(self.head_matrix_shared).reshape((4, 4)).transpose(1, 0)
-
-    @property
-    def hand_left(self):
-        return (
-            np.array(self.hand_left_shared)
-            .reshape((NR_OF_HAND_JOINTS, 4, 4))
-            .transpose(0, 2, 1)
-        )
-
-    @property
-    def hand_right(self):
-        return (
-            np.array(self.hand_right_shared)
-            .reshape((NR_OF_HAND_JOINTS, 4, 4))
-            .transpose(0, 2, 1)
-        )
-
 
 if __name__ == "__main__":
     vuer_app = VuerApp()
