@@ -33,6 +33,14 @@ class ServoManagerNode(Node):
             .double_value
         )
 
+        self.declare_parameter(
+            "config_folder_path",
+            "install/energirobotter_bringup/share/energirobotter_bringup/config/servos",
+        )
+        config_folder_path = (
+            self.get_parameter("config_folder_path").get_parameter_value().string_value
+        )
+
         # Subscriptions
         self.sub_joints_arms = self.create_subscription(
             JointState, "/joint_states", self.callback_joints_arms, 1
@@ -57,14 +65,11 @@ class ServoManagerNode(Node):
         )
 
         # Node variables
-        config_folder_path = (
-            "install/energirobotter_bringup/share/energirobotter_bringup/config/servos"
-        )
 
         # Configure arm servo manager
         json_files_arms = [
             f"{config_folder_path}/servo_arm_left_params.json",
-            # f"{config_folder_path}/servo_arm_right_params.json",
+            f"{config_folder_path}/servo_arm_right_params.json",
         ]
         self.driver_arms = ElrikDriverArms(
             json_files_arms, self.control_frequency_arms, synchronise_speed=True

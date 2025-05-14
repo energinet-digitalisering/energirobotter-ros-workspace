@@ -38,12 +38,10 @@ class TeleoperationVuerNode(Node):
         )
 
         # Publishers
-        self.pose_left_pub = self.create_publisher(
-            PoseStamped, "/link_left_hand/target_pose", 1
-        )
+        self.pose_left_pub = self.create_publisher(PoseStamped, "/left/target_pose", 1)
 
         self.pose_right_pub = self.create_publisher(
-            PoseStamped, "/link_right_hand/target_pose", 1
+            PoseStamped, "/right/target_pose", 1
         )
 
         self.joint_state_hands_pub = self.create_publisher(
