@@ -1,5 +1,5 @@
 """
-Base class for servo driver/managers of Elrik.
+Base class for servo driver/managers.
 """
 
 from abc import ABC, abstractmethod
@@ -12,18 +12,17 @@ from .utils import interval_map
 from servo_control.src.servo_control import ServoControl
 
 
-class ElrikDriverServos(ABC):
+class DriverServos(ABC):
     """
-    Base class for servo driver/managers of Elrik.
+    Base class for servo driver/managers.
     This class provides a framework for managing and controlling multiple servos.
     Subclasses must implement abstract methods to handle specific driver functionality.
     """
 
-    def __init__(self, config_files, control_frequency, synchronise_speed=False):
+    def __init__(self, config_files, synchronise_speed=False):
         self.logger = logging.getLogger(self.__class__.__name__)
         logging.basicConfig(level=logging.INFO)
 
-        self.control_frequency = control_frequency
         self.synchronise_speed = synchronise_speed
         self.servos = {}
 

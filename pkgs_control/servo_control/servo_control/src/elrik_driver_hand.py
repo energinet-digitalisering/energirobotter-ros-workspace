@@ -6,7 +6,7 @@ from adafruit_pca9685 import PCA9685
 import board
 
 from .utils import interval_map
-from servo_control.src.elrik_driver_servos import ElrikDriverServos
+from servo_control.src.driver_servos import DriverServos
 from servo_control.src.servo_control import ServoControl
 
 import time
@@ -15,7 +15,7 @@ from collections import deque
 call_times = deque()
 
 
-class ElrikDriverHand(ElrikDriverServos):
+class ElrikDriverHand(DriverServos):
 
     def setup_driver(self):
 

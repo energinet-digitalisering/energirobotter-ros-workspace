@@ -6,18 +6,16 @@ import threading
 import time
 
 from .SCServo_Python.scservo_sdk import PortHandler, sms_sts, scservo_def
-from servo_control.src.elrik_driver_servos import ElrikDriverServos
+from servo_control.src.driver_servos import DriverServos
 from servo_control.src.servo_control import ServoControl
 
 PORT = "/dev/ttyUSB0"
 BAUDRATE = 115200
 
 
-class ElrikDriverArms(ElrikDriverServos):
+class ElrikDriverArms(DriverServos):
     def __init__(self, config_files, control_frequency, synchronise_speed=False):
-        ElrikDriverServos.__init__(
-            self, config_files, control_frequency, synchronise_speed=False
-        )
+        DriverServos.__init__(self, config_files, synchronise_speed)
 
         self.port_handler = None
         self.running = True
