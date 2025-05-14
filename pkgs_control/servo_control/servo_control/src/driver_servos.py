@@ -7,6 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 import json
 import logging
 import numpy as np
+from pathlib import Path
 
 from .utils import interval_map
 from servo_control.src.servo_control import ServoControl
@@ -24,13 +25,29 @@ class DriverServos(ABC):
         logging.basicConfig(level=logging.INFO)
 
         self.synchronise_speed = synchronise_speed
-        self.servos = {}
+        self.servo_groups = {}
 
         # Load and process JSON files
         for json_file in config_files:
+            group_name = Path(json_file).stem
+
             with open(json_file, "r") as file:
                 servo_config = json.load(file)
-                self._add_servos(servo_config)
+                self.servo_groups[group_name] = self._add_servos(servo_config)
+
+        self.servos_all = {
+            name: servo
+            for group in self.servo_groups.values()
+            for name, servo in group.items()
+        }
+
+        self.logger.info(f"--------")
+
+        for group_name, data in self.servo_groups.items():
+            self.logger.info(f"group: {group_name}")
+
+            for servo_name, servo in data.items():
+                self.logger.info(f"servo: {servo.servo_id}")
 
         self.driver_object = self.setup_driver()
         self.coms_active = self.driver_object is not None
@@ -47,8 +64,10 @@ class DriverServos(ABC):
             servo_config (dict): Dictionary containing servo parameters.
         """
 
+        servo_dict = {}
+
         for name, parameters in servo_config.items():
-            self.servos[name] = ServoControl(
+            servo_dict[name] = ServoControl(
                 servo_id=parameters["servo_id"],
                 dir=parameters["dir"],
                 gear_ratio=parameters["gear_ratio"],
@@ -67,6 +86,8 @@ class DriverServos(ABC):
             )
 
             self.logger.info(f"Added servo: {name}")
+
+        return servo_dict
 
     @abstractmethod
     def setup_driver(self):
@@ -108,24 +129,30 @@ class DriverServos(ABC):
         if not self.coms_active:
             return
 
-        speeds = self._compute_relative_speeds(
-            command_dict,
-            ignored_keys=[
-                "joint_left_wrist_roll",
-                "joint_left_wrist_pitch",
-                "joint_left_forearm_yaw",
-                "joint_right_wrist_roll",
-                "joint_right_wrist_pitch",
-                "joint_right_forearm_yaw",
-            ],
-        )
+        speeds = {}
+        for servo_dict in self.servo_groups.values():
+            speeds.update(
+                self._compute_relative_speeds(
+                    servo_dict,
+                    command_dict,
+                    ignored_keys=[
+                        "joint_left_wrist_roll",
+                        "joint_left_wrist_pitch",
+                        "joint_left_forearm_yaw",
+                        "joint_right_wrist_roll",
+                        "joint_right_wrist_pitch",
+                        "joint_right_forearm_yaw",
+                    ],
+                )
+            )
 
         with ThreadPoolExecutor() as executor:
             futures = [
                 executor.submit(
                     self._command_servo, name, command_dict[name], speeds[name]
                 )
-                for name in self.servos.keys()
+                for group in self.servo_groups.values()
+                for name in group.keys()
                 if name in command_dict
             ]
             for future in futures:
@@ -145,8 +172,9 @@ class DriverServos(ABC):
         with ThreadPoolExecutor() as executor:
             futures = [
                 executor.submit(self._update_servo_feedback, name)
-                for name in self.servos.keys()
-                if self.servos[name].feedback_enabled
+                for group in self.servo_groups.values()
+                for name, servo in group.items()
+                if servo.feedback_enabled
             ]
             for future in futures:
                 try:
@@ -161,7 +189,9 @@ class DriverServos(ABC):
         Returns:
             dict: A dictionary mapping servo names to default command values (e.g., 0.0).
         """
-        return {name: 0.0 for name in self.servos}
+        return {
+            name: 0.0 for group in self.servo_groups.values() for name in group.keys()
+        }
 
     def get_servo_angles(self):
         """
@@ -170,9 +200,13 @@ class DriverServos(ABC):
         Returns:
             dict: A dictionary mapping servo names to current angles.
         """
-        return {name: float(self.servos[name].angle) for name in self.servos}
+        return {
+            name: float(servo.angle)
+            for group in self.servo_groups.values()
+            for name, servo in group.items()
+        }
 
-    def _compute_relative_speeds(self, command_dict, ignored_keys=[]):
+    def _compute_relative_speeds(self, servo_dict, command_dict, ignored_keys=[]):
         """
         Computes relative speed values for servos based on their target positions.
 
@@ -188,33 +222,33 @@ class DriverServos(ABC):
                   scaled relative to the longest movement required.
         """
 
-        speeds_allowed = {name: None for name in self.servos.keys()}
+        speeds_allowed = {name: None for name in servo_dict.keys()}
 
         if not self.synchronise_speed:
             return speeds_allowed
 
         servos_affected = [
             servo_name
-            for servo_name in self.servos.keys()
+            for servo_name in servo_dict.keys()
             if servo_name not in ignored_keys
         ]
 
         longest_distance = max(
             abs(
                 command_dict[name]
-                + self.servos[name].default_position
-                - self.servos[name].angle
+                + servo_dict[name].default_position
+                - servo_dict[name].angle
             )
             for name in servos_affected
         )
 
         if not longest_distance or longest_distance < self.distance_threshold_min:
-            speeds_allowed = {name: self.speed_min for name in self.servos.keys()}
+            speeds_allowed = {name: self.speed_min for name in servo_dict.keys()}
             return speeds_allowed
 
         # Compute allowed speed based on distance to travel
         for name in servos_affected:
-            servo = self.servos[name]
+            servo = servo_dict[name]
             distance = abs(command_dict[name] + servo.default_position - servo.angle)
             relative = distance / longest_distance
             speed_allowed = distance * relative * self.speed_multplier
@@ -237,7 +271,7 @@ class DriverServos(ABC):
         if np.isnan(command):
             return
 
-        servo = self.servos[name]
+        servo = self.servos_all[name]
         angle_target = command + servo.default_position
 
         angle_cmd, pwm_cmd = servo.reach_angle_direct(angle_target, speed)
@@ -254,10 +288,11 @@ class DriverServos(ABC):
         Args:
             name (str): Name of the servo to update feedback for.
         """
-        feedback_pwm = self.read_feedback(self.servos[name])
+        feedback_pwm = self.read_feedback(self.servos_all[name])
 
         if feedback_pwm is not None:
-            self.servos[name].set_feedback_pwm(feedback_pwm)
+            # WRONG! Need to update the right dict
+            self.servos_all[name].set_feedback_pwm(feedback_pwm)
 
     def _validate_command(self, servo: ServoControl, pwm):
         """

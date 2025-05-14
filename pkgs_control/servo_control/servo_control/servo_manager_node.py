@@ -82,7 +82,6 @@ class ServoManagerNode(Node):
         ]
         self.driver_hand_left = ElrikDriverHandLeft(
             json_files_hand_left,
-            1.0 / self.control_frequency_hands,
             synchronise_speed=False,
         )
 
@@ -92,7 +91,6 @@ class ServoManagerNode(Node):
         ]
         self.driver_hand_right = ElrikDriverHandRight(
             json_files_hand_right,
-            1.0 / self.control_frequency_hands,
             synchronise_speed=False,
         )
 
