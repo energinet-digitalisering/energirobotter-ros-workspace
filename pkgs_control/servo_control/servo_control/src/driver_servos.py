@@ -8,7 +8,6 @@ from dataclasses import dataclass
 import json
 import logging
 import numpy as np
-from pathlib import Path
 from typing import List
 
 from .utils import interval_map
@@ -28,38 +27,46 @@ class DriverServos(ABC):
     Subclasses must implement abstract methods to handle specific driver functionality.
     """
 
-    def __init__(self, config_files, synchronise_speed=False):
+    def __init__(self, config_files):
         self.logger = logging.getLogger(self.__class__.__name__)
         logging.basicConfig(level=logging.INFO)
 
-        self.synchronise_speed = synchronise_speed
         self.servo_groups = {}
+        self.servos = {}
 
         # Load and process JSON files
         for json_file in config_files:
-            group_name = Path(json_file).stem
 
             with open(json_file, "r") as file:
                 servo_config = json.load(file)
-                self.servo_groups[group_name] = self._add_servos(servo_config)
 
-        self.servos_all = {
-            name: servo
-            for group in self.servo_groups.values()
-            for name, servo in group.items()
-        }
+                # Add all servos to flat dict
+                self.servos.update(self._add_servos(servo_config["servos"]))
 
+                # Create a ServoGroup object
+                group_name = servo_config["group"]["name"]
+                synchronise = servo_config["group"]["synchronise_speed"]
+                servo_names = list(servo_config["servos"].keys())
+
+                self.servo_groups[group_name] = ServoGroup(
+                    servo_names=servo_names,
+                    synchronise_speed=synchronise,
+                )
+
+        # Info print
+        self.logger.info(f"--------")
+        for group_name, group in self.servo_groups.items():
+            self.logger.info(f"Added group '{group_name}', containing servos:")
+
+            for servo_name in group.servo_names:
+                self.logger.info(f"{servo_name}")
         self.logger.info(f"--------")
 
-        for group_name, data in self.servo_groups.items():
-            self.logger.info(f"group: {group_name}")
-
-            for servo_name, servo in data.items():
-                self.logger.info(f"servo: {servo.servo_id}")
-
+        # Setup driver
         self.driver_object = self.setup_driver()
         self.coms_active = self.driver_object is not None
 
+        # Member parameters
         self.speed_multplier = 2
         self.speed_min = 10.0
         self.distance_threshold_min = 5
@@ -93,7 +100,7 @@ class DriverServos(ABC):
                 gain_D=parameters["gain_D"],
             )
 
-            self.logger.info(f"Added servo: {name}")
+            self.logger.debug(f"Added servo: {name}")
 
         return servo_dict
 
@@ -137,12 +144,16 @@ class DriverServos(ABC):
         if not self.coms_active:
             return
 
+        # Compute speed for each servo, dependent on their servo group
         speeds = {}
-        for servo_dict in self.servo_groups.values():
+        for group in self.servo_groups.values():
+            servos_dict = {name: self.servos[name] for name in group.servo_names}
+
             speeds.update(
                 self._compute_relative_speeds(
-                    servo_dict,
+                    servos_dict,
                     command_dict,
+                    group.synchronise_speed,
                     ignored_keys=[
                         "joint_left_wrist_roll",
                         "joint_left_wrist_pitch",
@@ -159,8 +170,7 @@ class DriverServos(ABC):
                 executor.submit(
                     self._command_servo, name, command_dict[name], speeds[name]
                 )
-                for group in self.servo_groups.values()
-                for name in group.keys()
+                for name in self.servos.keys()
                 if name in command_dict
             ]
             for future in futures:
@@ -180,9 +190,8 @@ class DriverServos(ABC):
         with ThreadPoolExecutor() as executor:
             futures = [
                 executor.submit(self._update_servo_feedback, name)
-                for group in self.servo_groups.values()
-                for name, servo in group.items()
-                if servo.feedback_enabled
+                for name in self.servos.keys()
+                if self.servos[name].feedback_enabled
             ]
             for future in futures:
                 try:
@@ -197,9 +206,7 @@ class DriverServos(ABC):
         Returns:
             dict: A dictionary mapping servo names to default command values (e.g., 0.0).
         """
-        return {
-            name: 0.0 for group in self.servo_groups.values() for name in group.keys()
-        }
+        return {name: 0.0 for name in self.servos}
 
     def get_servo_angles(self):
         """
@@ -208,13 +215,11 @@ class DriverServos(ABC):
         Returns:
             dict: A dictionary mapping servo names to current angles.
         """
-        return {
-            name: float(servo.angle)
-            for group in self.servo_groups.values()
-            for name, servo in group.items()
-        }
+        return {name: float(self.servos[name].angle) for name in self.servos}
 
-    def _compute_relative_speeds(self, servo_dict, command_dict, ignored_keys=[]):
+    def _compute_relative_speeds(
+        self, servo_dict, command_dict, synchronise_speed, ignored_keys=[]
+    ):
         """
         Computes relative speed values for servos based on their target positions.
 
@@ -232,7 +237,7 @@ class DriverServos(ABC):
 
         speeds_allowed = {name: None for name in servo_dict.keys()}
 
-        if not self.synchronise_speed:
+        if not synchronise_speed:
             return speeds_allowed
 
         servos_affected = [
@@ -279,7 +284,7 @@ class DriverServos(ABC):
         if np.isnan(command):
             return
 
-        servo = self.servos_all[name]
+        servo = self.servos[name]
         angle_target = command + servo.default_position
 
         angle_cmd, pwm_cmd = servo.reach_angle_direct(angle_target, speed)
@@ -296,11 +301,11 @@ class DriverServos(ABC):
         Args:
             name (str): Name of the servo to update feedback for.
         """
-        feedback_pwm = self.read_feedback(self.servos_all[name])
+        feedback_pwm = self.read_feedback(self.servos[name])
 
         if feedback_pwm is not None:
             # WRONG! Need to update the right dict
-            self.servos_all[name].set_feedback_pwm(feedback_pwm)
+            self.servos[name].set_feedback_pwm(feedback_pwm)
 
     def _validate_command(self, servo: ServoControl, pwm):
         """

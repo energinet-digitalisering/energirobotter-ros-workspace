@@ -14,8 +14,8 @@ BAUDRATE = 115200
 
 
 class ElrikDriverArms(DriverServos):
-    def __init__(self, config_files, control_frequency, synchronise_speed=False):
-        DriverServos.__init__(self, config_files, synchronise_speed)
+    def __init__(self, config_files, control_frequency):
+        DriverServos.__init__(self, config_files)
 
         self.port_handler = None
         self.running = True
