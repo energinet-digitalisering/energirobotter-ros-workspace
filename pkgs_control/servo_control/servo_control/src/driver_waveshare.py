@@ -1,5 +1,5 @@
 """
-Servo driver/manager of Elrik arms, which are servos controlled by a Waveshare driver.
+Servo driver/manager of humanoid robot servos, which are servos controlled by a Waveshare driver.
 """
 
 import threading
@@ -13,7 +13,7 @@ PORT = "/dev/ttyUSB0"
 BAUDRATE = 115200
 
 
-class ElrikDriverArms(DriverServos):
+class DriverWaveshare(DriverServos):
     def __init__(self, config_files, control_frequency):
         DriverServos.__init__(self, config_files)
 

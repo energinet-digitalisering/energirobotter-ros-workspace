@@ -5,7 +5,7 @@ Managing ROS communication for all servos in Elrik
 import rclpy
 from rclpy.node import Node
 
-from servo_control.src.elrik_driver_arms import ElrikDriverArms
+from servo_control.src.elrik_driver_arms import DriverWaveshare
 
 
 class ServoResetNode(Node):
@@ -32,7 +32,7 @@ class ServoResetNode(Node):
             f"{config_folder_path}/servo_arm_left_params.json",
             f"{config_folder_path}/servo_arm_right_params.json",
         ]
-        self.driver_arms = ElrikDriverArms(json_files_arms, self.control_frequency)
+        self.driver_arms = DriverWaveshare(json_files_arms, self.control_frequency)
 
         self.servo_commands_arms = {}
         for servo in self.driver_arms.get_default_servo_commands().keys():

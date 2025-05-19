@@ -8,7 +8,7 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
 
-from servo_control.src.elrik_driver_arms import ElrikDriverArms
+from servo_control.src.driver_waveshare import DriverWaveshare
 from servo_control.src.elrik_driver_hand_left import ElrikDriverHandLeft
 from servo_control.src.elrik_driver_hand_right import ElrikDriverHandRight
 
@@ -71,7 +71,7 @@ class ServoManagerNode(Node):
             f"{config_folder_path}/servo_arm_left_params.json",
             f"{config_folder_path}/servo_arm_right_params.json",
         ]
-        self.driver_arms = ElrikDriverArms(json_files_arms, self.control_frequency_arms)
+        self.driver_arms = DriverWaveshare(json_files_arms, self.control_frequency_arms)
         self.servo_commands_arms = self.driver_arms.get_default_servo_commands()
 
         # Configure left hand servo manager
