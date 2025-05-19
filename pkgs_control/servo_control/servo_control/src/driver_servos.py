@@ -4,13 +4,21 @@ Base class for servo driver/managers.
 
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass
 import json
 import logging
 import numpy as np
 from pathlib import Path
+from typing import List
 
 from .utils import interval_map
 from servo_control.src.servo_control import ServoControl
+
+
+@dataclass
+class ServoGroup:
+    servo_names: List[str]
+    synchronise_speed: bool = False
 
 
 class DriverServos(ABC):
