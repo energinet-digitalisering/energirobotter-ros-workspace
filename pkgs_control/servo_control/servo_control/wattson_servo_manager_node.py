@@ -67,19 +67,13 @@ class ServoManagerNode(Node):
     def callback_joints_hands(self, msg):
         self.servo_commands_hands = dict(zip(msg.name, np.rad2deg(msg.position)))
 
-        # TODO: Reimplement finger mapping
+        # Map angles to servo range for fingers
+        for servo_name in self.servo_commands_hands:
+            servo = self.servo_driver.servos[servo_name]
+            command = self.servo_commands_hands[servo_name]
 
-        # # Left hand
-        # for servo_name, servo in self.driver_hand_left.servos.items():
-        #     command = self.servo_commands_hands[servo_name]
-        #     angle_mapped = self.driver_hand_left.map_finger_to_servo(servo, command)
-        #     self.servo_commands_hands[servo_name] = angle_mapped
-
-        # # Right hand
-        # for servo_name, servo in self.driver_hand_right.servos.items():
-        #     command = self.servo_commands_hands[servo_name]
-        #     angle_mapped = self.driver_hand_right.map_finger_to_servo(servo, command)
-        #     self.servo_commands_hands[servo_name] = angle_mapped
+            angle_mapped = self.servo_driver.map_finger_to_servo(servo, command)
+            self.servo_commands_hands[servo_name] = angle_mapped
 
     def callback_timer(self):
 
