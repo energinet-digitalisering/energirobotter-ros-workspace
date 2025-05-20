@@ -76,9 +76,10 @@ class ServoManagerNode(Node):
             self.servo_commands_hands[servo_name] = angle_mapped
 
     def callback_timer(self):
-
+        # Combine command dicts into one
         self.servo_commands = self.servo_commands_arms | self.servo_commands_hands
 
+        # Update servos
         self.servo_driver.update_feedback()
         self.servo_driver.command_servos(self.servo_commands)
 
