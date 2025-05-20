@@ -6,6 +6,7 @@ import threading
 import time
 
 from .SCServo_Python.scservo_sdk import PortHandler, sms_sts, scservo_def
+from .utils import interval_map
 from servo_control.src.driver_servos import DriverServos
 from servo_control.src.servo_control import ServoControl
 
@@ -104,3 +105,16 @@ class DriverWaveshare(DriverServos):
         except Exception as e:
             self.logger.error(f"Failed to read feedback: {e}")
             return None
+
+    def map_finger_to_servo(servo: ServoControl, angle_cmd):
+        # Function specific to finger servos, that takes an angle between 0-90 and converts to correct range
+
+        angle_mapped = interval_map(
+            angle_cmd,
+            0,
+            90,
+            servo.angle_software_min - servo.default_position,
+            servo.angle_software_max - servo.default_position,
+        )
+
+        return angle_mapped
