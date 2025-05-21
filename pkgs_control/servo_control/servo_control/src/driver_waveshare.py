@@ -94,10 +94,10 @@ class DriverWaveshare(DriverServos):
                 SCS_MOVING_ACC := 64,
             )
 
-            if scs_addparam_result != True:
-                self.logger.warning(
-                    f"groupSyncWrite addparam failed, servo ID: {servo.servo_id}"
-                )
+            # if scs_addparam_result != True:
+            # self.logger.warning(
+            # f"groupSyncWrite addparam failed, servo ID: {servo.servo_id}"
+            # )
 
     def read_feedback(self, servo: ServoControl):
         try:
