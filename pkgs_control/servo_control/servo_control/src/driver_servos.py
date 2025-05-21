@@ -144,6 +144,9 @@ class DriverServos(ABC):
         if not self.coms_active:
             return
 
+        if not command_dict:
+            return
+
         # Compute speed for each servo, dependent on their servo group
         speeds = {}
         for group in self.servo_groups.values():

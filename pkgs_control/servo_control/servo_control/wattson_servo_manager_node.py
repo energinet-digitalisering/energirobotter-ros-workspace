@@ -69,6 +69,9 @@ class ServoManagerNode(Node):
 
         # Map angles to servo range for fingers
         for servo_name in self.servo_commands_hands:
+            if servo_name not in self.servo_driver.servos:
+                continue
+
             servo = self.servo_driver.servos[servo_name]
             command = self.servo_commands_hands[servo_name]
 
@@ -78,6 +81,11 @@ class ServoManagerNode(Node):
     def callback_timer(self):
         # Combine command dicts into one
         self.servo_commands = self.servo_commands_arms | self.servo_commands_hands
+
+        if not self.servo_commands:
+            self.get_logger().info(f"No commands received yet...", once=True)
+        else:
+            self.get_logger().info(f"Commands received!", once=True)
 
         # Update servos
         self.servo_driver.update_feedback()
