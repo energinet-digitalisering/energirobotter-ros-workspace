@@ -18,14 +18,18 @@ class ServoResetNode(Node):
         self.control_frequency = (
             self.get_parameter("control_frequency").get_parameter_value().double_value
         )
+        self.declare_parameter(
+            "config_folder_path",
+            "install/energirobotter_bringup/share/energirobotter_bringup/config/servos",
+        )
+        config_folder_path = (
+            self.get_parameter("config_folder_path").get_parameter_value().string_value
+        )
 
         # Timers
         self.timer = self.create_timer(self.control_frequency, self.callback_timer)
 
         # Node variables
-        config_folder_path = (
-            "install/energirobotter_bringup/share/energirobotter_bringup/config/servos"
-        )
 
         # Configure arm servo manager
         json_files_arms = [
