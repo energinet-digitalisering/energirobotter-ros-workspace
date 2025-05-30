@@ -91,6 +91,17 @@ class ServoManagerNode(Node):
         self.servo_driver.update_feedback()
         self.servo_driver.command_servos(self.servo_commands)
 
+        # DEBUG
+        positions = self.servo_driver.get_servo_angles()
+
+        msg = JointState()
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.name = list(positions.keys())
+        msg.position = list(positions.values())
+
+        self.pub_speeds.publish(msg)
+        # DEBUG END
+
 
 def main(args=None):
     rclpy.init(args=args)
