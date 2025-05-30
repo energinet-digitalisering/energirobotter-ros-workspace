@@ -26,6 +26,8 @@ setup(
             "servo_driver_arduino = servo_control.test_nodes.servo_driver_arduino:main",
             "servo_driver_pca9685 = servo_control.test_nodes.servo_driver_pca9685:main",
             "servo_driver_waveshare = servo_control.test_nodes.servo_driver_waveshare:main",
+            "servo_acc_test_node = servo_control.test_nodes.servo_acc_test_node:main",
+            "servo_acc_test2_node = servo_control.test_nodes.servo_acc_test2_node:main",
         ],
     },
 )
