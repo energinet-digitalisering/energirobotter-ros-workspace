@@ -19,13 +19,13 @@ setup(
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [
-            "servo_control_node = servo_control.servo_control_node:main",
-            "servo_driver_arduino = servo_control.servo_driver_arduino:main",
-            "servo_driver_pca9685 = servo_control.servo_driver_pca9685:main",
-            "servo_driver_waveshare = servo_control.servo_driver_waveshare:main",
             "elrik_servo_manager_node = servo_control.elrik_servo_manager_node:main",
             "wattson_servo_manager_node = servo_control.wattson_servo_manager_node:main",
             "servo_reset_node = servo_control.servo_reset_node:main",
+            "servo_control_node = servo_control.servo_control_node:main",
+            "servo_driver_arduino = servo_control.test_nodes.servo_driver_arduino:main",
+            "servo_driver_pca9685 = servo_control.test_nodes.servo_driver_pca9685:main",
+            "servo_driver_waveshare = servo_control.test_nodes.servo_driver_waveshare:main",
         ],
     },
 )
