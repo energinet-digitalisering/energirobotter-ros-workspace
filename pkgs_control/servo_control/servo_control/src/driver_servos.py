@@ -149,24 +149,28 @@ class DriverServos(ABC):
 
         # Compute speed for each servo, dependent on their servo group
         speeds = {}
-        for group in self.servo_groups.values():
-            servos_dict = {name: self.servos[name] for name in group.servo_names}
 
-            speeds.update(
-                self._compute_relative_speeds(
-                    servos_dict,
-                    command_dict,
-                    group.synchronise_speed,
-                    ignored_keys=[
-                        "joint_left_wrist_roll",
-                        "joint_left_wrist_pitch",
-                        "joint_left_forearm_yaw",
-                        "joint_right_wrist_roll",
-                        "joint_right_wrist_pitch",
-                        "joint_right_forearm_yaw",
-                    ],
-                )
+        for group in self.servo_groups.values():
+            group_servo_dict = {name: self.servos[name] for name in group.servo_names}
+            group_command_dict = {
+                name: command_dict[name] for name in group.servo_names
+            }
+
+            group_speeds = self._compute_relative_speeds(
+                group_servo_dict,
+                group_command_dict,
+                group.synchronise_speed,
+                ignored_keys=[
+                    "joint_left_wrist_roll",
+                    "joint_left_wrist_pitch",
+                    "joint_left_forearm_yaw",
+                    "joint_right_wrist_roll",
+                    "joint_right_wrist_pitch",
+                    "joint_right_forearm_yaw",
+                ],
             )
+
+            speeds.update(group_speeds)
 
         with ThreadPoolExecutor() as executor:
             futures = [

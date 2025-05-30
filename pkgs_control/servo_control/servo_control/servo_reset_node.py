@@ -32,12 +32,12 @@ class ServoResetNode(Node):
         # Node variables
 
         # Configure arm servo manager
-        json_files_arms = [
+        json_files = [
             f"{config_folder_path}/servo_arm_left_params.json",
             f"{config_folder_path}/servo_arm_right_params.json",
         ]
 
-        self.servo_driver = DriverWaveshare(json_files_arms, self.control_frequency)
+        self.servo_driver = DriverWaveshare(json_files, self.control_frequency)
         self.servo_commands = self.servo_driver.get_default_servo_commands()
 
     def callback_timer(self):
