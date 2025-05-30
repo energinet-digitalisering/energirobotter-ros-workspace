@@ -20,7 +20,7 @@ class ServoResetNode(Node):
         )
         self.declare_parameter(
             "config_folder_path",
-            "install/energirobotter_bringup/share/energirobotter_bringup/config/servos",
+            "install/wattson_description/share/wattson_description/servo_configs",
         )
         config_folder_path = (
             self.get_parameter("config_folder_path").get_parameter_value().string_value
@@ -36,14 +36,12 @@ class ServoResetNode(Node):
             f"{config_folder_path}/servo_arm_left_params.json",
             f"{config_folder_path}/servo_arm_right_params.json",
         ]
-        self.driver_arms = DriverWaveshare(json_files_arms, self.control_frequency)
 
-        self.servo_commands_arms = {}
-        for servo in self.driver_arms.get_default_servo_commands().keys():
-            self.servo_commands_arms[servo] = 1
+        self.servo_driver = DriverWaveshare(json_files_arms, self.control_frequency)
+        self.servo_commands = self.servo_driver.get_default_servo_commands()
 
     def callback_timer(self):
-        self.driver_arms.command_servos(self.servo_commands_arms)
+        self.servo_driver.command_servos(self.servo_commands)
 
 
 def main(args=None):
