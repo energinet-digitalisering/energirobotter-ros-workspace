@@ -52,9 +52,13 @@ The `servo_manager_node` loads `.json` files that describes all parameters for e
 
 
 
-### Notes
+### Waveshare Servo Notes
 
-Waveshare servos can rotate from `0°` to `360°` and have a configurable **middle-point**, corresponding to `180°`. This middle-point acts as a reference around which the servo moves. Choosing the correct middle-point is especially important when the servo is **geared**, and its range of motion is reduced. The middle-point of a servo is configured through the web-app hosted by the servo driver. 
+Waveshare servos PWM is represented by a 12-bit number, so in base 10 it is `0 - 4095`. Tests showed that the actual range accepted by the driver was `0 - 4094`.
+
+When sending a direct command to a Waveshare servo in code, one can set `SCS_MOVING_SPEED` and `SCS_MOVING_ACC`. In the contorl code in this repo, both are set to a constant value (typically max), as the speed and acceleration are controlled through sending specific positions. But for reference and tests, the maximum value for `SCS_MOVING_SPEED` seems to be `4000` (unknown unit) and for `SCS_MOVING_ACC` it is `255` (will crash the program if it goes beyond). Setting `SCS_MOVING_SPEED` to `0` will set it to the maximum value.
+
+Waveshare servos can rotate from `0°` to `360°` and have a configurable **middle-point**, corresponding to `180°`. This middle-point acts as a reference around which the servo moves. Choosing the correct middle-point is especially important when the servo is **geared**, and its range of motion is reduced. The middle-point of a servo is configured through the web-app hosted by the servo driver.
 
 ---
 
@@ -102,3 +106,4 @@ The **default position** is the servo's starting/resting position after power-on
 > then set the default position to `135°`, not `180°`.
 
 ---
+
