@@ -28,6 +28,7 @@ setup(
             "servo_driver_waveshare = servo_control.test_nodes.servo_driver_waveshare:main",
             "servo_acc_test_node = servo_control.test_nodes.servo_acc_test_node:main",
             "servo_acc_test2_node = servo_control.test_nodes.servo_acc_test2_node:main",
+            "command_test_node = servo_control.test_nodes.command_test_node:main",
         ],
     },
 )
