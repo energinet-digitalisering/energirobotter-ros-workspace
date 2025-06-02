@@ -67,7 +67,6 @@ class DriverServos(ABC):
         self.coms_active = self.driver_object is not None
 
         # Member parameters
-        self.speed_multplier = 2
         self.speed_min = 10.0
         self.distance_threshold_min = 5
 
@@ -271,7 +270,7 @@ class DriverServos(ABC):
             servo = servo_dict[name]
             distance = abs(command_dict[name] + servo.default_position - servo.angle)
             relative = distance / longest_distance
-            speed_allowed = distance * relative * self.speed_multplier
+            speed_allowed = servo.angle_speed_max * relative
 
             # Always allow a minimum speed
             speed_allowed = max(speed_allowed, self.speed_min)
