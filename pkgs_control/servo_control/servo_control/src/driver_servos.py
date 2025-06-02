@@ -151,13 +151,10 @@ class DriverServos(ABC):
 
         for group in self.servo_groups.values():
             group_servo_dict = {name: self.servos[name] for name in group.servo_names}
-            group_command_dict = {
-                name: command_dict[name] for name in group.servo_names
-            }
 
             group_speeds = self._compute_relative_speeds(
                 group_servo_dict,
-                group_command_dict,
+                command_dict,
                 group.synchronise_speed,
                 ignored_keys=[
                     "joint_left_wrist_roll",
