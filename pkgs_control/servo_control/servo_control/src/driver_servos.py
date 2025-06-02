@@ -243,10 +243,16 @@ class DriverServos(ABC):
         if not synchronise_speed:
             return speeds_allowed
 
+        # Filter out ignored keys
         servos_affected = [
             servo_name
             for servo_name in servo_dict.keys()
             if servo_name not in ignored_keys
+        ]
+
+        # Filter out servos that did not receive commands
+        servos_affected = [
+            servo_name for servo_name in servos_affected if servo_name in command_dict
         ]
 
         longest_distance = max(
