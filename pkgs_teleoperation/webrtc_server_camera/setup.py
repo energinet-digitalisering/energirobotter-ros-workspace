@@ -18,6 +18,8 @@ setup(
     license="Energinet",
     tests_require=["pytest"],
     entry_points={
-        "console_scripts": [],
+        "console_scripts": [
+            f"webrtc_server_camera_node = {package_name}.webrtc_server_camera_node:main",
+        ],
     },
 )
