@@ -1,5 +1,5 @@
 """
-Managing ROS communication for all servos in Elrik
+Resets all servos to their default positions.
 """
 
 import time
@@ -29,7 +29,7 @@ class ServoResetNode(Node):
             f"{config_folder_path}/servo_arm_left_params.json",
             f"{config_folder_path}/servo_arm_right_params.json",
         ]
-        self.servo_driver = DriverWaveshare(json_files, 0.5)
+        self.servo_driver = DriverWaveshare(json_files, 1.0)
 
         # Send commands
         self.servo_commands = self.servo_driver.get_default_servo_commands()
