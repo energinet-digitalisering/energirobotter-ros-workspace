@@ -15,8 +15,20 @@ from webrtc_server_camera.src.video_track_zed import VideoTrackZED
 
 
 class WebRTCServerCamera:
+    """
+    A simple WebRTC server that streams video from a ZED camera using aiortc and aiohttp.
+    """
+
     def __init__(self, host="0.0.0.0", port=8080, ssl_context=None):
-        # Initialize logging
+        """
+        Initialize the WebRTC server.
+
+        Args:
+            host (str): Host address to bind the server to. Defaults to "0.0.0.0".
+            port (int): Port number to run the server on. Defaults to 8080.
+            ssl_context (ssl.SSLContext, optional): SSL context for HTTPS. Defaults to None.
+        """
+
         self.logger = logging.getLogger(self.__class__.__name__)
         logging.basicConfig(level=logging.INFO)
 
@@ -46,6 +58,15 @@ class WebRTCServerCamera:
         web.run_app(app, host=host, port=port, ssl_context=ssl_context)
 
     def force_codec(self, pc, sender, forced_codec):
+        """
+        Force a specific codec for a given RTCRtpSender.
+
+        Args:
+            pc (RTCPeerConnection): The peer connection to modify.
+            sender (RTCRtpSender): The RTP sender whose codec to set.
+            forced_codec (str): MIME type of the codec to enforce, e.g., "video/H264".
+        """
+
         kind = forced_codec.split("/")[0]
         codecs = RTCRtpSender.getCapabilities(kind).codecs
         transceiver = next(t for t in pc.getTransceivers() if t.sender == sender)
@@ -54,6 +75,16 @@ class WebRTCServerCamera:
         )
 
     async def offer(self, request):
+        """
+        Handle incoming WebRTC offer from a client, respond with an answer.
+
+        Args:
+            request (aiohttp.web.Request): The incoming HTTP POST request containing SDP offer.
+
+        Returns:
+            aiohttp.web.Response: JSON response containing the SDP answer.
+        """
+
         self.logger.info("Client connected")
 
         params = await request.json()
@@ -88,6 +119,13 @@ class WebRTCServerCamera:
         )
 
     async def on_shutdown(self, app):
+        """
+        Cleanup function called on server shutdown. Closes all peer connections.
+
+        Args:
+            app (aiohttp.web.Application): The aiohttp application instance.
+        """
+
         self.logger.info("Shutting down. Closing peer connections...")
 
         coros = [pc.close() for pc in self.pcs]
@@ -95,10 +133,30 @@ class WebRTCServerCamera:
         self.pcs.clear()
 
     async def index(self, request):
+        """
+        Serve the main HTML page.
+
+        Args:
+            request (aiohttp.web.Request): The incoming HTTP GET request.
+
+        Returns:
+            aiohttp.web.Response: The HTML page content.
+        """
+
         content = open(os.path.join(self.root, "index.html"), "r").read()
         return web.Response(content_type="text/html", text=content)
 
     async def javascript(self, request):
+        """
+        Serve the client-side JavaScript.
+
+        Args:
+            request (aiohttp.web.Request): The incoming HTTP GET request.
+
+        Returns:
+            aiohttp.web.Response: The JavaScript file content.
+        """
+
         content = open(os.path.join(self.root, "client.js"), "r").read()
         return web.Response(content_type="application/javascript", text=content)
 
