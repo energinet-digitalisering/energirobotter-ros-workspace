@@ -32,16 +32,20 @@ class WebRTCServerCamera:
         self.logger = logging.getLogger(self.__class__.__name__)
         logging.basicConfig(level=logging.INFO)
 
+        self.host = host
+        self.port = port
+        self.ssl_context = ssl_context
+
         self.root = os.path.dirname(__file__)
 
         self.pcs = set()
         self.camera_track = VideoTrackZED()
 
-        app = web.Application()
-        app.on_shutdown.append(self.on_shutdown)
+        self.app = web.Application()
+        self.app.on_shutdown.append(self.on_shutdown)
 
         cors = aiohttp_cors.setup(
-            app,
+            self.app,
             defaults={
                 "*": aiohttp_cors.ResourceOptions(
                     allow_credentials=True,
@@ -51,11 +55,40 @@ class WebRTCServerCamera:
                 )
             },
         )
-        cors.add(app.router.add_get("/", self.index))
-        cors.add(app.router.add_get("/client.js", self.javascript))
-        cors.add(app.router.add_post("/offer", self.offer))
+        cors.add(self.app.router.add_get("/", self.index))
+        cors.add(self.app.router.add_get("/client.js", self.javascript))
+        cors.add(self.app.router.add_post("/offer", self.offer))
 
-        web.run_app(app, host=host, port=port, ssl_context=ssl_context)
+        self.runner = web.AppRunner(self.app)
+
+    async def start(self):
+
+        await self.runner.setup()
+        site = web.TCPSite(
+            self.runner, host=self.host, port=self.port, ssl_context=self.ssl_context
+        )
+        await site.start()
+        self.logger.info(f"WebRTC server started at http://{self.host}:{self.port}")
+
+    async def stop(self):
+        self.logger.info("Stopping WebRTC server...")
+        await self.app.shutdown()
+        await self.app.cleanup()  # Triggers `on_shutdown`
+        await self.runner.cleanup()
+
+    async def on_shutdown(self, app):
+        """
+        Cleanup function called on server shutdown. Closes all peer connections.
+
+        Args:
+            app (aiohttp.web.Application): The aiohttp application instance.
+        """
+
+        self.logger.info("Shutting down. Closing peer connections...")
+
+        coros = [pc.close() for pc in self.pcs]
+        await asyncio.gather(*coros)
+        self.pcs.clear()
 
     def force_codec(self, pc, sender, forced_codec):
         """
@@ -73,6 +106,34 @@ class WebRTCServerCamera:
         transceiver.setCodecPreferences(
             [codec for codec in codecs if codec.mimeType == forced_codec]
         )
+
+    async def index(self, request):
+        """
+        Serve the main HTML page.
+
+        Args:
+            request (aiohttp.web.Request): The incoming HTTP GET request.
+
+        Returns:
+            aiohttp.web.Response: The HTML page content.
+        """
+
+        content = open(os.path.join(self.root, "index.html"), "r").read()
+        return web.Response(content_type="text/html", text=content)
+
+    async def javascript(self, request):
+        """
+        Serve the client-side JavaScript.
+
+        Args:
+            request (aiohttp.web.Request): The incoming HTTP GET request.
+
+        Returns:
+            aiohttp.web.Response: The JavaScript file content.
+        """
+
+        content = open(os.path.join(self.root, "client.js"), "r").read()
+        return web.Response(content_type="application/javascript", text=content)
 
     async def offer(self, request):
         """
@@ -118,48 +179,20 @@ class WebRTCServerCamera:
             ),
         )
 
-    async def on_shutdown(self, app):
-        """
-        Cleanup function called on server shutdown. Closes all peer connections.
-
-        Args:
-            app (aiohttp.web.Application): The aiohttp application instance.
-        """
-
-        self.logger.info("Shutting down. Closing peer connections...")
-
-        coros = [pc.close() for pc in self.pcs]
-        await asyncio.gather(*coros)
-        self.pcs.clear()
-
-    async def index(self, request):
-        """
-        Serve the main HTML page.
-
-        Args:
-            request (aiohttp.web.Request): The incoming HTTP GET request.
-
-        Returns:
-            aiohttp.web.Response: The HTML page content.
-        """
-
-        content = open(os.path.join(self.root, "index.html"), "r").read()
-        return web.Response(content_type="text/html", text=content)
-
-    async def javascript(self, request):
-        """
-        Serve the client-side JavaScript.
-
-        Args:
-            request (aiohttp.web.Request): The incoming HTTP GET request.
-
-        Returns:
-            aiohttp.web.Response: The JavaScript file content.
-        """
-
-        content = open(os.path.join(self.root, "client.js"), "r").read()
-        return web.Response(content_type="application/javascript", text=content)
-
 
 if __name__ == "__main__":
-    webrtc_server_camera = WebRTCServerCamera()
+
+    server = WebRTCServerCamera()
+
+    async def main():
+        await server.start()
+        try:
+            # Keep running until Ctrl+C
+            while True:
+                await asyncio.sleep(1)
+        except KeyboardInterrupt:
+            pass
+        finally:
+            await server.stop()
+
+    asyncio.run(main())
