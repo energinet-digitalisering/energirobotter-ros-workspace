@@ -264,6 +264,10 @@ class DriverServos(ABC):
             servo_name for servo_name in servos_affected if servo_name in command_dict
         ]
 
+        # Return early if no servos meet criteria
+        if not servos_affected:
+            return speeds_allowed
+
         longest_distance = max(
             abs(
                 command_dict[name]
