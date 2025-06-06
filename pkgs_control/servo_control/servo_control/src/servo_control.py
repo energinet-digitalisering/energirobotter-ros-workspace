@@ -74,8 +74,7 @@ class ServoControl:
         self.gain_D = gain_D
         self.feedback_enabled = feedback_enabled
 
-        self.zero_position = (angle_max + angle_min) // 2
-
+        self.gear_zero_position = (angle_max + angle_min) // 2
         self.angle_init = self.default_position
         self.angle = self.angle_init
         self.pwm = self.angle_2_pwm(self.angle)
@@ -282,7 +281,7 @@ class ServoControl:
         Returns:
             float: Input angle.
         """
-        return (value - self.zero_position) / gear_ratio + self.zero_position
+        return (value - self.gear_zero_position) / gear_ratio + self.gear_zero_position
 
     def gearing_out(self, value, gear_ratio):
         """
@@ -295,7 +294,7 @@ class ServoControl:
         Returns:
             float: Output angle.
         """
-        return self.zero_position + (value - self.zero_position) * gear_ratio
+        return self.gear_zero_position + (value - self.gear_zero_position) * gear_ratio
 
     def reach_angle_direct(self, angle, speed=None):
         """
