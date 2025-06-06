@@ -220,6 +220,15 @@ class DriverServos(ABC):
         """
         return {name: float(self.servos[name].angle) for name in self.servos}
 
+    def get_servo_temperatures(self):
+        """
+        Generate a dictionary of current temperatures for all servos.
+
+        Returns:
+            dict: A dictionary mapping servo names to current temperatures.
+        """
+        return {name: float(self.servos[name].temperature) for name in self.servos}
+
     def _compute_relative_speeds(
         self, servo_dict, command_dict, synchronise_speed, ignored_keys=[]
     ):
