@@ -1,8 +1,7 @@
-import matplotlib.pyplot as plt
 import rclpy
-
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
+import matplotlib.pyplot as plt
 from collections import deque
 
 

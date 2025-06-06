@@ -22,23 +22,7 @@ class ElrikKdlKinematics(Node):
 
         self.urdf = self.retrieve_urdf()
 
-        self.end_effectors = [
-            "link_left_hand",
-            "link_right_hand",
-            "link_head_roll",
-        ]
-
-        self.chain_names = {
-            self.end_effectors[0]: "left",
-            self.end_effectors[1]: "right",
-            self.end_effectors[2]: "head",
-        }
-
-        self.locked_joints = {
-            self.end_effectors[0]: {5: 0.0},
-            self.end_effectors[1]: {},
-            self.end_effectors[2]: {},
-        }
+        self.end_effectors = ["link_left_hand", "link_right_hand", "link_head_roll"]
 
         self.end_effector_callback_subs = {
             self.end_effectors[0]: self.callback_target_pos_left,
@@ -74,13 +58,11 @@ class ElrikKdlKinematics(Node):
 
             # We automatically loads the kinematics corresponding to the config
             if chain.getNrOfJoints():
-                self.get_logger().info(
-                    f'Found kinematics chain for "{end_effector}"! Chain length: {chain.getNrOfJoints()}'
-                )
+                self.get_logger().info(f'Found kinematics chain for "{end_effector}"!')
 
                 self.target_sub[end_effector] = self.create_subscription(
                     msg_type=PoseStamped,
-                    topic=f"/{self.chain_names[end_effector]}/target_pose",
+                    topic=f"/{end_effector}/target_pose",
                     qos_profile=5,
                     callback=self.end_effector_callback_subs[end_effector],
                 )
@@ -119,7 +101,7 @@ class ElrikKdlKinematics(Node):
                     q0=self.q_init[end_effector],
                     target_pose=self.target_pose[end_effector],
                     nb_joints=self.chain[end_effector].getNrOfJoints(),
-                    locked_joints=self.locked_joints[end_effector],
+                    locked_joints={5: 0.0},
                 )
             else:
                 q_solution = self.q_init[end_effector]

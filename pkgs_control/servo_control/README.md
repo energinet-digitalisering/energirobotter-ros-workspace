@@ -2,9 +2,6 @@
 
 Package implementing PID control and communication of/with servo motors, with Serial or I2C protocol through a servo driver, either a [Waveshare Driver](https://www.waveshare.com/servo-driver-with-esp32.htm), [PCA9685](https://www.adafruit.com/product/815), or any [Arduino](https://www.arduino.cc/) board.
 
-> NOTE: This README is deprecated...
-
-
 See `examples/` for usage examples. Run examples from root through the terminal:
 ```
 python3 src/energirobotter-vision/servo_control/examples/arduino_single_servo_example.py
