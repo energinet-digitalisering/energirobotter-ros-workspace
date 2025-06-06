@@ -23,7 +23,7 @@ class DriverWaveshare(DriverServos):
         self.lock = threading.Lock()
 
         self.loop_thread = threading.Thread(
-            target=self.loop_send_command, args=(control_frequency,), daemon=True
+            target=self.loop_sync_commands, args=(control_frequency,), daemon=True
         )
         self.loop_thread.start()
 
@@ -54,20 +54,18 @@ class DriverWaveshare(DriverServos):
             self.logger.error(f"Failed to open port: {e}")
             return None
 
-    def loop_send_command(self, frequency=50):
+    def loop_sync_commands(self, frequency=10):
         interval = 1.0 / frequency
 
         while self.running:
             start = time.time()
-            self.send_command_sync()
+            self.sync_commands()
             elapsed = time.time() - start
             time.sleep(max(0, interval - elapsed))
 
-    def send_command_sync(self):
+    def sync_commands(self):
 
         with self.lock:
-            # self.logger.info(f"Sync send")
-            # return
 
             # Syncwrite goal position
             scs_comm_result = self.driver_object.groupSyncWrite.txPacket()
