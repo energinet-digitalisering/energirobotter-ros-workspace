@@ -1,0 +1,7 @@
+{
+    "group": {
+        "name": "hand_right",
+        "synchronise_speed": false
+    },
+    "servos": {}
+}

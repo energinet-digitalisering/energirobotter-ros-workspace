@@ -16,10 +16,11 @@ package_name = "energirobotter_bringup"
 
 def launch_setup(context, *args, **kwargs):
     rviz = LaunchConfiguration("rviz")
+    description_package = LaunchConfiguration("description_package")
 
     urdf_file = PathJoinSubstitution(
         [
-            FindPackageShare("elrik_description"),
+            FindPackageShare(description_package),
             "urdf",
             "phobos_generated.urdf",
         ]
@@ -72,6 +73,12 @@ def generate_launch_description():
                 default_value="false",
                 description="Start RViz2 automatically with this launch file.",
                 choices=["true", "false"],
+            ),
+            DeclareLaunchArgument(
+                "description_package",
+                default_value="wattson_description",
+                description="Package in workspace that contains robot URDF description.",
+                choices=["elrik_description", "wattson_description"],
             ),
             OpaqueFunction(function=launch_setup),
         ]

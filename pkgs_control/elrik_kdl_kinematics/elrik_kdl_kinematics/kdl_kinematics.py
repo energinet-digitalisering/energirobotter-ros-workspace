@@ -86,7 +86,8 @@ def inverse_kinematics(
     # Reapply lock after solving
     if locked_joints:
         for i, val in locked_joints.items():
-            sol[i] = val
+            if i < len(sol):
+                sol[i] = val
 
     return res, sol
 

@@ -1,6 +1,19 @@
 # Energirobotter ROS Workspace
 
-Packages for Energinets Humanoid Robots, part of the project "Energirobotter". 
+Packages for Energinet's Humanoid Robots, part of the project "Energirobotter". 
+
+- [Energirobotter ROS Workspace](#energirobotter-ros-workspace)
+  - [Setup](#setup)
+    - [Dialout Group](#dialout-group)
+    - [Repository](#repository)
+    - [ZED SDK](#zed-sdk)
+      - [Ubuntu 22.04](#ubuntu-2204)
+      - [Jetson Orin Nano (Jetpack 6.0)](#jetson-orin-nano-jetpack-60)
+    - [Dependencies](#dependencies)
+    - [AI model](#ai-model)
+    - [Build](#build)
+  - [Usage](#usage)
+
 
 ## Setup
 
@@ -61,17 +74,5 @@ colcon build --symlink-install
 
 ## Usage
 
-Use the `energirobotter_bringup` package's `vision.launch.py` to start the camera and face detection:
-
-```
-source install/setup.bash
-ros2 launch energirobotter_bringup vision.launch.py use_compressed:=true
-```
-
-If no camera is available, run example with:
-```
-ros2 launch energirobotter_bringup vision.launch.py use_mock_camera:=true
-```
-
-> Note: The first time `face_detection` is run `ultralytics` will install som extra packages, and require a restart of the node.
+Refer to the `README.md` in the `energirobotter_bringup` package for a description of the different launch files - aka. features.
 
