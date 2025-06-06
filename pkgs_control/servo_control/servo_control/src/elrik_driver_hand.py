@@ -6,7 +6,7 @@ from adafruit_pca9685 import PCA9685
 import board
 
 from .utils import interval_map
-from servo_control.src.driver_servos import DriverServos
+from servo_control.src.elrik_driver_servos import ElrikDriverServos
 from servo_control.src.servo_control import ServoControl
 
 import time
@@ -15,7 +15,7 @@ from collections import deque
 call_times = deque()
 
 
-class ElrikDriverHand(DriverServos):
+class ElrikDriverHand(ElrikDriverServos):
 
     def setup_driver(self):
 
@@ -56,7 +56,7 @@ class ElrikDriverHand(DriverServos):
             call_times.popleft()
 
         frequency = len(call_times) / 10  # Calls per second in the last 10 sec
-        # self.logger.info(f"Frequency (last 10s): {frequency:.2f} calls/sec")
+        self.logger.info(f"Frequency (last 10s): {frequency:.2f} calls/sec")
 
         # self.logger.info(f"Servo: {servo.servo_id}. Stopping pwm of: {pwm}")
         # return

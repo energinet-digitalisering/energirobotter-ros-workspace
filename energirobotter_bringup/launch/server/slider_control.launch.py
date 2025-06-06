@@ -1,13 +1,9 @@
 from launch import LaunchDescription
 from launch.actions import (
-    DeclareLaunchArgument,
     IncludeLaunchDescription,
     OpaqueFunction,
 )
-from launch.substitutions import (
-    LaunchConfiguration,
-    PathJoinSubstitution,
-)
+from launch.substitutions import PathJoinSubstitution
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.substitutions import FindPackageShare
 
@@ -16,11 +12,10 @@ package_name = "energirobotter_bringup"
 
 
 def launch_setup(context, *args, **kwargs):
-    description_package = LaunchConfiguration("description_package")
 
     urdf_file = PathJoinSubstitution(
         [
-            FindPackageShare(description_package),
+            FindPackageShare("elrik_description"),
             "urdf",
             "phobos_generated.urdf",
         ]
@@ -44,7 +39,7 @@ def launch_setup(context, *args, **kwargs):
             ]
         ),
         launch_arguments={
-            "urdf_package": description_package,
+            "urdf_package": "elrik_description",
             "urdf_package_path": urdf_file,
             "rviz_config": rviz_config_file,
         }.items(),
@@ -59,12 +54,6 @@ def generate_launch_description():
 
     return LaunchDescription(
         [
-            DeclareLaunchArgument(
-                "description_package",
-                default_value="wattson_description",
-                description="Package in workspace that contains robot URDF description.",
-                choices=["elrik_description", "wattson_description"],
-            ),
             OpaqueFunction(function=launch_setup),
         ]
     )
