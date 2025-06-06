@@ -1,7 +1,7 @@
 import rclpy
 from rclpy.node import Node
 
-from .src.SCServo_Python.scservo_sdk import PortHandler, sms_sts, scservo_def
+from ..src.SCServo_Python.scservo_sdk import PortHandler, sms_sts, scservo_def
 
 from energirobotter_interfaces.msg import ServoCommand
 

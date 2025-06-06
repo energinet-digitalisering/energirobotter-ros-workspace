@@ -1,23 +1,22 @@
 """
-Servo driver/manager of Elrik arms, which are servos controlled by a Waveshare driver.
+Servo driver/manager of humanoid robot servos, which are servos controlled by a Waveshare driver.
 """
 
 import threading
 import time
 
 from .SCServo_Python.scservo_sdk import PortHandler, sms_sts, scservo_def
-from servo_control.src.elrik_driver_servos import ElrikDriverServos
+from .utils import interval_map
+from servo_control.src.driver_servos import DriverServos
 from servo_control.src.servo_control import ServoControl
 
 PORT = "/dev/ttyUSB0"
 BAUDRATE = 115200
 
 
-class ElrikDriverArms(ElrikDriverServos):
-    def __init__(self, config_files, control_frequency, synchronise_speed=False):
-        ElrikDriverServos.__init__(
-            self, config_files, control_frequency, synchronise_speed=False
-        )
+class DriverWaveshare(DriverServos):
+    def __init__(self, config_files, control_frequency):
+        DriverServos.__init__(self, config_files)
 
         self.port_handler = None
         self.running = True
@@ -95,10 +94,10 @@ class ElrikDriverArms(ElrikDriverServos):
                 SCS_MOVING_ACC := 64,
             )
 
-            if scs_addparam_result != True:
-                self.logger.warning(
-                    f"groupSyncWrite addparam failed, servo ID: {servo.servo_id}"
-                )
+            # if scs_addparam_result != True:
+            # self.logger.warning(
+            # f"groupSyncWrite addparam failed, servo ID: {servo.servo_id}"
+            # )
 
     def read_feedback(self, servo: ServoControl):
         try:
@@ -106,3 +105,16 @@ class ElrikDriverArms(ElrikDriverServos):
         except Exception as e:
             self.logger.error(f"Failed to read feedback: {e}")
             return None
+
+    def map_finger_to_servo(servo: ServoControl, angle_cmd):
+        # Function specific to finger servos, that takes an angle between 0-90 and converts to correct range
+
+        angle_mapped = interval_map(
+            angle_cmd,
+            0,
+            90,
+            servo.angle_software_min - servo.default_position,
+            servo.angle_software_max - servo.default_position,
+        )
+
+        return angle_mapped

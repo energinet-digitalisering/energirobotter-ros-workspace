@@ -76,7 +76,7 @@ def generate_launch_description():
             ),
             DeclareLaunchArgument(
                 "description_package",
-                default_value="elrik_description",
+                default_value="wattson_description",
                 description="Package in workspace that contains robot URDF description.",
                 choices=["elrik_description", "wattson_description"],
             ),
