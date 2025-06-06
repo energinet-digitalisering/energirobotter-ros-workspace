@@ -104,6 +104,12 @@ class sms_sts(protocol_packet_handler):
         moving, scs_comm_result, scs_error = self.read1ByteTxRx(scs_id, SMS_STS_MOVING)
         return moving, scs_comm_result, scs_error
 
+    def ReadTemperature(self, scs_id):
+        temperature, scs_comm_result, scs_error = self.read1ByteTxRx(
+            scs_id, SMS_STS_PRESENT_TEMPERATURE
+        )
+        return temperature, scs_comm_result, scs_error
+
     def SyncWritePosEx(self, scs_id, position, speed, acc):
         txpacket = [
             acc,
