@@ -13,10 +13,10 @@ class VuerApp(VRInterfaceApp):
         self.camera_enabled = camera_enabled
 
         # Initialize the Vuer app
-        self.app = Vuer(host="localhost", port=8012, free_port=True, static_root=".")
-        self.app.add_handler("CAMERA_MOVE")(self.on_camera_move)
-        self.app.add_handler("HAND_MOVE")(self.on_hand_move)
-        self.app.spawn(start=False)(self.session_manager)
+        self.app_vuer = Vuer(host="0.0.0.0", port=8012, free_port=True, static_root=".")
+        self.app_vuer.add_handler("CAMERA_MOVE")(self.on_camera_move)
+        self.app_vuer.add_handler("HAND_MOVE")(self.on_hand_move)
+        self.app_vuer.spawn(start=False)(self.session_manager)
 
         # Start the Vuer app in a separate process
         self.process = Process(target=self.run)
@@ -27,7 +27,7 @@ class VuerApp(VRInterfaceApp):
 
     def run(self):
         """Run the Vuer app"""
-        self.app.run()
+        self.app_vuer.run()
 
     async def on_camera_move(self, event, session: VuerSession):
         """Handle head tracking data"""
@@ -61,7 +61,7 @@ class VuerApp(VRInterfaceApp):
         self.logger.info("Session initialised")
 
         # Ensure the WebSocket is active
-        if len(self.app.ws) == 0:
+        if len(self.app_vuer.ws) == 0:
             self.logger.warning("WebSocket session missing, ending session")
             return
 
@@ -82,7 +82,7 @@ class VuerApp(VRInterfaceApp):
         )
 
         # Session loop
-        while len(self.app.ws) > 0:
+        while len(self.app_vuer.ws) > 0:
             # 'jpeg' encoding should give about 30fps with a 16ms wait in-between.
             await sleep(0.016 * 2)
 
