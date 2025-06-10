@@ -1,5 +1,9 @@
+import aiohttp
+from aiohttp.web_response import Response
 from asyncio import sleep
+from cgi import parse_header
 from multiprocessing import Process
+import traceback
 from vuer import Vuer, VuerSession
 from vuer.schemas import DefaultScene, Hands, WebRTCVideoPlane
 
@@ -18,6 +22,9 @@ class VuerApp(VRInterfaceApp):
         self.app_vuer.add_handler("HAND_MOVE")(self.on_hand_move)
         self.app_vuer.spawn(start=False)(self.session_manager)
 
+        # Add WebRTC offer proxy route
+        self.app_vuer._route("/offer", self.proxy_offer, method="POST")
+
         # Member variables
         self.webrtc_server_uri = "http://localhost:8080/offer"
         self.ngrok_webrtc_server_uri = "https://<ngrok_session_id>.ngrok-free.app/offer"
@@ -29,6 +36,36 @@ class VuerApp(VRInterfaceApp):
     def run(self):
         """Run the Vuer app"""
         self.app_vuer.run()
+
+    async def proxy_offer(self, request):
+        try:
+            headers = {
+                "Content-Type": request.headers.get("Content-Type", "application/json")
+            }
+            data = await request.read()
+
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    self.webrtc_server_uri, data=data, headers=headers
+                ) as resp:
+                    response_data = await resp.read()
+
+                    # Parse content type to extract 'type' and 'charset'
+                    content_type_raw = resp.headers.get(
+                        "Content-Type", "application/json"
+                    )
+                    content_type, params = parse_header(content_type_raw)
+
+                    return Response(
+                        body=response_data,
+                        status=resp.status,
+                        content_type=content_type,
+                        charset=params.get("charset"),
+                    )
+
+        except Exception as e:
+            traceback.print_exc()
+            return aiohttp.web.Response(status=500, text=f"Proxy error: {e}")
 
     async def on_camera_move(self, event, session: VuerSession):
         """Handle head tracking data"""
