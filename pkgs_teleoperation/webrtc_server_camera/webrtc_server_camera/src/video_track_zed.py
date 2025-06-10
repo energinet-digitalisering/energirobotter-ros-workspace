@@ -41,6 +41,12 @@ class VideoTrackZED(VideoStreamTrack):
         self.image_left = sl.Mat()
         self.image_right = sl.Mat()
 
+    def __del__(self):
+        """
+        Closes ZED camera properly.
+        """
+
+        self.zed.close()
 
     async def recv(self):
         """
