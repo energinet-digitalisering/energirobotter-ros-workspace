@@ -18,12 +18,13 @@ class VuerApp(VRInterfaceApp):
         self.app_vuer.add_handler("HAND_MOVE")(self.on_hand_move)
         self.app_vuer.spawn(start=False)(self.session_manager)
 
+        # Member variables
+        self.webrtc_server_uri = "http://localhost:8080/offer"
+        self.ngrok_webrtc_server_uri = "https://<ngrok_session_id>.ngrok-free.app/offer"
+
         # Start the Vuer app in a separate process
         self.process = Process(target=self.run)
         self.process.start()
-
-        # Member variables
-        # self.webrtc_server_uri = "http://localhost:8080/offer"
 
     def run(self):
         """Run the Vuer app"""
@@ -67,7 +68,7 @@ class VuerApp(VRInterfaceApp):
 
         # Create camera stream plane
         quad = WebRTCVideoPlane(
-            src="http://localhost:8080/offer",
+            src=self.ngrok_webrtc_server_uri,
             key="video-quad",
             height=1,
             aspect=16 / 9,
