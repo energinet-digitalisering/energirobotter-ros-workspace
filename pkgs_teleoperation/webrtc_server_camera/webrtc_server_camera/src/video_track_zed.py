@@ -2,6 +2,7 @@
 from aiortc import VideoStreamTrack
 import asyncio
 from av import VideoFrame
+import cv2
 import numpy as np
 import logging
 import pyzed.sl as sl
@@ -29,8 +30,12 @@ class VideoTrackZED(VideoStreamTrack):
         logging.basicConfig(level=logging.INFO)
 
         self.zed = sl.Camera()
-        init = sl.InitParameters()
-        if self.zed.open(init) != sl.ERROR_CODE.SUCCESS:
+
+        init_params = sl.InitParameters()
+        # init_params.camera_resolution = sl.RESOLUTION.HD1080
+        init_params.camera_fps = 30
+
+        if self.zed.open(init_params) != sl.ERROR_CODE.SUCCESS:
             raise RuntimeError("Failed to open ZED camera")
 
         self.image_left = sl.Mat()
@@ -48,9 +53,8 @@ class VideoTrackZED(VideoStreamTrack):
             VideoFrame: The next frame to send, or None if the camera failed to grab a frame.
         """
 
-        await asyncio.sleep(1 / 60)  # Maintain 60 FPS
-
-        pts, time_base = await self.next_timestamp()
+        await asyncio.sleep(1 / 30)  # Maintain 30 FPS
+        timestamp, time_base = await self.next_timestamp()
 
         if self.zed.grab() != sl.ERROR_CODE.SUCCESS:
             return None
@@ -61,10 +65,19 @@ class VideoTrackZED(VideoStreamTrack):
         frame_left = self.image_left.get_data()
         frame_right = self.image_right.get_data()
 
+        frame_left = cv2.cvtColor(frame_left, cv2.COLOR_BGR2GRAY)
+        frame_right = cv2.cvtColor(frame_right, cv2.COLOR_BGR2GRAY)
+
         # Concatenate the images horizontally
         stereo_frame = np.hstack((frame_left, frame_right))
+
+        stereo_frame = cv2.cvtColor(
+            stereo_frame, cv2.COLOR_GRAY2BGR
+        )  # To fit bgr24 format
+        stereo_frame = cv2.resize(stereo_frame, (1280, 360))
+
         # Convert to VideoFrame
-        video_frame.pts = pts
         video_frame = VideoFrame.from_ndarray(stereo_frame[:, :, :3], format="bgr24")
+        video_frame.pts = timestamp
         video_frame.time_base = time_base
         return video_frame
