@@ -5,7 +5,7 @@ from cgi import parse_header
 from multiprocessing import Process
 import traceback
 from vuer import Vuer, VuerSession
-from vuer.schemas import DefaultScene, Hands, WebRTCVideoPlane
+from vuer.schemas import DefaultScene, Hands, WebRTCStereoVideoPlane
 
 from teleoperation.src.vr_interface_app import VRInterfaceApp
 
@@ -104,13 +104,13 @@ class VuerApp(VRInterfaceApp):
             return
 
         # Create camera stream plane
-        quad = WebRTCVideoPlane(
+        quad = WebRTCStereoVideoPlane(
             src=self.ngrok_webrtc_server_uri,
             key="video-quad",
             height=1,
             aspect=16 / 9,
             fixed=True,
-            position=[0, 1, -2],
+            position=[0, 1, -1.5],
         )
 
         # Initialize the session

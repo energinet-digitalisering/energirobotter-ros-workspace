@@ -2,6 +2,7 @@
 from aiortc import VideoStreamTrack
 import asyncio
 from av import VideoFrame
+import numpy as np
 import logging
 import pyzed.sl as sl
 
@@ -31,7 +32,10 @@ class VideoTrackZED(VideoStreamTrack):
         init = sl.InitParameters()
         if self.zed.open(init) != sl.ERROR_CODE.SUCCESS:
             raise RuntimeError("Failed to open ZED camera")
-        self.image = sl.Mat()
+
+        self.image_left = sl.Mat()
+        self.image_right = sl.Mat()
+
 
     async def recv(self):
         """
@@ -51,11 +55,16 @@ class VideoTrackZED(VideoStreamTrack):
         if self.zed.grab() != sl.ERROR_CODE.SUCCESS:
             return None
 
-        self.zed.retrieve_image(self.image, sl.VIEW.LEFT)
-        frame = self.image.get_data()
+        self.zed.retrieve_image(self.image_left, sl.VIEW.LEFT)
+        self.zed.retrieve_image(self.image_right, sl.VIEW.RIGHT)
 
+        frame_left = self.image_left.get_data()
+        frame_right = self.image_right.get_data()
+
+        # Concatenate the images horizontally
+        stereo_frame = np.hstack((frame_left, frame_right))
         # Convert to VideoFrame
-        video_frame = VideoFrame.from_ndarray(frame[:, :, :3], format="bgr24")
         video_frame.pts = pts
+        video_frame = VideoFrame.from_ndarray(stereo_frame[:, :, :3], format="bgr24")
         video_frame.time_base = time_base
         return video_frame
