@@ -14,8 +14,18 @@ package_name = "energirobotter_bringup"
 
 
 def launch_setup(context, *args, **kwargs):
-    rviz = LaunchConfiguration("rviz")
+    camera_enabled = LaunchConfiguration("camera_enabled")
     ik_enabled = LaunchConfiguration("ik_enabled")
+    rviz = LaunchConfiguration("rviz")
+
+    webrtc_server_node = Node(
+        package="webrtc_server_camera",
+        executable="webrtc_server_camera_node",
+        output="screen",
+        condition=IfCondition(
+            camera_enabled,
+        ),
+    )
 
     ik_control_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -34,9 +44,13 @@ def launch_setup(context, *args, **kwargs):
         package="teleoperation",
         executable="teleoperation_vuer_node",
         output="screen",
+        parameters=[
+            {"camera_enabled": camera_enabled},
+        ],
     )
 
     return [
+        webrtc_server_node,
         ik_control_launch,
         teleoperation_vuer_node,
     ]
@@ -46,15 +60,21 @@ def generate_launch_description():
     return LaunchDescription(
         [
             DeclareLaunchArgument(
-                "rviz",
+                "camera_enabled",
                 default_value="false",
-                description="Start RViz2 automatically with this launch file.",
+                description="Run teleoperation with or without camera.",
                 choices=["true", "false"],
             ),
             DeclareLaunchArgument(
                 "ik_enabled",
                 default_value="false",
                 description="Run teleoperation with or without publishing IK.",
+                choices=["true", "false"],
+            ),
+            DeclareLaunchArgument(
+                "rviz",
+                default_value="false",
+                description="Start RViz2 automatically with this launch file.",
                 choices=["true", "false"],
             ),
             OpaqueFunction(function=launch_setup),
