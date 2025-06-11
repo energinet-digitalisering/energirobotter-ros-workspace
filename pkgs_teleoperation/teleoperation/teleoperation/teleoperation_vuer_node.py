@@ -19,7 +19,7 @@ class TeleoperationVuerNode(Node):
         super().__init__("teleoperation_vuer_node")
 
         # Parameters
-        self.declare_parameter("camera_enabled", True)
+        self.declare_parameter("camera_enabled", False)
         camera_enabled = (
             self.get_parameter("camera_enabled").get_parameter_value().bool_value
         )
@@ -27,6 +27,11 @@ class TeleoperationVuerNode(Node):
         self.declare_parameter("frecuency", 30)
         self.frecuency = (
             self.get_parameter("frecuency").get_parameter_value().integer_value
+        )
+
+        self.declare_parameter("ngrok_enabled", False)
+        ngrok_enabled = (
+            self.get_parameter("ngrok_enabled").get_parameter_value().bool_value
         )
 
         # Publishers
@@ -49,7 +54,7 @@ class TeleoperationVuerNode(Node):
 
         self.cv_bridge = CvBridge()
 
-        self.vuer_app = VuerApp(camera_enabled)
+        self.vuer_app = VuerApp(camera_enabled, ngrok_enabled)
         self.tracking_transformer = TrackingTransformer()
         self.tracking_filter_left = TrackingFilter()
         self.tracking_filter_right = TrackingFilter()

@@ -16,6 +16,7 @@ package_name = "energirobotter_bringup"
 def launch_setup(context, *args, **kwargs):
     camera_enabled = LaunchConfiguration("camera_enabled")
     ik_enabled = LaunchConfiguration("ik_enabled")
+    ngrok_enabled = LaunchConfiguration("ngrok_enabled")
     rviz = LaunchConfiguration("rviz")
 
     webrtc_server_node = Node(
@@ -46,6 +47,7 @@ def launch_setup(context, *args, **kwargs):
         output="screen",
         parameters=[
             {"camera_enabled": camera_enabled},
+            {"ngrok_enabled": ngrok_enabled},
         ],
     )
 
@@ -69,6 +71,12 @@ def generate_launch_description():
                 "ik_enabled",
                 default_value="false",
                 description="Run teleoperation with or without publishing IK.",
+                choices=["true", "false"],
+            ),
+            DeclareLaunchArgument(
+                "ngrok_enabled",
+                default_value="false",
+                description="Run teleoperation with or without ngrok.",
                 choices=["true", "false"],
             ),
             DeclareLaunchArgument(
