@@ -12,79 +12,90 @@ rosdep install --from-paths src -y --ignore-src
 ```
 
 - [Energirobotter Bringup](#energirobotter-bringup)
-  - [Teleoperation Unity](#teleoperation-unity)
-    - [Setup VR Headset](#setup-vr-headset)
-      - [Connected to computer with Unity](#connected-to-computer-with-unity)
-      - [Only VR headset](#only-vr-headset)
+  - [Teleoperation Vuer (Wireless and with camera)](#teleoperation-vuer-wireless-and-with-camera)
     - [Setup Robot](#setup-robot)
-    - [Calibrate and Launch](#calibrate-and-launch)
-  - [Teleoperation Vuer](#teleoperation-vuer)
-    - [Setup VR Headset](#setup-vr-headset-1)
+      - [Enable Servo Serial Forwarding](#enable-servo-serial-forwarding)
+    - [Setup VR Headset](#setup-vr-headset)
     - [Setup Teleoperation](#setup-teleoperation)
+    - [Calibrate and Launch](#calibrate-and-launch)
+  - [Teleoperation Vuer (Wired and No Camera)](#teleoperation-vuer-wired-and-no-camera)
+    - [Setup VR Headset](#setup-vr-headset-1)
+    - [Setup Teleoperation](#setup-teleoperation-1)
     - [Setup Robot](#setup-robot-1)
     - [Calibrate and Launch](#calibrate-and-launch-1)
     - [V1 Demo notes (Danish)](#v1-demo-notes-danish)
+  - [Teleoperation Unity](#teleoperation-unity)
+    - [Setup VR Headset](#setup-vr-headset-2)
+      - [Connected to computer with Unity](#connected-to-computer-with-unity)
+      - [Only VR headset](#only-vr-headset)
+    - [Setup Robot](#setup-robot-2)
+    - [Calibrate and Launch](#calibrate-and-launch-2)
   - [Face Following](#face-following)
 
 
 
 
-## Teleoperation Unity
-
-### Setup VR Headset 
-
-Either you want to test an app directly from Unity, or you would directly run the app already built on the headset.
-
-#### Connected to computer with Unity
-
-1. Turn on headset
-2. Create a boundary
-3. Plug USB cable into headset and computer
-> If the "`USB-C Port Disabled, water and debris`" message pops up, restart the headset and try again. If that does not work, use the other end of the cable and try again.
-1. Enable Link
-> Do NOT click on the `USB Detected` pop-up, only enable the link. 
-1. In Unity, start the VR Interface app
-
-#### Only VR headset
-
-1. Turn on headset
-2. Create a boundary
-3. Start the VR Interface app
+## Teleoperation Vuer (Wireless and with camera)
 
 
 ### Setup Robot
-Have a screen connected to the Jetson of the robot, to verify tracking data sent from Unity with RViz. 
 
-1. Turn on the tobot
-2. In a teminal on the Jetson, open RViz2 with config file:
+1. Turn on the robot
+2. From terminal on PC SSH into the robot (Elrik example):
+   ```
+   ssh elrik@192.168.1.101
+   ```
+3. Export your [authtoken from the ngrok dashboard](https://dashboard.ngrok.com/get-started/your-authtoken) as NGROK_AUTHTOKEN in your terminal:
+   ```
+   export NGROK_AUTHTOKEN=$YOUR_AUTHTOKEN
+   ```
+4. Run teleoperation with:
+   ```
+   ros2 launch energirobotter_bringup teleoperation_vuer.launch.py camera_enabled:=true ngrok:=true ik_enabled:=true rviz:=false
+   ```
+
+#### Enable Servo Serial Forwarding
+
+1. On your phone, connect to the `ESP32_DEV` Wi-Fi network
+2. In browser, go to `192.168.4.1`
+3. Click button `Start Serial Forwarding` - OBS! Make sure nothing is sending commands to the robot yet
+4. Click botton `Stop Serial Forwarding` but don't click `OK`, it's now ready as a stop button if needed
+
+
+### Setup VR Headset
+
+1. Turn on headset
+2. In the headset's browser, go to the ngrok address shown in the terminal when launching the teleoperation
+
+
+### Setup Teleoperation
+
+1. In a teminal on your computer, open RViz2 with config file:
    ```
    rviz2 -d src/energirobotter-ros-workspace/energirobotter_bringup/config/rviz/teleoperation.rviz
    ```
-3. In another terminal, run teleoperation with:
-   ```
-   ros2 launch energirobotter_bringup teleoperation_zeromq.launch.py ik_enabled:=true camera_enabled:=true ip_target:="192.168.1.102"
-   ```
-4. On your phone, connect to the `ESP32_DEV` Wi-Fi network
-5. In browser, go to `192.168.4.1`
-6. Click button `Start Serial Forwarding` - OBS! Make sure nothing is sending commands to the robot yet
-7. Click botton `Stop Serial Forwarding` but don't click `OK`, it's now ready as a stop button if needed
+
 
 ### Calibrate and Launch
 
-1. Calibrate the view (hold down Meta button on right controller)
-2. Verify that tracking is working in RViz
-3. Start `arm.launch.py` on the Jetson:
-   >Make sure the VR is tracking properly! As soon as the `arm.launch.py` is running, it will start moving!
+1. In the headset, press "passthrough"
+2. Calibrate the view (hold down Meta button on right controller)
+3. Verify that tracking is working in RViz
+4. Start `servos.launch.py` in a terminal on the robot:
+   >Make sure the VR is tracking properly! As soon as the `servos.launch.py` is running, it will start moving!
    ```
    cd energinet/
    shumble
    sw
-   ros2 launch energirobotter_bringup arm.launch.py
+   ros2 launch energirobotter_bringup servos.launch.py
    ```
-4. When done with the teleoperation, stop the `arm.launch.py` terminal
+   
+5. When done with the teleoperation, stop the `servos.launch.py` terminal
+
+---
 
 
-## Teleoperation Vuer
+## Teleoperation Vuer (Wired and No Camera)
 
 ### Setup VR Headset
 
@@ -158,6 +169,62 @@ Steps:
 - Hænderne på bordet (eller bare stille foran én) 
 - Start programmet! 
 - Vær klar til at stoppe, hvis der sker noget, eller de tager headset af for hurtigt
+
+
+## Teleoperation Unity
+> **Deprecated**
+
+### Setup VR Headset 
+
+Either you want to test an app directly from Unity, or you would directly run the app already built on the headset.
+
+#### Connected to computer with Unity
+
+1. Turn on headset
+2. Create a boundary
+3. Plug USB cable into headset and computer
+> If the "`USB-C Port Disabled, water and debris`" message pops up, restart the headset and try again. If that does not work, use the other end of the cable and try again.
+1. Enable Link
+> Do NOT click on the `USB Detected` pop-up, only enable the link. 
+1. In Unity, start the VR Interface app
+
+#### Only VR headset
+
+1. Turn on headset
+2. Create a boundary
+3. Start the VR Interface app
+
+
+### Setup Robot
+Have a screen connected to the Jetson of the robot, to verify tracking data sent from Unity with RViz. 
+
+1. Turn on the tobot
+2. In a teminal on the Jetson, open RViz2 with config file:
+   ```
+   rviz2 -d src/energirobotter-ros-workspace/energirobotter_bringup/config/rviz/teleoperation.rviz
+   ```
+3. In another terminal, run teleoperation with:
+   ```
+   ros2 launch energirobotter_bringup teleoperation_zeromq.launch.py ik_enabled:=true camera_enabled:=true ip_target:="192.168.1.102"
+   ```
+4. On your phone, connect to the `ESP32_DEV` Wi-Fi network
+5. In browser, go to `192.168.4.1`
+6. Click button `Start Serial Forwarding` - OBS! Make sure nothing is sending commands to the robot yet
+7. Click botton `Stop Serial Forwarding` but don't click `OK`, it's now ready as a stop button if needed
+
+### Calibrate and Launch
+
+1. Calibrate the view (hold down Meta button on right controller)
+2. Verify that tracking is working in RViz
+3. Start `arm.launch.py` on the Jetson:
+   >Make sure the VR is tracking properly! As soon as the `arm.launch.py` is running, it will start moving!
+   ```
+   cd energinet/
+   shumble
+   sw
+   ros2 launch energirobotter_bringup arm.launch.py
+   ```
+4. When done with the teleoperation, stop the `arm.launch.py` terminal
 
 
 ## Face Following
