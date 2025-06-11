@@ -8,7 +8,7 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
 
-from servo_control.src.elrik_driver_arms import ElrikDriverArms
+from servo_control.src.driver_waveshare import DriverWaveshare
 from servo_control.src.elrik_driver_hand_left import ElrikDriverHandLeft
 from servo_control.src.elrik_driver_hand_right import ElrikDriverHandRight
 
@@ -71,30 +71,20 @@ class ServoManagerNode(Node):
             f"{config_folder_path}/servo_arm_left_params.json",
             f"{config_folder_path}/servo_arm_right_params.json",
         ]
-        self.driver_arms = ElrikDriverArms(
-            json_files_arms, self.control_frequency_arms, synchronise_speed=True
-        )
+        self.driver_arms = DriverWaveshare(json_files_arms, self.control_frequency_arms)
         self.servo_commands_arms = self.driver_arms.get_default_servo_commands()
 
         # Configure left hand servo manager
         json_files_hand_left = [
             f"{config_folder_path}/servo_hand_left_params.json",
         ]
-        self.driver_hand_left = ElrikDriverHandLeft(
-            json_files_hand_left,
-            1.0 / self.control_frequency_hands,
-            synchronise_speed=False,
-        )
+        self.driver_hand_left = ElrikDriverHandLeft(json_files_hand_left)
 
         # Configure right hand servo manager
         json_files_hand_right = [
             f"{config_folder_path}/servo_hand_right_params.json",
         ]
-        self.driver_hand_right = ElrikDriverHandRight(
-            json_files_hand_right,
-            1.0 / self.control_frequency_hands,
-            synchronise_speed=False,
-        )
+        self.driver_hand_right = ElrikDriverHandRight(json_files_hand_right)
 
         self.servo_commands_hands = (
             self.driver_hand_left.get_default_servo_commands()

@@ -15,7 +15,7 @@ def launch_setup(context, *args, **kwargs):
     # Servo Driver
     servo_manager_node = Node(
         package="servo_control",
-        executable="servo_manager_node",
+        executable="wattson_servo_manager_node",
         output="screen",
         parameters=[
             {"config_folder_path": config_folder_path},

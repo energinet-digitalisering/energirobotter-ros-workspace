@@ -1,42 +1,72 @@
 """
-Base class for servo driver/managers of Elrik.
+Base class for servo driver/managers.
 """
 
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass
 import json
 import logging
 import numpy as np
+from typing import List
 
 from .utils import interval_map
 from servo_control.src.servo_control import ServoControl
 
 
-class ElrikDriverServos(ABC):
+@dataclass
+class ServoGroup:
+    servo_names: List[str]
+    synchronise_speed: bool = False
+
+
+class DriverServos(ABC):
     """
-    Base class for servo driver/managers of Elrik.
+    Base class for servo driver/managers.
     This class provides a framework for managing and controlling multiple servos.
     Subclasses must implement abstract methods to handle specific driver functionality.
     """
 
-    def __init__(self, config_files, control_frequency, synchronise_speed=False):
+    def __init__(self, config_files):
         self.logger = logging.getLogger(self.__class__.__name__)
         logging.basicConfig(level=logging.INFO)
 
-        self.control_frequency = control_frequency
-        self.synchronise_speed = synchronise_speed
+        self.servo_groups = {}
         self.servos = {}
 
         # Load and process JSON files
         for json_file in config_files:
+
             with open(json_file, "r") as file:
                 servo_config = json.load(file)
-                self._add_servos(servo_config)
 
+                # Add all servos to flat dict
+                self.servos.update(self._add_servos(servo_config["servos"]))
+
+                # Create a ServoGroup object
+                group_name = servo_config["group"]["name"]
+                synchronise = servo_config["group"]["synchronise_speed"]
+                servo_names = list(servo_config["servos"].keys())
+
+                self.servo_groups[group_name] = ServoGroup(
+                    servo_names=servo_names,
+                    synchronise_speed=synchronise,
+                )
+
+        # Info print
+        self.logger.info(f"--------")
+        for group_name, group in self.servo_groups.items():
+            self.logger.info(f"Added group '{group_name}', containing servos:")
+
+            for servo_name in group.servo_names:
+                self.logger.info(f"{servo_name}")
+        self.logger.info(f"--------")
+
+        # Setup driver
         self.driver_object = self.setup_driver()
         self.coms_active = self.driver_object is not None
 
-        self.speed_multplier = 2
+        # Member parameters
         self.speed_min = 10.0
         self.distance_threshold_min = 5
 
@@ -48,8 +78,10 @@ class ElrikDriverServos(ABC):
             servo_config (dict): Dictionary containing servo parameters.
         """
 
+        servo_dict = {}
+
         for name, parameters in servo_config.items():
-            self.servos[name] = ServoControl(
+            servo_dict[name] = ServoControl(
                 servo_id=parameters["servo_id"],
                 dir=parameters["dir"],
                 gear_ratio=parameters["gear_ratio"],
@@ -67,7 +99,9 @@ class ElrikDriverServos(ABC):
                 gain_D=parameters["gain_D"],
             )
 
-            self.logger.info(f"Added servo: {name}")
+            self.logger.debug(f"Added servo: {name}")
+
+        return servo_dict
 
     @abstractmethod
     def setup_driver(self):
@@ -109,17 +143,30 @@ class ElrikDriverServos(ABC):
         if not self.coms_active:
             return
 
-        speeds = self._compute_relative_speeds(
-            command_dict,
-            ignored_keys=[
-                "joint_left_wrist_roll",
-                "joint_left_wrist_pitch",
-                "joint_left_forearm_yaw",
-                "joint_right_wrist_roll",
-                "joint_right_wrist_pitch",
-                "joint_right_forearm_yaw",
-            ],
-        )
+        if not command_dict:
+            return
+
+        # Compute speed for each servo, dependent on their servo group
+        speeds = {}
+
+        for group in self.servo_groups.values():
+            group_servo_dict = {name: self.servos[name] for name in group.servo_names}
+
+            group_speeds = self._compute_relative_speeds(
+                group_servo_dict,
+                command_dict,
+                group.synchronise_speed,
+                ignored_keys=[
+                    "joint_left_wrist_roll",
+                    "joint_left_wrist_pitch",
+                    "joint_left_forearm_yaw",
+                    "joint_right_wrist_roll",
+                    "joint_right_wrist_pitch",
+                    "joint_right_forearm_yaw",
+                ],
+            )
+
+            speeds.update(group_speeds)
 
         with ThreadPoolExecutor() as executor:
             futures = [
@@ -173,7 +220,9 @@ class ElrikDriverServos(ABC):
         """
         return {name: float(self.servos[name].angle) for name in self.servos}
 
-    def _compute_relative_speeds(self, command_dict, ignored_keys=[]):
+    def _compute_relative_speeds(
+        self, servo_dict, command_dict, synchronise_speed, ignored_keys=[]
+    ):
         """
         Computes relative speed values for servos based on their target positions.
 
@@ -189,36 +238,42 @@ class ElrikDriverServos(ABC):
                   scaled relative to the longest movement required.
         """
 
-        speeds_allowed = {name: None for name in self.servos.keys()}
+        speeds_allowed = {name: None for name in servo_dict.keys()}
 
-        if not self.synchronise_speed:
+        if not synchronise_speed:
             return speeds_allowed
 
+        # Filter out ignored keys
         servos_affected = [
             servo_name
-            for servo_name in self.servos.keys()
+            for servo_name in servo_dict.keys()
             if servo_name not in ignored_keys
+        ]
+
+        # Filter out servos that did not receive commands
+        servos_affected = [
+            servo_name for servo_name in servos_affected if servo_name in command_dict
         ]
 
         longest_distance = max(
             abs(
                 command_dict[name]
-                + self.servos[name].default_position
-                - self.servos[name].angle
+                + servo_dict[name].default_position
+                - servo_dict[name].angle
             )
             for name in servos_affected
         )
 
         if not longest_distance or longest_distance < self.distance_threshold_min:
-            speeds_allowed = {name: self.speed_min for name in self.servos.keys()}
+            speeds_allowed = {name: self.speed_min for name in servo_dict.keys()}
             return speeds_allowed
 
         # Compute allowed speed based on distance to travel
         for name in servos_affected:
-            servo = self.servos[name]
+            servo = servo_dict[name]
             distance = abs(command_dict[name] + servo.default_position - servo.angle)
             relative = distance / longest_distance
-            speed_allowed = distance * relative * self.speed_multplier
+            speed_allowed = servo.angle_speed_max * relative
 
             # Always allow a minimum speed
             speed_allowed = max(speed_allowed, self.speed_min)
@@ -258,6 +313,7 @@ class ElrikDriverServos(ABC):
         feedback_pwm = self.read_feedback(self.servos[name])
 
         if feedback_pwm is not None:
+            # WRONG! Need to update the right dict
             self.servos[name].set_feedback_pwm(feedback_pwm)
 
     def _validate_command(self, servo: ServoControl, pwm):
