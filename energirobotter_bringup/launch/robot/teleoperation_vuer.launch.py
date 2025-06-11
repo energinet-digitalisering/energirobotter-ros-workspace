@@ -33,7 +33,7 @@ def launch_setup(context, *args, **kwargs):
             [
                 FindPackageShare(package_name),
                 "/launch",
-                "/server",
+                "/robot",
                 "/ik_control.launch.py",
             ]
         ),
