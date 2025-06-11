@@ -12,7 +12,7 @@ rosdep install --from-paths src -y --ignore-src
 ```
 
 - [Energirobotter Bringup](#energirobotter-bringup)
-  - [Teleoperation Vuer (Wireless and with camera)](#teleoperation-vuer-wireless-and-with-camera)
+  - [Teleoperation Vuer (Wireless and With Camera)](#teleoperation-vuer-wireless-and-with-camera)
     - [Setup Robot](#setup-robot)
       - [Enable Servo Serial Forwarding](#enable-servo-serial-forwarding)
     - [Setup VR Headset](#setup-vr-headset)
@@ -35,7 +35,7 @@ rosdep install --from-paths src -y --ignore-src
 
 
 
-## Teleoperation Vuer (Wireless and with camera)
+## Teleoperation Vuer (Wireless and With Camera)
 
 
 ### Setup Robot
@@ -43,7 +43,7 @@ rosdep install --from-paths src -y --ignore-src
 1. Turn on the robot
 2. From terminal on PC SSH into the robot (Elrik example):
    ```
-   ssh elrik@192.168.1.101
+   ssh elrik@192.168.1.105
    ```
 3. Export your [authtoken from the ngrok dashboard](https://dashboard.ngrok.com/get-started/your-authtoken) as NGROK_AUTHTOKEN in your terminal:
    ```
@@ -51,7 +51,7 @@ rosdep install --from-paths src -y --ignore-src
    ```
 4. Run teleoperation with:
    ```
-   ros2 launch energirobotter_bringup teleoperation_vuer.launch.py camera_enabled:=true ngrok:=true ik_enabled:=true rviz:=false
+   ros2 launch energirobotter_bringup teleoperation_vuer.launch.py camera_enabled:=true ngrok_enabled:=true ik_enabled:=true rviz:=false
    ```
 
 #### Enable Servo Serial Forwarding
