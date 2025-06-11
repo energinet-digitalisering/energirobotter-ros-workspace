@@ -8,6 +8,8 @@ from aiohttp.web_response import Response
 from asyncio import sleep
 from cgi import parse_header
 from multiprocessing import Process
+import ngrok
+import os
 import traceback
 from vuer import Vuer, VuerSession
 from vuer.schemas import DefaultScene, Hands, WebRTCStereoVideoPlane
@@ -16,10 +18,22 @@ from teleoperation.src.vr_interface_app import VRInterfaceApp
 
 
 class VuerApp(VRInterfaceApp):
-    def __init__(self, camera_enabled=True):
+    def __init__(self, camera_enabled=False, ngrok_enabled=True):
         VRInterfaceApp.__init__(self)
 
         self.camera_enabled = camera_enabled
+        self.ngrok_enabled = ngrok_enabled
+
+        # URIs
+        self.offer_route = "/offer"
+        self.webrtc_server_uri = "http://localhost:8080" + self.offer_route
+
+        # Establish ngrok connectivity
+        if ngrok_enabled:
+            self.ngrok_listener = ngrok.forward(9000, authtoken_from_env=True)
+            self.logger.info("----------------------------------------")
+            self.logger.info(f"ngrok URL: {self.ngrok_listener.url()}")
+            self.logger.info("----------------------------------------")
 
         # Initialize the Vuer app
         self.app_vuer = Vuer(host="0.0.0.0", port=8012, free_port=True, static_root=".")
@@ -30,10 +44,6 @@ class VuerApp(VRInterfaceApp):
         # Add WebRTC offer proxy route
         if camera_enabled:
             self.app_vuer._route("/offer", self.proxy_offer, method="POST")
-
-        # Member variables
-        self.webrtc_server_uri = "http://localhost:8080/offer"
-        self.ngrok_webrtc_server_uri = "https://<ngrok_session_id>.ngrok-free.app/offer"
 
         # Start the Vuer app in a separate process
         self.process = Process(target=self.run)
@@ -116,9 +126,16 @@ class VuerApp(VRInterfaceApp):
         )
 
         if self.camera_enabled:
+
+            # Choose source
+            if self.ngrok_enabled:
+                stream_src = self.ngrok_listener.url() + self.offer_route
+            else:
+                stream_src = self.webrtc_server_uri
+
             # Create camera stream plane
             video_plane = WebRTCStereoVideoPlane(
-                src=self.ngrok_webrtc_server_uri,
+                src=stream_src,
                 key="video-quad",
                 height=1,
                 aspect=16 / 9,
