@@ -19,6 +19,8 @@ class WebRTCServerCameraNode(Node):
         self.thread.start()
 
     def _run_loop(self):
+        self.get_logger().info("Starting WebRTC server...")
+
         asyncio.set_event_loop(self.loop)
         self.loop.run_until_complete(self.server.start())
         self.loop.run_forever()

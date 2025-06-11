@@ -16,8 +16,10 @@ from teleoperation.src.vr_interface_app import VRInterfaceApp
 
 
 class VuerApp(VRInterfaceApp):
-    def __init__(self):
+    def __init__(self, camera_enabled=True):
         VRInterfaceApp.__init__(self)
+
+        self.camera_enabled = camera_enabled
 
         # Initialize the Vuer app
         self.app_vuer = Vuer(host="0.0.0.0", port=8012, free_port=True, static_root=".")
@@ -26,7 +28,8 @@ class VuerApp(VRInterfaceApp):
         self.app_vuer.spawn(start=False)(self.session_manager)
 
         # Add WebRTC offer proxy route
-        self.app_vuer._route("/offer", self.proxy_offer, method="POST")
+        if camera_enabled:
+            self.app_vuer._route("/offer", self.proxy_offer, method="POST")
 
         # Member variables
         self.webrtc_server_uri = "http://localhost:8080/offer"
@@ -106,21 +109,25 @@ class VuerApp(VRInterfaceApp):
             self.logger.warning("WebSocket session missing, ending session")
             return
 
-        # Create camera stream plane
-        quad = WebRTCStereoVideoPlane(
-            src=self.ngrok_webrtc_server_uri,
-            key="video-quad",
-            height=1,
-            aspect=16 / 9,
-            fixed=True,
-            position=[0, 1, -1.5],
-        )
-
         # Initialize the session
-        session.set @ DefaultScene(quad, frameloop="always")
+        session.set @ DefaultScene(frameloop="always")
         session.upsert @ Hands(
             fps=30, stream=True, key="hands", showLeft=True, showRight=True
         )
+
+        if self.camera_enabled:
+            # Create camera stream plane
+            video_plane = WebRTCStereoVideoPlane(
+                src=self.ngrok_webrtc_server_uri,
+                key="video-quad",
+                height=1,
+                aspect=16 / 9,
+                fixed=True,
+                position=[0, 1, -1.5],
+            )
+
+            # Set session again with video_plane
+            session.set @ DefaultScene(video_plane, frameloop="always")
 
         # Session loop
         while len(self.app_vuer.ws) > 0:

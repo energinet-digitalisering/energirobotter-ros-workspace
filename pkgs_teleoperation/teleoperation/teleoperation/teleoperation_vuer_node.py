@@ -19,6 +19,11 @@ class TeleoperationVuerNode(Node):
         super().__init__("teleoperation_vuer_node")
 
         # Parameters
+        self.declare_parameter("camera_enabled", True)
+        camera_enabled = (
+            self.get_parameter("camera_enabled").get_parameter_value().bool_value
+        )
+
         self.declare_parameter("frecuency", 30)
         self.frecuency = (
             self.get_parameter("frecuency").get_parameter_value().integer_value
@@ -44,7 +49,7 @@ class TeleoperationVuerNode(Node):
 
         self.cv_bridge = CvBridge()
 
-        self.vuer_app = VuerApp()
+        self.vuer_app = VuerApp(camera_enabled)
         self.tracking_transformer = TrackingTransformer()
         self.tracking_filter_left = TrackingFilter()
         self.tracking_filter_right = TrackingFilter()
@@ -81,8 +86,6 @@ class TeleoperationVuerNode(Node):
         return joint_state_msg
 
     def callback_timer(self):
-        self.vuer_app.update_frames(self.image_left, self.image_right)
-
         # Transform tracking to robot frame
         _, left_wrist_mat, right_wrist_mat, hand_angles = (
             self.tracking_transformer.process(
