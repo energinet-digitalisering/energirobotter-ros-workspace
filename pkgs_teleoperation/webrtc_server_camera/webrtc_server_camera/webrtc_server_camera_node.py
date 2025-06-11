@@ -11,7 +11,7 @@ class WebRTCServerCameraNode(Node):
     def __init__(self):
         super().__init__("webrtc_server_camera_node")
 
-        self.server = WebRTCServerCamera()
+        self.server = WebRTCServerCamera(free_port=True)
 
         # Run the async WebRTC server in its own event loop in a thread
         self.loop = asyncio.new_event_loop()

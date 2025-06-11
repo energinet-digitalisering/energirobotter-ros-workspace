@@ -8,8 +8,10 @@ import aiohttp_cors
 from aiortc.rtcrtpsender import RTCRtpSender
 import asyncio
 import json
+from killport import kill_ports
 import os
 import logging
+import time
 
 from webrtc_server_camera.src.video_track_zed import VideoTrackZED
 
@@ -19,7 +21,7 @@ class WebRTCServerCamera:
     A simple WebRTC server that streams video from a ZED camera using aiortc and aiohttp.
     """
 
-    def __init__(self, host="0.0.0.0", port=8080, ssl_context=None):
+    def __init__(self, host="0.0.0.0", port=8080, ssl_context=None, free_port=False):
         """
         Initialize the WebRTC server.
 
@@ -35,6 +37,7 @@ class WebRTCServerCamera:
         self.host = host
         self.port = port
         self.ssl_context = ssl_context
+        self.free_port = free_port
 
         self.root = os.path.dirname(__file__)
 
@@ -62,6 +65,10 @@ class WebRTCServerCamera:
         self.runner = web.AppRunner(self.app)
 
     async def start(self):
+
+        if self.free_port:
+            kill_ports(ports=[self.port])
+            time.sleep(0.01)
 
         await self.runner.setup()
         site = web.TCPSite(
