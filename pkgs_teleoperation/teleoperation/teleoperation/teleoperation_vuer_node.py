@@ -4,7 +4,6 @@ from cv_bridge import CvBridge
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped, Pose, Point, Quaternion
-from sensor_msgs.msg import CompressedImage
 from std_msgs.msg import Header
 from sensor_msgs.msg import JointState
 
@@ -20,21 +19,9 @@ class TeleoperationVuerNode(Node):
         super().__init__("teleoperation_vuer_node")
 
         # Parameters
-        self.declare_parameter("fps", 30)
-        self.fps = self.get_parameter("fps").get_parameter_value().integer_value
-
-        self.declare_parameter("camera_enabled", True)
-        self.camera_enabled = (
-            self.get_parameter("camera_enabled").get_parameter_value().bool_value
-        )
-
-        # Subscribers
-        self.subscription_image_left = self.create_subscription(
-            CompressedImage, "/image_left", self.callback_image_left, 1
-        )
-
-        self.subscription_image_right = self.create_subscription(
-            CompressedImage, "/image_right", self.callback_image_right, 1
+        self.declare_parameter("frecuency", 30)
+        self.frecuency = (
+            self.get_parameter("frecuency").get_parameter_value().integer_value
         )
 
         # Publishers
@@ -49,7 +36,7 @@ class TeleoperationVuerNode(Node):
         )
 
         # Timers
-        self.timer = self.create_timer(1.0 / self.fps, self.callback_timer)
+        self.timer = self.create_timer(1.0 / self.frecuency, self.callback_timer)
 
         # Variables
         self.image_left = None
@@ -57,21 +44,11 @@ class TeleoperationVuerNode(Node):
 
         self.cv_bridge = CvBridge()
 
-        self.vuer_app = VuerApp(self.camera_enabled)
+        self.vuer_app = VuerApp()
         self.tracking_transformer = TrackingTransformer()
         self.tracking_filter_left = TrackingFilter()
         self.tracking_filter_right = TrackingFilter()
         self.tracking_collision_avoidance = TrackingCollisionAvoidance()
-
-    def callback_image_left(self, msg):
-        self.image_left = self.cv_bridge.compressed_imgmsg_to_cv2(
-            msg, desired_encoding="rgb8"
-        )
-
-    def callback_image_right(self, msg):
-        self.image_right = self.cv_bridge.compressed_imgmsg_to_cv2(
-            msg, desired_encoding="rgb8"
-        )
 
     def tf_matrix_to_msg(self, tf_matrix):
         position = tf_matrix[0:3, 3]

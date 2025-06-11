@@ -1,3 +1,8 @@
+"""
+VR Interface with Vuer.
+It receives tracking data from the VR headset, and forwards a WebRTC camera stream to the headset, to update the texture of a fixed plane.
+"""
+
 import aiohttp
 from aiohttp.web_response import Response
 from asyncio import sleep
@@ -11,10 +16,8 @@ from teleoperation.src.vr_interface_app import VRInterfaceApp
 
 
 class VuerApp(VRInterfaceApp):
-    def __init__(self, camera_enabled=True):
+    def __init__(self):
         VRInterfaceApp.__init__(self)
-
-        self.camera_enabled = camera_enabled
 
         # Initialize the Vuer app
         self.app_vuer = Vuer(host="0.0.0.0", port=8012, free_port=True, static_root=".")

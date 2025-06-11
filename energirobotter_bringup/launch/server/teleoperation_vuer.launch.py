@@ -15,11 +15,7 @@ package_name = "energirobotter_bringup"
 
 def launch_setup(context, *args, **kwargs):
     rviz = LaunchConfiguration("rviz")
-    camera_enabled = LaunchConfiguration("camera_enabled")
     ik_enabled = LaunchConfiguration("ik_enabled")
-
-    image_topic_left = "/zed/zed_node/left/image_rect_color/compressed"
-    image_topic_right = "/zed/zed_node/right/image_rect_color/compressed"
 
     ik_control_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -38,13 +34,6 @@ def launch_setup(context, *args, **kwargs):
         package="teleoperation",
         executable="teleoperation_vuer_node",
         output="screen",
-        remappings=[
-            ("/image_left", image_topic_left),
-            ("/image_right", image_topic_right),
-        ],
-        parameters=[
-            {"camera_enabled": camera_enabled},
-        ],
     )
 
     return [
@@ -60,12 +49,6 @@ def generate_launch_description():
                 "rviz",
                 default_value="false",
                 description="Start RViz2 automatically with this launch file.",
-                choices=["true", "false"],
-            ),
-            DeclareLaunchArgument(
-                "camera_enabled",
-                default_value="false",
-                description="Run teleoperation with or without camera.",
                 choices=["true", "false"],
             ),
             DeclareLaunchArgument(
