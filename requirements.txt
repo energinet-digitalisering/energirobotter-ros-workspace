@@ -1,3 +1,4 @@
--r network_bridge/requirements.txt
 -r pkgs_control/servo_control/requirements.txt
+-r pkgs_teleoperation/network_bridge/requirements.txt
 -r pkgs_teleoperation/teleoperation/requirements.txt
+-r pkgs_teleoperation/webrtc_server_camera/requirements.txt
