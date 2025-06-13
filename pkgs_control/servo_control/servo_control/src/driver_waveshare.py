@@ -67,15 +67,24 @@ class DriverWaveshare(DriverServos):
 
         with self.lock:
 
-            # Syncwrite goal position
-            scs_comm_result = self.driver_object.groupSyncWrite.txPacket()
-
-            if scs_comm_result != scservo_def.COMM_SUCCESS:
-                self.logger.error(
-                    f"Communication error: {self.driver_object.getTxRxResult(scs_comm_result)}"
+            for servo in self.servos.values():
+                self.logger.info(servo)
+                scs_addparam_result = self.driver_object.groupSyncRead.addParam(
+                    servo.servo_id
                 )
 
-            # Clear syncwrite parameter storage
+            scs_comm_result = self.driver_object.groupSyncRead.txPacket()
+            if scs_comm_result != scservo_def.COMM_SUCCESS:
+                self.logger.error(
+                    f"Communication error while reading: {self.driver_object.getTxRxResult(scs_comm_result)}"
+                )
+
+            # Sync write
+            scs_comm_result = self.driver_object.groupSyncWrite.txPacket()
+            if scs_comm_result != scservo_def.COMM_SUCCESS:
+                self.logger.error(
+                    f"Communication error while writing: {self.driver_object.getTxRxResult(scs_comm_result)}"
+                )
             self.driver_object.groupSyncWrite.clearParam()
 
     def send_command(self, servo: ServoControl, pwm):
@@ -98,8 +107,11 @@ class DriverWaveshare(DriverServos):
             # )
 
     def read_feedback(self, servo: ServoControl):
+
         try:
-            return self.driver_object.ReadPos(servo.servo_id)[0]
+            # return self.driver_object.ReadPos(servo.servo_id)[0]
+            # return self.driver_object.ReadTemperature(servo.servo_id)[0]
+            return self.driver_object.SyncRead(servo.servo_id)
         except Exception as e:
             self.logger.error(f"Failed to read feedback: {e}")
             return None

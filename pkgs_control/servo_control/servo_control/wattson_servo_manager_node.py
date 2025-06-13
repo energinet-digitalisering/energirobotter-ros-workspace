@@ -52,7 +52,7 @@ class ServoManagerNode(Node):
         # Configure servo manager
         json_files = [
             f"{config_folder_path}/servo_arm_left_params.json",
-            f"{config_folder_path}/servo_arm_right_params.json",
+            # f"{config_folder_path}/servo_arm_right_params.json",
         ]
         self.servo_driver = DriverWaveshare(json_files, self.control_frequency)
         self.servo_commands = self.servo_driver.get_default_servo_commands()
@@ -92,12 +92,13 @@ class ServoManagerNode(Node):
         self.servo_driver.command_servos(self.servo_commands)
 
         # DEBUG
-        positions = self.servo_driver.get_servo_angles()
+        temperatures = self.servo_driver.get_servo_temperatures()
+        # positions = self.servo_driver.get_servo_angles()
 
         msg = JointState()
         msg.header.stamp = self.get_clock().now().to_msg()
-        msg.name = list(positions.keys())
-        msg.position = list(positions.values())
+        msg.name = list(temperatures.keys())
+        msg.position = list(temperatures.values())
 
         self.pub_speeds.publish(msg)
         # DEBUG END

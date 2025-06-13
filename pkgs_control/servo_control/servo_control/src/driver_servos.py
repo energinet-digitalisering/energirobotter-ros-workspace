@@ -194,7 +194,7 @@ class DriverServos(ABC):
             futures = [
                 executor.submit(self._update_servo_feedback, name)
                 for name in self.servos.keys()
-                if self.servos[name].feedback_enabled
+                # if self.servos[name].feedback_enabled
             ]
             for future in futures:
                 try:
@@ -323,11 +323,23 @@ class DriverServos(ABC):
         Args:
             name (str): Name of the servo to update feedback for.
         """
-        feedback_pwm = self.read_feedback(self.servos[name])
 
-        if feedback_pwm is not None:
-            # WRONG! Need to update the right dict
-            self.servos[name].set_feedback_pwm(feedback_pwm)
+        feedback_temperature = self.read_feedback(self.servos[name])
+
+        if feedback_temperature is not None:
+            self.servos[name].set_feedback_temperature(feedback_temperature)
+
+    # def _update_servo_feedback(self, name):
+    #     """
+    #     Update feedback for a single servo.
+
+    #     Args:
+    #         name (str): Name of the servo to update feedback for.
+    #     """
+    #     feedback_pwm = self.read_feedback(self.servos[name])
+
+    #     if feedback_pwm is not None:
+    #         self.servos[name].set_feedback_pwm(feedback_pwm)
 
     def _validate_command(self, servo: ServoControl, pwm):
         """

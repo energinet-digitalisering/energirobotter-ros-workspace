@@ -61,6 +61,7 @@ SMS_STS_PRESENT_CURRENT_H = 70
 class sms_sts(protocol_packet_handler):
     def __init__(self, portHandler):
         protocol_packet_handler.__init__(self, portHandler, 0)
+        self.groupSyncRead = GroupSyncRead(self, SMS_STS_PRESENT_POSITION_L, 4)
         self.groupSyncWrite = GroupSyncWrite(self, SMS_STS_ACC, 7)
 
     def WritePosEx(self, scs_id, position, speed, acc):
@@ -109,6 +110,22 @@ class sms_sts(protocol_packet_handler):
             scs_id, SMS_STS_PRESENT_TEMPERATURE
         )
         return temperature, scs_comm_result, scs_error
+
+    def SyncRead(self, scs_id):
+        # scs_addparam_result = self.groupSyncRead.addParam(scs_id)
+
+        scs_data_result, scs_error = self.groupSyncRead.isAvailable(
+            scs_id, SMS_STS_PRESENT_TEMPERATURE, 2
+        )
+        if scs_data_result == True:
+            scs_present_temperature = self.groupSyncRead.getData(
+                scs_id, SMS_STS_PRESENT_TEMPERATURE, 2
+            )
+
+            self.groupSyncRead.clearParam()
+            return scs_present_temperature
+        else:
+            return None
 
     def SyncWritePosEx(self, scs_id, position, speed, acc):
         txpacket = [
