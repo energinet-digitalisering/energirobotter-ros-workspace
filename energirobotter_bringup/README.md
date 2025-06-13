@@ -15,10 +15,10 @@ rosdep install --from-paths src -y --ignore-src
   - [Teleoperation Vuer](#teleoperation-vuer)
     - [Setup Robot](#setup-robot)
       - [Enable Servo Serial Forwarding](#enable-servo-serial-forwarding)
+    - [Setup Visualisation](#setup-visualisation)
     - [Setup VR Headset](#setup-vr-headset)
       - [Wireless](#wireless)
       - [Wired](#wired)
-    - [Setup Visualisation](#setup-visualisation)
     - [Calibrate and Launch](#calibrate-and-launch)
     - [V1 Demo notes (Danish)](#v1-demo-notes-danish)
   - [Teleoperation Unity](#teleoperation-unity)
@@ -51,6 +51,9 @@ The camera can only be served in the headset over a secure connection, for this 
    ```
 4. Run teleoperation with (set appropriate flags):
    ```
+   cd energinet/
+   shumble
+   sw
    ros2 launch energirobotter_bringup teleoperation_vuer.launch.py camera_enabled:=true ngrok_enabled:=true ik_enabled:=true rviz:=false
    ```
    > Only set `rviz:=true` if a display is connected to the robot computer. 
@@ -63,12 +66,20 @@ The camera can only be served in the headset over a secure connection, for this 
 4. Click botton `Stop Serial Forwarding` but don't click `OK`, it's now ready as a stop button if needed
 
 
+### Setup Visualisation
+
+1. If a display is not connected to the robot, start `RViz` on your computer in a teminal with:
+   ```
+   rviz2 -d src/energirobotter-ros-workspace/energirobotter_bringup/config/rviz/teleoperation.rviz
+   ```
+
+
 ### Setup VR Headset
 
 1. Turn on headset
 
 #### Wireless
-1. In the headset's browser, go to the URL shown in the terminal when launching the teleoperation. This is either a local subnet IP or an `ngrok` URL depending on setup
+2. In the headset's browser, go to the `ngrok` URL shown in the terminal when launching the teleoperation. 
 
 #### Wired
 2. Plug USB cable into headset first, then put it on
@@ -78,15 +89,8 @@ The camera can only be served in the headset over a secure connection, for this 
    ```
    adb reverse tcp:8012 tcp:8012
    ```
-
-
-### Setup Visualisation
-
-1. If a display is not connected to the robot, start `RViz` on your computer in a teminal with:
-   ```
-   rviz2 -d src/energirobotter-ros-workspace/energirobotter_bringup/config/rviz/teleoperation.rviz
-   ```
-
+5. In the headset's browser, go to the `localhost` URL shown in the terminal when launching the teleoperation. 
+   
 
 ### Calibrate and Launch
 
