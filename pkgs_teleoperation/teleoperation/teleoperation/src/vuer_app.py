@@ -5,11 +5,11 @@ It receives tracking data from the VR headset, and forwards a WebRTC camera stre
 
 import aiohttp
 from aiohttp.web_response import Response
-from asyncio import sleep
+import asyncio
+
 from cgi import parse_header
 from multiprocessing import Process
 import ngrok
-import socket
 import traceback
 from vuer import Vuer, VuerSession
 from vuer.schemas import DefaultScene, Hands, WebRTCStereoVideoPlane
@@ -162,7 +162,7 @@ class VuerApp(VRInterfaceApp):
         # Session loop
         while len(self.app_vuer.ws) > 0:
             # 'jpeg' encoding should give about 30fps with a 16ms wait in-between.
-            await sleep(0.016 * 2)
+            await asyncio.sleep(0.016 * 2)
 
         self.logger.info("WebSocket closed, exiting session loop")
 
