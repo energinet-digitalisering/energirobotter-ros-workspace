@@ -63,6 +63,12 @@ class VuerApp(VRInterfaceApp):
 
     def run(self):
         """Run the Vuer app"""
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
         self.app_vuer.run()
 
     async def proxy_offer(self, request):
