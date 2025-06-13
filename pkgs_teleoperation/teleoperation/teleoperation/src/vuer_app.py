@@ -139,9 +139,6 @@ class VuerApp(VRInterfaceApp):
 
         # Initialize the session
         session.set @ DefaultScene(frameloop="always")
-        session.upsert @ Hands(
-            fps=30, stream=True, key="hands", showLeft=True, showRight=True
-        )
 
         # Setup camera stream plane
         if self.camera_enabled:
@@ -164,6 +161,11 @@ class VuerApp(VRInterfaceApp):
 
             # Set session again with video_plane
             session.set @ DefaultScene(video_plane, frameloop="always")
+
+        # Add hand tracking
+        session.upsert @ Hands(
+            fps=30, stream=True, key="hands", showLeft=True, showRight=True
+        )
 
         # Session loop
         while len(self.app_vuer.ws) > 0:
