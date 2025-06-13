@@ -54,7 +54,7 @@ The camera can only be served in the headset over a secure connection, for this 
    cd energinet/
    shumble
    sw
-   ros2 launch energirobotter_bringup teleoperation_vuer.launch.py camera_enabled:=true ngrok_enabled:=true ik_enabled:=true rviz:=false
+   ros2 launch energirobotter_bringup teleoperation_vuer.launch.py camera_enabled:=true stereo_enabled:=false ngrok_enabled:=true ik_enabled:=true rviz:=false
    ```
    > Only set `rviz:=true` if a display is connected to the robot computer. 
 

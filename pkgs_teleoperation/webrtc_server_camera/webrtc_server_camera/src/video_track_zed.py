@@ -16,7 +16,7 @@ class VideoTrackZED(VideoStreamTrack):
     and provides them as `aiortc`-compatible `VideoFrame` objects for streaming.
     """
 
-    def __init__(self):
+    def __init__(self, stereo_enabled=False):
         """
         Initialize the ZED camera and prepare it for frame capture.
 
@@ -29,8 +29,9 @@ class VideoTrackZED(VideoStreamTrack):
         self.logger = logging.getLogger(self.__class__.__name__)
         logging.basicConfig(level=logging.INFO)
 
-        self.zed = sl.Camera()
+        self.stereo_enabled = stereo_enabled
 
+        self.zed = sl.Camera()
         init_params = sl.InitParameters()
         # init_params.camera_resolution = sl.RESOLUTION.HD1080
         init_params.camera_fps = 30
@@ -65,25 +66,33 @@ class VideoTrackZED(VideoStreamTrack):
         if self.zed.grab() != sl.ERROR_CODE.SUCCESS:
             return None
 
-        self.zed.retrieve_image(self.image_left, sl.VIEW.LEFT)
-        self.zed.retrieve_image(self.image_right, sl.VIEW.RIGHT)
+        format = "gray"  # "bgr24"
 
-        frame_left = self.image_left.get_data()
-        frame_right = self.image_right.get_data()
+        if self.stereo_enabled:
+            self.zed.retrieve_image(self.image_left, sl.VIEW.LEFT)
+            self.zed.retrieve_image(self.image_right, sl.VIEW.RIGHT)
 
-        frame_left = cv2.cvtColor(frame_left, cv2.COLOR_BGR2GRAY)
-        frame_right = cv2.cvtColor(frame_right, cv2.COLOR_BGR2GRAY)
+            frame_left = self.image_left.get_data()
+            frame_right = self.image_right.get_data()
 
-        # Concatenate the images horizontally
-        stereo_frame = np.hstack((frame_left, frame_right))
+            frame_left = cv2.cvtColor(frame_left, cv2.COLOR_BGR2GRAY)
+            frame_right = cv2.cvtColor(frame_right, cv2.COLOR_BGR2GRAY)
 
-        stereo_frame = cv2.cvtColor(
-            stereo_frame, cv2.COLOR_GRAY2BGR
-        )  # To fit bgr24 format
-        stereo_frame = cv2.resize(stereo_frame, (1280, 360))
+            frame_stereo = np.hstack((frame_left, frame_right))
+            frame_stereo = cv2.resize(frame_stereo, (1280, 360))
 
-        # Convert to VideoFrame
-        video_frame = VideoFrame.from_ndarray(stereo_frame[:, :, :3], format="bgr24")
+            video_frame = VideoFrame.from_ndarray(frame_stereo, format=format)
+
+        else:
+            self.zed.retrieve_image(self.image_left, sl.VIEW.LEFT)
+
+            frame_mono = self.image_left.get_data()
+            frame_mono = cv2.cvtColor(frame_mono, cv2.COLOR_BGR2GRAY)
+            frame_mono = cv2.resize(frame_mono, (640, 360))
+
+            video_frame = VideoFrame.from_ndarray(frame_mono, format=format)
+
+        # Metadata
         video_frame.pts = timestamp
         video_frame.time_base = time_base
         return video_frame

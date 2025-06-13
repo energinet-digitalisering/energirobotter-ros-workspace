@@ -21,7 +21,14 @@ class WebRTCServerCamera:
     A simple WebRTC server that streams video from a ZED camera using aiortc and aiohttp.
     """
 
-    def __init__(self, host="0.0.0.0", port=8080, ssl_context=None, free_port=False):
+    def __init__(
+        self,
+        host="0.0.0.0",
+        port=8080,
+        ssl_context=None,
+        free_port=False,
+        stereo_enabled=False,
+    ):
         """
         Initialize the WebRTC server.
 
@@ -42,7 +49,7 @@ class WebRTCServerCamera:
         self.root = os.path.dirname(__file__)
 
         self.pcs = set()
-        self.camera_track = VideoTrackZED()
+        self.camera_track = VideoTrackZED(stereo_enabled)
 
         self.app = web.Application()
         self.app.on_shutdown.append(self.on_shutdown)

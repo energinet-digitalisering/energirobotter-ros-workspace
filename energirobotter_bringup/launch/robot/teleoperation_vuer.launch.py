@@ -15,6 +15,7 @@ package_name = "energirobotter_bringup"
 
 def launch_setup(context, *args, **kwargs):
     camera_enabled = LaunchConfiguration("camera_enabled")
+    stereo_enabled = LaunchConfiguration("stereo_enabled")
     ik_enabled = LaunchConfiguration("ik_enabled")
     ngrok_enabled = LaunchConfiguration("ngrok_enabled")
     rviz = LaunchConfiguration("rviz")
@@ -23,6 +24,9 @@ def launch_setup(context, *args, **kwargs):
         package="webrtc_server_camera",
         executable="webrtc_server_camera_node",
         output="screen",
+        parameters=[
+            {"stereo_enabled": stereo_enabled},
+        ],
         condition=IfCondition(
             camera_enabled,
         ),
@@ -47,6 +51,7 @@ def launch_setup(context, *args, **kwargs):
         output="screen",
         parameters=[
             {"camera_enabled": camera_enabled},
+            {"stereo_enabled": stereo_enabled},
             {"ngrok_enabled": ngrok_enabled},
         ],
     )
@@ -65,6 +70,12 @@ def generate_launch_description():
                 "camera_enabled",
                 default_value="false",
                 description="Run teleoperation with or without camera.",
+                choices=["true", "false"],
+            ),
+            DeclareLaunchArgument(
+                "stereo_enabled",
+                default_value="false",
+                description="Run teleoperation with or without stereo.",
                 choices=["true", "false"],
             ),
             DeclareLaunchArgument(

@@ -34,6 +34,11 @@ class TeleoperationVuerNode(Node):
             self.get_parameter("ngrok_enabled").get_parameter_value().bool_value
         )
 
+        self.declare_parameter("stereo_enabled", False)
+        stereo_enabled = (
+            self.get_parameter("stereo_enabled").get_parameter_value().bool_value
+        )
+
         # Publishers
         self.pose_left_pub = self.create_publisher(PoseStamped, "/left/target_pose", 1)
 
@@ -54,7 +59,7 @@ class TeleoperationVuerNode(Node):
 
         self.cv_bridge = CvBridge()
 
-        self.vuer_app = VuerApp(camera_enabled, ngrok_enabled)
+        self.vuer_app = VuerApp(camera_enabled, stereo_enabled, ngrok_enabled)
         self.tracking_transformer = TrackingTransformer()
         self.tracking_filter_left = TrackingFilter()
         self.tracking_filter_right = TrackingFilter()

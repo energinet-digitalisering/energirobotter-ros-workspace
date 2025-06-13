@@ -12,16 +12,17 @@ from multiprocessing import Process
 import ngrok
 import traceback
 from vuer import Vuer, VuerSession
-from vuer.schemas import DefaultScene, Hands, WebRTCStereoVideoPlane
+from vuer.schemas import DefaultScene, Hands, WebRTCVideoPlane, WebRTCStereoVideoPlane
 
 from teleoperation.src.vr_interface_app import VRInterfaceApp
 
 
 class VuerApp(VRInterfaceApp):
-    def __init__(self, camera_enabled=False, ngrok_enabled=False):
+    def __init__(self, camera_enabled=False, stereo_enabled=False, ngrok_enabled=False):
         VRInterfaceApp.__init__(self)
 
         self.camera_enabled = camera_enabled
+        self.stereo_enabled = stereo_enabled
         self.ngrok_enabled = ngrok_enabled
 
         vuer_host = "localhost"
@@ -150,7 +151,11 @@ class VuerApp(VRInterfaceApp):
                 stream_src = self.webrtc_server_uri
 
             # Create camera stream plane
-            video_plane = WebRTCStereoVideoPlane(
+            VideoPlaneClass = (
+                WebRTCStereoVideoPlane if self.stereo_enabled else WebRTCVideoPlane
+            )
+
+            video_plane = VideoPlaneClass(
                 src=stream_src,
                 key="video-quad",
                 height=1,

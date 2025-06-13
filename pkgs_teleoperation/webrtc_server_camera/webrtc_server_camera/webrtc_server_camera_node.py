@@ -11,7 +11,14 @@ class WebRTCServerCameraNode(Node):
     def __init__(self):
         super().__init__("webrtc_server_camera_node")
 
-        self.server = WebRTCServerCamera(free_port=True)
+        # Parameters
+        self.declare_parameter("stereo_enabled", False)
+        stereo_enabled = (
+            self.get_parameter("stereo_enabled").get_parameter_value().bool_value
+        )
+
+        # Create server
+        self.server = WebRTCServerCamera(free_port=True, stereo_enabled=stereo_enabled)
 
         # Run the async WebRTC server in its own event loop in a thread
         self.loop = asyncio.new_event_loop()
