@@ -18,7 +18,7 @@ from teleoperation.src.vr_interface_app import VRInterfaceApp
 
 
 class VuerApp(VRInterfaceApp):
-    def __init__(self, camera_enabled=False, ngrok_enabled=True):
+    def __init__(self, camera_enabled=False, ngrok_enabled=False):
         VRInterfaceApp.__init__(self)
 
         self.camera_enabled = camera_enabled
