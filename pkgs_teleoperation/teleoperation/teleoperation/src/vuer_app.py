@@ -156,7 +156,7 @@ class VuerApp(VRInterfaceApp):
                 height=1,
                 aspect=16 / 9,
                 fixed=True,
-                position=[0, 1, -1.5],
+                position=[0, 1.5, -1.5],
             )
 
             # Set session again with video_plane
