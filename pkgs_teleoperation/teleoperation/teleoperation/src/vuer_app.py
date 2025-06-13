@@ -9,7 +9,7 @@ from asyncio import sleep
 from cgi import parse_header
 from multiprocessing import Process
 import ngrok
-import os
+import socket
 import traceback
 from vuer import Vuer, VuerSession
 from vuer.schemas import DefaultScene, Hands, WebRTCStereoVideoPlane
@@ -24,19 +24,32 @@ class VuerApp(VRInterfaceApp):
         self.camera_enabled = camera_enabled
         self.ngrok_enabled = ngrok_enabled
 
+        vuer_host = "0.0.0.0"
+        vuer_port = 8012
+        local_ip = self.get_local_ip()
+
         # URIs
-        self.offer_route = "/offer"
-        self.webrtc_server_uri = "http://localhost:8080" + self.offer_route
+        if camera_enabled:
+            self.offer_route = "/offer"
+            self.webrtc_server_uri = "http://localhost:8080" + self.offer_route
 
         # Establish ngrok connectivity
         if ngrok_enabled:
             self.ngrok_listener = ngrok.forward(9000, authtoken_from_env=True)
             self.logger.info("----------------------------------------")
-            self.logger.info(f"ngrok URL: {self.ngrok_listener.url()}")
+            self.logger.info(f"Connect to URL in headset: {self.ngrok_listener.url()}")
+            self.logger.info("----------------------------------------")
+        else:
+            self.logger.info("----------------------------------------")
+            self.logger.info(
+                f"Connect to (local) URL in headset: http://{local_ip}:{vuer_port}"
+            )
             self.logger.info("----------------------------------------")
 
         # Initialize the Vuer app
-        self.app_vuer = Vuer(host="0.0.0.0", port=8012, free_port=True, static_root=".")
+        self.app_vuer = Vuer(
+            host=vuer_host, port=vuer_port, free_port=True, static_root="."
+        )
         self.app_vuer.add_handler("CAMERA_MOVE")(self.on_camera_move)
         self.app_vuer.add_handler("HAND_MOVE")(self.on_hand_move)
         self.app_vuer.spawn(start=False)(self.session_manager)
@@ -52,6 +65,15 @@ class VuerApp(VRInterfaceApp):
     def run(self):
         """Run the Vuer app"""
         self.app_vuer.run()
+
+    def get_local_ip(self):
+        try:
+            # Connect to an external address (doesn't have to be reachable)
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+                s.connect(("8.8.8.8", 80))  # Google's DNS
+                return s.getsockname()[0]
+        except Exception as e:
+            return f"Error: {e}"
 
     async def proxy_offer(self, request):
         try:
@@ -125,6 +147,7 @@ class VuerApp(VRInterfaceApp):
             fps=30, stream=True, key="hands", showLeft=True, showRight=True
         )
 
+        # Setup camera stream plane
         if self.camera_enabled:
 
             # Choose source
