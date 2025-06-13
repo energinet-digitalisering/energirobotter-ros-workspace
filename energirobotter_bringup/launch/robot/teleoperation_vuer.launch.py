@@ -14,19 +14,30 @@ package_name = "energirobotter_bringup"
 
 
 def launch_setup(context, *args, **kwargs):
-    rviz = LaunchConfiguration("rviz")
     camera_enabled = LaunchConfiguration("camera_enabled")
+    stereo_enabled = LaunchConfiguration("stereo_enabled")
     ik_enabled = LaunchConfiguration("ik_enabled")
+    ngrok_enabled = LaunchConfiguration("ngrok_enabled")
+    rviz = LaunchConfiguration("rviz")
 
-    image_topic_left = "/zed/zed_node/left/image_rect_color/compressed"
-    image_topic_right = "/zed/zed_node/right/image_rect_color/compressed"
+    webrtc_server_node = Node(
+        package="webrtc_server_camera",
+        executable="webrtc_server_camera_node",
+        output="screen",
+        parameters=[
+            {"stereo_enabled": stereo_enabled},
+        ],
+        condition=IfCondition(
+            camera_enabled,
+        ),
+    )
 
     ik_control_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             [
                 FindPackageShare(package_name),
                 "/launch",
-                "/server",
+                "/robot",
                 "/ik_control.launch.py",
             ]
         ),
@@ -38,16 +49,15 @@ def launch_setup(context, *args, **kwargs):
         package="teleoperation",
         executable="teleoperation_vuer_node",
         output="screen",
-        remappings=[
-            ("/image_left", image_topic_left),
-            ("/image_right", image_topic_right),
-        ],
         parameters=[
             {"camera_enabled": camera_enabled},
+            {"stereo_enabled": stereo_enabled},
+            {"ngrok_enabled": ngrok_enabled},
         ],
     )
 
     return [
+        webrtc_server_node,
         ik_control_launch,
         teleoperation_vuer_node,
     ]
@@ -57,21 +67,33 @@ def generate_launch_description():
     return LaunchDescription(
         [
             DeclareLaunchArgument(
-                "rviz",
-                default_value="false",
-                description="Start RViz2 automatically with this launch file.",
-                choices=["true", "false"],
-            ),
-            DeclareLaunchArgument(
                 "camera_enabled",
                 default_value="false",
                 description="Run teleoperation with or without camera.",
                 choices=["true", "false"],
             ),
             DeclareLaunchArgument(
+                "stereo_enabled",
+                default_value="false",
+                description="Run teleoperation with or without stereo.",
+                choices=["true", "false"],
+            ),
+            DeclareLaunchArgument(
                 "ik_enabled",
                 default_value="false",
                 description="Run teleoperation with or without publishing IK.",
+                choices=["true", "false"],
+            ),
+            DeclareLaunchArgument(
+                "ngrok_enabled",
+                default_value="false",
+                description="Run teleoperation with or without ngrok.",
+                choices=["true", "false"],
+            ),
+            DeclareLaunchArgument(
+                "rviz",
+                default_value="false",
+                description="Start RViz2 automatically with this launch file.",
                 choices=["true", "false"],
             ),
             OpaqueFunction(function=launch_setup),
