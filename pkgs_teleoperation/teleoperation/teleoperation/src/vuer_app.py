@@ -6,10 +6,10 @@ It receives tracking data from the VR headset, and forwards a WebRTC camera stre
 import aiohttp
 from aiohttp.web_response import Response
 import asyncio
-
 from cgi import parse_header
 from multiprocessing import Process
 import ngrok
+import numpy as np
 import traceback
 from vuer import Vuer, VuerSession
 from vuer.schemas import DefaultScene, Hands, WebRTCVideoPlane, WebRTCStereoVideoPlane
@@ -158,10 +158,11 @@ class VuerApp(VRInterfaceApp):
             video_plane = VideoPlaneClass(
                 src=stream_src,
                 key="video-quad",
-                height=1,
+                height=1.5,
                 aspect=16 / 9,
                 fixed=True,
-                position=[0, 1.5, -1.5],
+                position=[0, 1.0, -1.5],
+                rotation=[np.deg2rad(-20), 0, 0],
             )
 
             # Set session again with video_plane
