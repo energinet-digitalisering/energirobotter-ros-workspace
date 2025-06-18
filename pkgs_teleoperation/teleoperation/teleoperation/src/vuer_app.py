@@ -155,7 +155,7 @@ class VuerApp(VRInterfaceApp):
                 WebRTCStereoVideoPlane if self.stereo_enabled else WebRTCVideoPlane
             )
 
-            video_plane = VideoPlaneClass(
+            session.upsert @ VideoPlaneClass(
                 src=stream_src,
                 key="video-quad",
                 height=1.5,
@@ -164,9 +164,6 @@ class VuerApp(VRInterfaceApp):
                 position=[0, 1.0, -1.5],
                 rotation=[np.deg2rad(-20), 0, 0],
             )
-
-            # Set session again with video_plane
-            session.set @ DefaultScene(video_plane, frameloop="always")
 
         # Add hand tracking
         session.upsert @ Hands(
