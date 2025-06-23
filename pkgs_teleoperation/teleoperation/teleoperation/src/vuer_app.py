@@ -48,7 +48,14 @@ class VuerApp(VRInterfaceApp):
 
         # Initialize the Vuer app
         self.app_vuer = Vuer(
-            host=vuer_host, port=vuer_port, free_port=True, static_root="."
+            host=vuer_host,
+            port=vuer_port,
+            free_port=True,
+            static_root=".",
+            queries=dict(
+                grid=False,
+                collapseMenu=True,
+            ),
         )
         self.app_vuer.add_handler("CAMERA_MOVE")(self.on_camera_move)
         self.app_vuer.add_handler("HAND_MOVE")(self.on_hand_move)
