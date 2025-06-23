@@ -1,13 +1,7 @@
-from typing import Optional
+import numpy as np
 
 import rclpy
 from rclpy.node import Node
-
-# from rclpy.lifecycle import Node
-# from rclpy.lifecycle import Publisher
-# from rclpy.lifecycle import State
-# from rclpy.lifecycle import TransitionCallbackReturn
-from rclpy.timer import Timer
 import std_msgs.msg
 import vision_msgs.msg
 
@@ -29,6 +23,11 @@ class FaceFollowingNode(Node):
         self.declare_parameter("image_h", 720)
         self.image_h = self.get_parameter("image_h").get_parameter_value().integer_value
 
+        self.declare_parameter("dead_zone", 0)
+        self.dead_zone = (
+            self.get_parameter("dead_zone").get_parameter_value().integer_value
+        )
+
         self.declare_parameter("fov_w", 70)
         self.fov_w = self.get_parameter("fov_w").get_parameter_value().integer_value
 
@@ -42,11 +41,6 @@ class FaceFollowingNode(Node):
             self.callback_bounding_box,
             1,
         )
-
-        # Lifecycle Node timers and publishers
-        # self.timer: Optional[Timer] = None
-        # self.publisher_servo_yaw: Optional[Publisher] = None
-        # self.publisher_servo_pitch: Optional[Publisher] = None
 
         # Publishers
         self.publisher_servo_pitch = self.create_publisher(
@@ -98,65 +92,26 @@ class FaceFollowingNode(Node):
             # self.servo_yaw.reset_position(self.timer_period)
             return
 
+        error_pitch = self.center_y - self.target_y
+        error_yaw = self.center_x - self.target_x
+
         # Reset error if detection is gone for too long
         if time_diff > self.detection_time_stop_error:
             error_pitch = 0.0
             error_yaw = 0.0
 
-        else:
-            error_pitch = self.center_y - self.target_y
-            error_yaw = self.center_x - self.target_x
+        # Dead zone
+        if np.abs(error_pitch) < self.dead_zone:
+            error_pitch = 0.0
+
+        if np.abs(error_yaw) < self.dead_zone:
+            error_yaw = 0.0
 
         # Send command to servos
-
         self.publisher_servo_pitch.publish(
             std_msgs.msg.Float64(data=float(error_pitch))
         )
         self.publisher_servo_yaw.publish(std_msgs.msg.Float64(data=float(error_yaw)))
-
-    ##################### Lifecyle Node Functions #####################
-
-    # def on_configure(self, state: State) -> TransitionCallbackReturn:
-    #     self.get_logger().info("on_configure() is called.")
-
-    #     # Publishers
-    #     self.publisher_servo_pitch = self.create_publisher(
-    #         std_msgs.msg.Float64, "/head/pitch/set_error", 1
-    #     )
-    #     self.publisher_servo_yaw = self.create_publisher(
-    #         std_msgs.msg.Float64, "/head/yaw/set_error", 1
-    #     )
-
-    #     # Timers
-    #     self.timer = self.create_timer(self.timer_period, self.callback_timer)
-
-    #     return TransitionCallbackReturn.SUCCESS
-
-    # def on_activate(self, state: State) -> TransitionCallbackReturn:
-    #     self.get_logger().info("on_activate() is called.")
-    #     return super().on_activate(state)
-
-    # def on_deactivate(self, state: State) -> TransitionCallbackReturn:
-    #     self.get_logger().info("on_deactivate() is called.")
-    #     return super().on_deactivate(state)
-
-    # def on_cleanup(self, state: State) -> TransitionCallbackReturn:
-    #     self.get_logger().info("on_cleanup() is called.")
-
-    #     self.destroy_timer(self.timer)
-    #     self.destroy_publisher(self.publisher_servo_yaw)
-    #     self.destroy_publisher(self.publisher_servo_pitch)
-
-    #     return TransitionCallbackReturn.SUCCESS
-
-    # def on_shutdown(self, state: State) -> TransitionCallbackReturn:
-    #     self.get_logger().info("on_shutdown() is called.")
-
-    #     self.destroy_timer(self.timer)
-    #     self.destroy_publisher(self.publisher_servo_yaw)
-    #     self.destroy_publisher(self.publisher_servo_pitch)
-
-    #     return TransitionCallbackReturn.SUCCESS
 
 
 def main(args=None):

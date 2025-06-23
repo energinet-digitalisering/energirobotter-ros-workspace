@@ -1,0 +1,83 @@
+/**:
+  ros__parameters:
+    operation_mode: "angle"
+    driver_device: "pca9685"
+    control_frequency: 0.05
+    pwm_min: 2400
+    pwm_max: 9600
+    angle_min: 0
+    angle_software_min: 0
+    angle_max: 180
+    angle_software_max: 180
+    speed_max: 200
+    gain_P: 1.0
+
+/hand_left/pinky/servo:
+  ros__parameters:
+    servo_id: 0
+    angle_software_min: 70
+    angle_software_max: 124
+    dir: 1
+
+/hand_left/ring/servo:
+  ros__parameters:
+    servo_id: 1
+    angle_software_min: 68
+    angle_software_max: 116
+    dir: -1
+
+/hand_left/middle/servo:
+  ros__parameters:
+    servo_id: 2
+    angle_software_min: 68
+    angle_software_max: 116
+    dir: -1
+
+/hand_left/index/servo:
+  ros__parameters:
+    servo_id: 3
+    angle_software_min: 80
+    angle_software_max: 124
+    dir: 1
+
+/hand_left/thumb/servo:
+  ros__parameters:
+    servo_id: 4
+    angle_software_min: 80
+    angle_software_max: 108
+    dir: -1
+
+/hand_right/pinky/servo:
+  ros__parameters:
+    servo_id: 8
+    angle_software_min: 70
+    angle_software_max: 124
+    dir: 1
+
+/hand_right/ring/servo:
+  ros__parameters:
+    servo_id: 9
+    angle_software_min: 68
+    angle_software_max: 116
+    dir: -1
+
+/hand_right/middle/servo:
+  ros__parameters:
+    servo_id: 10
+    angle_software_min: 68
+    angle_software_max: 116
+    dir: -1
+
+/hand_right/index/servo:
+  ros__parameters:
+    servo_id: 11
+    angle_software_min: 80
+    angle_software_max: 124
+    dir: 1
+
+/hand_right/thumb/servo:
+  ros__parameters:
+    servo_id: 12
+    angle_software_min: 80
+    angle_software_max: 108
+    dir: -1

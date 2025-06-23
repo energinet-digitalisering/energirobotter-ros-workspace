@@ -1,1 +1,1 @@
-vuer[all]
+vuer==0.0.35

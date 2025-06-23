@@ -19,7 +19,8 @@ setup(
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [
-            "teleoperation_node = teleoperation.teleoperation_node:main"
+            f"teleoperation_vuer_node = {package_name}.teleoperation_vuer_node:main",
+            f"teleoperation_zeromq_node = {package_name}.teleoperation_zeromq_node:main",
         ],
     },
 )
