@@ -20,7 +20,8 @@ Clone this repository into a `workspace/src/` folder, along with [zed-ros2-wrapp
 ```
 cd src
 git clone git@github.com:energinet-digitalisering/energirobotter-ros-workspace.git
-git clone  --recursive https://github.com/stereolabs/zed-ros2-wrapper.git
+
+git clone --branch humble-v4.1.4 --recursive https://github.com/stereolabs/zed-ros2-wrapper.git
 ```
 
 ### ZED SDK
