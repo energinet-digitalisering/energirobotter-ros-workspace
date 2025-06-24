@@ -49,14 +49,16 @@ The camera can only be served in the headset over a secure connection, for this 
    ```
    export NGROK_AUTHTOKEN=$YOUR_AUTHTOKEN
    ```
-4. Run teleoperation with (set appropriate flags):
+4. Run teleoperation on robot with (set appropriate flags):
    ```
    cd energinet/
    shumble
    sw
    ros2 launch energirobotter_bringup teleoperation_vuer.launch.py camera_enabled:=true stereo_enabled:=false ngrok_enabled:=true ik_enabled:=true rviz:=false
    ```
-   > Only set `rviz:=true` if a display is connected to the robot computer. 
+   > Only set `rviz:=true` if a display is connected to the computer. 
+
+   > You can also run the `teleoperation_vuer.launch.py` from a PC and it will work if the robot and computer are on the same subnet. If not on robot set `camera_enabled:=false`. 
 
 #### Enable Servo Serial Forwarding
 
@@ -90,7 +92,7 @@ The camera can only be served in the headset over a secure connection, for this 
    adb reverse tcp:8012 tcp:8012
    ```
 5. In the headset's browser, go to the `localhost` URL shown in the terminal when launching the teleoperation. 
-   
+
 
 ### Calibrate and Launch
 
