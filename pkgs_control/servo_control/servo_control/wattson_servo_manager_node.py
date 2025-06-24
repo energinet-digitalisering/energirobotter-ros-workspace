@@ -52,7 +52,7 @@ class ServoManagerNode(Node):
         # Configure servo manager
         json_files = [
             f"{config_folder_path}/servo_arm_left_params.json",
-            # f"{config_folder_path}/servo_arm_right_params.json",
+            f"{config_folder_path}/servo_arm_right_params.json",
         ]
         self.servo_driver = DriverWaveshare(json_files, self.control_frequency)
         self.servo_commands = self.servo_driver.get_default_servo_commands()
