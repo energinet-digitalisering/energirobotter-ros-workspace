@@ -323,23 +323,11 @@ class DriverServos(ABC):
         Args:
             name (str): Name of the servo to update feedback for.
         """
+        feedback = self.read_feedback(self.servos[name])
 
-        feedback_temperature = self.read_feedback(self.servos[name])
-
-        if feedback_temperature is not None:
-            self.servos[name].set_feedback_temperature(feedback_temperature)
-
-    # def _update_servo_feedback(self, name):
-    #     """
-    #     Update feedback for a single servo.
-
-    #     Args:
-    #         name (str): Name of the servo to update feedback for.
-    #     """
-    #     feedback_pwm = self.read_feedback(self.servos[name])
-
-    #     if feedback_pwm is not None:
-    #         self.servos[name].set_feedback_pwm(feedback_pwm)
+        if feedback is not None:
+            self.servos[name].set_feedback_pwm(feedback["position"])
+            self.servos[name].set_feedback_temperature(feedback["temperature"])
 
     def _validate_command(self, servo: ServoControl, pwm):
         """

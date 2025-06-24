@@ -113,7 +113,10 @@ class DriverWaveshare(DriverServos):
         try:
             # return self.driver_object.ReadPos(servo.servo_id)[0]
             # return self.driver_object.ReadTemperature(servo.servo_id)[0]
-            return self.driver_object.SyncRead(servo.servo_id)
+
+            feedback = self.driver_object.SyncRead(servo.servo_id)
+            return feedback
+
         except Exception as e:
             self.logger.error(f"Failed to read feedback: {e}")
             return None
