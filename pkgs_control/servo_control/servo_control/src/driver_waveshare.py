@@ -67,17 +67,19 @@ class DriverWaveshare(DriverServos):
 
         with self.lock:
 
+            # Sync read
+            self.driver_object.groupSyncRead.clearParam()
+
             for servo in self.servos.values():
-                self.logger.info(servo)
                 scs_addparam_result = self.driver_object.groupSyncRead.addParam(
                     servo.servo_id
                 )
 
-            scs_comm_result = self.driver_object.groupSyncRead.txPacket()
             if scs_comm_result != scservo_def.COMM_SUCCESS:
                 self.logger.error(
                     f"Communication error while reading: {self.driver_object.getTxRxResult(scs_comm_result)}"
                 )
+            scs_comm_result = self.driver_object.groupSyncRead.txRxPacket()
 
             # Sync write
             scs_comm_result = self.driver_object.groupSyncWrite.txPacket()

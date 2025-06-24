@@ -112,8 +112,6 @@ class sms_sts(protocol_packet_handler):
         return temperature, scs_comm_result, scs_error
 
     def SyncRead(self, scs_id):
-        # scs_addparam_result = self.groupSyncRead.addParam(scs_id)
-
         scs_data_result, scs_error = self.groupSyncRead.isAvailable(
             scs_id, SMS_STS_PRESENT_TEMPERATURE, 2
         )
@@ -122,7 +120,6 @@ class sms_sts(protocol_packet_handler):
                 scs_id, SMS_STS_PRESENT_TEMPERATURE, 2
             )
 
-            self.groupSyncRead.clearParam()
             return scs_present_temperature
         else:
             return None
