@@ -22,10 +22,15 @@ class DriverWaveshare(DriverServos):
         self.running = True
         self.lock = threading.Lock()
 
-        self.loop_thread = threading.Thread(
-            target=self.loop_sync_commands, args=(control_frequency,), daemon=True
+        self.loop_thread_read = threading.Thread(
+            target=self.loop_sync_commands_read, args=(control_frequency,), daemon=True
         )
-        self.loop_thread.start()
+        self.loop_thread_read.start()
+
+        self.loop_thread_write = threading.Thread(
+            target=self.loop_sync_commands_write, args=(control_frequency,), daemon=True
+        )
+        self.loop_thread_write.start()
 
     def __del__(self):
         self.running = False
@@ -54,16 +59,25 @@ class DriverWaveshare(DriverServos):
             self.logger.error(f"Failed to open port: {e}")
             return None
 
-    def loop_sync_commands(self, frequency=10):
+    def loop_sync_commands_read(self):
+        interval = 1.0
+
+        while self.running:
+            start = time.time()
+            self.sync_commands_read()
+            elapsed = time.time() - start
+            time.sleep(max(0, interval - elapsed))
+
+    def loop_sync_commands_write(self, frequency=10):
         interval = 1.0 / frequency
 
         while self.running:
             start = time.time()
-            self.sync_commands()
+            self.sync_commands_write()
             elapsed = time.time() - start
             time.sleep(max(0, interval - elapsed))
 
-    def sync_commands(self):
+    def sync_commands_read(self):
 
         with self.lock:
 
@@ -80,6 +94,10 @@ class DriverWaveshare(DriverServos):
             #     self.logger.error(
             #         f"Communication error while reading: {self.driver_object.getTxRxResult(scs_comm_result)}"
             #     )
+
+    def sync_commands_write(self):
+
+        with self.lock:
 
             # Sync write
             scs_comm_result = self.driver_object.groupSyncWrite.txPacket()
