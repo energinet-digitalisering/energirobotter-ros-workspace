@@ -37,14 +37,11 @@ class ObjectDetectionNode(Node):
         )
 
         # Subscriptions
-        if self.use_compressed:
-            self.subscription = self.create_subscription(
-                CompressedImage, "/camera", self.camera_callback, 1
-            )
-        else:
-            self.subscription = self.create_subscription(
-                Image, "/camera", self.camera_callback, 1
-            )
+        ImageMsgType = CompressedImage if self.use_compressed else Image
+
+        self.subscription = self.create_subscription(
+            ImageMsgType, "/camera", self.camera_callback, 1
+        )
 
         # Publishers
         self.publisher_annotation = self.create_publisher(Image, "/camera_annotated", 1)
