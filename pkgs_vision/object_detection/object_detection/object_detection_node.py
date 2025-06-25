@@ -12,7 +12,7 @@ from object_detection.src import inference_yolo
 class ObjectDetectionNode(Node):
 
     def __init__(self):
-        super().__init__("face_detection_node")
+        super().__init__("object_detection_node")
 
         # Parameters
         self.declare_parameter("box_size_multiplier", 0.0)
@@ -47,14 +47,7 @@ class ObjectDetectionNode(Node):
             )
 
         # Publishers
-        if self.use_compressed:
-            self.publisher_annotation = self.create_publisher(
-                CompressedImage, "/camera_annotated", 1
-            )
-        else:
-            self.publisher_annotation = self.create_publisher(
-                Image, "/camera_annotated", 1
-            )
+        self.publisher_annotation = self.create_publisher(Image, "/camera_annotated", 1)
 
         self.publisher_bounding_box = self.create_publisher(
             BoundingBox2D, "/target_bounding_box", 1
@@ -105,16 +98,10 @@ class ObjectDetectionNode(Node):
             annotated = results[0].plot(show=False)
             cv2.circle(annotated, (int(box.x), int(box.y)), 10, (0, 255, 0), -1)
 
-            if self.use_compressed:
-                image_pub = self.cv_bridge.cv2_to_compressed_imgmsg(annotated)
-            else:
-                image_pub = self.cv_bridge.cv2_to_imgmsg(annotated, encoding="rgb8")
+            image_pub = self.cv_bridge.cv2_to_imgmsg(annotated, encoding="rgb8")
 
             # Publish annotated image
-            self.publisher_annotation.publish(msg)
-            # self.publisher_annotation.publish(image_pub)
-
-            self.get_logger().info(f"Published {msg.header}")
+            self.publisher_annotation.publish(image_pub)
 
 
 def main(args=None):
