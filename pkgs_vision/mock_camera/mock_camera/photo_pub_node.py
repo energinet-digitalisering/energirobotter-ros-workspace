@@ -11,10 +11,8 @@ class MockCameraNode(Node):
     def __init__(self):
         super().__init__("photo_pub_node")
 
-        self.declare_parameter("timer_period", 0.5)
-        timer_period = (
-            self.get_parameter("timer_period").get_parameter_value().double_value
-        )
+        self.declare_parameter("frequency", 5.0)
+        frequency = self.get_parameter("frequency").get_parameter_value().double_value
 
         self.declare_parameter("use_compressed", False)
         self.use_compressed = (
@@ -28,7 +26,7 @@ class MockCameraNode(Node):
             self.publisher = self.create_publisher(Image, "/camera", 1)
 
         # Timers
-        self.timer = self.create_timer(timer_period, self.timer_callback)
+        self.timer = self.create_timer(1.0 / frequency, self.timer_callback)
 
         # Node variables
         img_path = "install/mock_camera/share/mock_camera/images/faces.jpg"
