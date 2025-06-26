@@ -35,7 +35,11 @@ class VuerApp(VRInterfaceApp):
 
         # Establish ngrok connectivity
         if ngrok_enabled:
-            self.ngrok_listener = ngrok.forward(vuer_port, authtoken_from_env=True)
+            self.ngrok_listener = ngrok.forward(
+                vuer_port,
+                domain="gladly-destined-lacewing.ngrok-free.app",
+                authtoken_from_env=True,
+            )
             self.logger.info("----------------------------------------")
             self.logger.info(f"Connect to URL in headset: {self.ngrok_listener.url()}")
             self.logger.info("----------------------------------------")
