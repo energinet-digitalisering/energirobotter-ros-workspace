@@ -74,13 +74,13 @@ class ServoControl:
         self.gain_D = gain_D
         self.feedback_enabled = feedback_enabled
 
-        self.zero_position = (angle_max + angle_min) // 2
-
+        self.gear_zero_position = (angle_max + angle_min) // 2
         self.angle_init = self.default_position
         self.angle = self.angle_init
         self.pwm = self.angle_2_pwm(self.angle)
-        self.time_prev = time.time()
+        self.temperature = 0.0
 
+        self.time_prev = time.time()
         self.error_acc = 0.0
         self.error_prev = 0.0
 
@@ -109,6 +109,16 @@ class ServoControl:
 
         self.pwm = feedback_pwm
         self.angle = self.gearing_in(self.pwm_2_angle(feedback_pwm), self.gear_ratio)
+
+    def set_feedback_temperature(self, feedback_temperature):
+        """
+        Updates the servo's temperature value using external feedback.
+
+        Args:
+            feedback_temperature (int): The measured temperature from the servo's feedback system.
+        """
+
+        self.temperature = feedback_temperature
 
     def controller_PID(self, error, error_acc, error_prev, gain_P, gain_I, gain_D):
         """
@@ -271,7 +281,7 @@ class ServoControl:
         Returns:
             float: Input angle.
         """
-        return (value - self.zero_position) / gear_ratio + self.zero_position
+        return (value - self.gear_zero_position) / gear_ratio + self.gear_zero_position
 
     def gearing_out(self, value, gear_ratio):
         """
@@ -284,7 +294,7 @@ class ServoControl:
         Returns:
             float: Output angle.
         """
-        return self.zero_position + (value - self.zero_position) * gear_ratio
+        return self.gear_zero_position + (value - self.gear_zero_position) * gear_ratio
 
     def reach_angle_direct(self, angle, speed=None):
         """
