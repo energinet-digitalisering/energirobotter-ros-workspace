@@ -107,7 +107,20 @@ class DriverWaveshare(DriverServos):
             #     )
             self.driver_object.groupSyncWrite.clearParam()
 
-    def send_command(self, servo: ServoControl, pwm):
+    def read_feedback(self, servo: ServoControl):
+
+        try:
+            # return self.driver_object.ReadPos(servo.servo_id)[0]
+            # return self.driver_object.ReadTemperature(servo.servo_id)[0]
+
+            feedback = self.driver_object.SyncRead(servo.servo_id)
+            return feedback
+
+        except Exception as e:
+            self.logger.error(f"Failed to read feedback: {e}")
+            return None
+
+    def write_command(self, servo: ServoControl, pwm):
 
         with self.lock:
             # self.logger.info(f"Servo: {servo.servo_id}. Stopping pwm of: {pwm}")
@@ -125,19 +138,6 @@ class DriverWaveshare(DriverServos):
             # self.logger.warning(
             # f"groupSyncWrite addparam failed, servo ID: {servo.servo_id}"
             # )
-
-    def read_feedback(self, servo: ServoControl):
-
-        try:
-            # return self.driver_object.ReadPos(servo.servo_id)[0]
-            # return self.driver_object.ReadTemperature(servo.servo_id)[0]
-
-            feedback = self.driver_object.SyncRead(servo.servo_id)
-            return feedback
-
-        except Exception as e:
-            self.logger.error(f"Failed to read feedback: {e}")
-            return None
 
     def map_finger_to_servo(servo: ServoControl, angle_cmd):
         # Function specific to finger servos, that takes an angle between 0-90 and converts to correct range

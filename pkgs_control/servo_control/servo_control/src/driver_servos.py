@@ -112,7 +112,7 @@ class DriverServos(ABC):
         pass
 
     @abstractmethod
-    def send_command(self, servo: ServoControl, pwm):
+    def write_command(self, servo: ServoControl, pwm):
         """
         Abstract method to send a command to a servo.
 
@@ -314,7 +314,7 @@ class DriverServos(ABC):
         if not self._validate_command(servo, pwm_cmd):
             return
 
-        self.send_command(servo, pwm_cmd)
+        self.write_command(servo, pwm_cmd)
 
     def _update_servo_feedback(self, name):
         """

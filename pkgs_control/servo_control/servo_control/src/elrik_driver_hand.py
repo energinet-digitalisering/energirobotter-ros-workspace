@@ -46,7 +46,7 @@ class ElrikDriverHand(DriverServos):
 
         return angle_mapped
 
-    def send_command(self, servo: ServoControl, pwm):
+    def write_command(self, servo: ServoControl, pwm):
 
         now = time.time()
         call_times.append(now)
