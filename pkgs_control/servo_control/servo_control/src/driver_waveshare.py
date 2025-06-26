@@ -85,10 +85,10 @@ class DriverWaveshare(DriverServos):
                 )
 
             scs_comm_result = self.driver_object.groupSyncRead.txRxPacket()
-            # if scs_comm_result != scservo_def.COMM_SUCCESS:
-            #     self.logger.error(
-            #         f"Communication error while reading: {self.driver_object.getTxRxResult(scs_comm_result)}"
-            #     )
+            if scs_comm_result != scservo_def.COMM_SUCCESS:
+                self.logger.error(
+                    f"Communication error while reading: {self.driver_object.getTxRxResult(scs_comm_result)}"
+                )
 
     def sync_commands_write(self):
 
@@ -96,10 +96,10 @@ class DriverWaveshare(DriverServos):
 
             # Sync write
             scs_comm_result = self.driver_object.groupSyncWrite.txPacket()
-            # if scs_comm_result != scservo_def.COMM_SUCCESS:
-            #     self.logger.error(
-            #         f"Communication error while writing: {self.driver_object.getTxRxResult(scs_comm_result)}"
-            #     )
+            if scs_comm_result != scservo_def.COMM_SUCCESS:
+                self.logger.error(
+                    f"Communication error while writing: {self.driver_object.getTxRxResult(scs_comm_result)}"
+                )
             self.driver_object.groupSyncWrite.clearParam()
 
     def read_feedback(self, servo: ServoControl):
