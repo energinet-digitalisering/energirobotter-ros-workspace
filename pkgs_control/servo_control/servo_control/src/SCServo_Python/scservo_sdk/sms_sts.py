@@ -61,6 +61,7 @@ SMS_STS_PRESENT_CURRENT_H = 70
 class sms_sts(protocol_packet_handler):
     def __init__(self, portHandler):
         protocol_packet_handler.__init__(self, portHandler, 0)
+        self.groupSyncRead = GroupSyncRead(self, SMS_STS_PRESENT_POSITION_L, 15)
         self.groupSyncWrite = GroupSyncWrite(self, SMS_STS_ACC, 7)
 
     def WritePosEx(self, scs_id, position, speed, acc):
@@ -103,6 +104,39 @@ class sms_sts(protocol_packet_handler):
     def ReadMoving(self, scs_id):
         moving, scs_comm_result, scs_error = self.read1ByteTxRx(scs_id, SMS_STS_MOVING)
         return moving, scs_comm_result, scs_error
+
+    def ReadTemperature(self, scs_id):
+        temperature, scs_comm_result, scs_error = self.read1ByteTxRx(
+            scs_id, SMS_STS_PRESENT_TEMPERATURE
+        )
+        return temperature, scs_comm_result, scs_error
+
+    def SyncRead(self, scs_id):
+        scs_data_result, scs_error = self.groupSyncRead.isAvailable(
+            scs_id, SMS_STS_PRESENT_POSITION_L, 15
+        )
+        if scs_data_result == True:
+            scs_data_dict = {
+                "position": self.groupSyncRead.getData(
+                    scs_id, SMS_STS_PRESENT_POSITION_L, 2
+                ),
+                "speed": self.groupSyncRead.getData(scs_id, SMS_STS_PRESENT_SPEED_L, 2),
+                "load": self.groupSyncRead.getData(scs_id, SMS_STS_PRESENT_LOAD_L, 2),
+                "voltage": self.groupSyncRead.getData(
+                    scs_id, SMS_STS_PRESENT_VOLTAGE, 1
+                ),
+                "temperature": self.groupSyncRead.getData(
+                    scs_id, SMS_STS_PRESENT_TEMPERATURE, 1
+                ),
+                "moving": self.groupSyncRead.getData(scs_id, SMS_STS_MOVING, 1),
+                "current": self.groupSyncRead.getData(
+                    scs_id, SMS_STS_PRESENT_CURRENT_L, 2
+                ),
+            }
+
+            return scs_data_dict
+        else:
+            return None
 
     def SyncWritePosEx(self, scs_id, position, speed, acc):
         txpacket = [
