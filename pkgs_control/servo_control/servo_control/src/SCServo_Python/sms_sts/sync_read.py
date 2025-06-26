@@ -10,14 +10,18 @@
 import sys
 import os
 
-if os.name == 'nt':
+if os.name == "nt":
     import msvcrt
+
     def getch():
         return msvcrt.getch().decode()
+
 else:
     import sys, tty, termios
+
     fd = sys.stdin.fileno()
     old_settings = termios.tcgetattr(fd)
+
     def getch():
         try:
             tty.setraw(sys.stdin.fileno())
@@ -26,13 +30,25 @@ else:
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
         return ch
 
+
 sys.path.append("..")
-from scservo_sdk import *                       # Uses SC Servo SDK library
+from SCServo_Python.scservo_sdk import (
+    PortHandler,
+    sms_sts,
+    scservo_def,
+    GroupSyncRead,
+)  # Uses SC Servo SDK library
+
+from SCServo_Python.scservo_sdk.sms_sts import (
+    COMM_SUCCESS,
+    SMS_STS_PRESENT_POSITION_L,
+    SMS_STS_PRESENT_SPEED_L,
+)
 
 # Default setting
-BAUDRATE                    = 1000000           # SC Servo default baudrate : 1000000
-DEVICENAME                  = '/dev/ttyUSB0'    # Check which port is being used on your controller
-                                                # ex) Windows: "COM1"   Linux: "/dev/ttyUSB0" Mac: "/dev/tty.usbserial-*"
+BAUDRATE = 115200  # SC Servo default baudrate : 1000000
+DEVICENAME = "/dev/ttyUSB0"  # Check which port is being used on your controller
+# ex) Windows: "COM1"   Linux: "/dev/ttyUSB0" Mac: "/dev/tty.usbserial-*"
 
 # Initialize PortHandler instance
 # Set the port path
@@ -66,7 +82,7 @@ groupSyncRead = GroupSyncRead(packetHandler, SMS_STS_PRESENT_POSITION_L, 4)
 
 while 1:
     print("Press any key to continue! (or press ESC to quit!)")
-    if getch() == chr(0x1b):
+    if getch() == chr(0x1B):
         break
 
     for scs_id in range(1, 11):
@@ -81,12 +97,25 @@ while 1:
 
     for scs_id in range(1, 11):
         # Check if groupsyncread data of SC Servo#1~10 is available
-        scs_data_result, scs_error = groupSyncRead.isAvailable(scs_id, SMS_STS_PRESENT_POSITION_L, 4)
+        scs_data_result, scs_error = groupSyncRead.isAvailable(
+            scs_id, SMS_STS_PRESENT_POSITION_L, 4
+        )
         if scs_data_result == True:
             # Get SC Servo#scs_id present position value
-            scs_present_position = groupSyncRead.getData(scs_id, SMS_STS_PRESENT_POSITION_L, 2)
-            scs_present_speed = groupSyncRead.getData(scs_id, SMS_STS_PRESENT_SPEED_L, 2)
-            print("[ID:%03d] PresPos:%d PresSpd:%d" % (scs_id, scs_present_position, packetHandler.scs_tohost(scs_present_speed, 15)))
+            scs_present_position = groupSyncRead.getData(
+                scs_id, SMS_STS_PRESENT_POSITION_L, 2
+            )
+            scs_present_speed = groupSyncRead.getData(
+                scs_id, SMS_STS_PRESENT_SPEED_L, 2
+            )
+            print(
+                "[ID:%03d] PresPos:%d PresSpd:%d"
+                % (
+                    scs_id,
+                    scs_present_position,
+                    packetHandler.scs_tohost(scs_present_speed, 15),
+                )
+            )
         else:
             print("[ID:%03d] groupSyncRead getdata failed" % scs_id)
             continue

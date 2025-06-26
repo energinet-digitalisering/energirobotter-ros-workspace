@@ -112,7 +112,7 @@ class DriverServos(ABC):
         pass
 
     @abstractmethod
-    def send_command(self, servo: ServoControl, pwm):
+    def write_command(self, servo: ServoControl, pwm):
         """
         Abstract method to send a command to a servo.
 
@@ -194,7 +194,7 @@ class DriverServos(ABC):
             futures = [
                 executor.submit(self._update_servo_feedback, name)
                 for name in self.servos.keys()
-                if self.servos[name].feedback_enabled
+                # if self.servos[name].feedback_enabled
             ]
             for future in futures:
                 try:
@@ -219,6 +219,15 @@ class DriverServos(ABC):
             dict: A dictionary mapping servo names to current angles.
         """
         return {name: float(self.servos[name].angle) for name in self.servos}
+
+    def get_servo_temperatures(self):
+        """
+        Generate a dictionary of current temperatures for all servos.
+
+        Returns:
+            dict: A dictionary mapping servo names to current temperatures.
+        """
+        return {name: float(self.servos[name].temperature) for name in self.servos}
 
     def _compute_relative_speeds(
         self, servo_dict, command_dict, synchronise_speed, ignored_keys=[]
@@ -305,7 +314,7 @@ class DriverServos(ABC):
         if not self._validate_command(servo, pwm_cmd):
             return
 
-        self.send_command(servo, pwm_cmd)
+        self.write_command(servo, pwm_cmd)
 
     def _update_servo_feedback(self, name):
         """
@@ -314,11 +323,11 @@ class DriverServos(ABC):
         Args:
             name (str): Name of the servo to update feedback for.
         """
-        feedback_pwm = self.read_feedback(self.servos[name])
+        feedback = self.read_feedback(self.servos[name])
 
-        if feedback_pwm is not None:
-            # WRONG! Need to update the right dict
-            self.servos[name].set_feedback_pwm(feedback_pwm)
+        if feedback is not None:
+            self.servos[name].set_feedback_pwm(feedback["position"])
+            self.servos[name].set_feedback_temperature(feedback["temperature"])
 
     def _validate_command(self, servo: ServoControl, pwm):
         """
