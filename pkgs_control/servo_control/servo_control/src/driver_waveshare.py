@@ -23,12 +23,16 @@ class DriverWaveshare(DriverServos):
         self.lock = threading.Lock()
 
         self.loop_thread_read = threading.Thread(
-            target=self.loop_sync_commands_read, args=(control_frequency,), daemon=True
+            target=self.loop_sync_commands,
+            args=(self.sync_commands_read, 1.0),
+            daemon=True,
         )
         self.loop_thread_read.start()
 
         self.loop_thread_write = threading.Thread(
-            target=self.loop_sync_commands_write, args=(control_frequency,), daemon=True
+            target=self.loop_sync_commands,
+            args=(self.sync_commands_write, control_frequency),
+            daemon=True,
         )
         self.loop_thread_write.start()
 
@@ -59,21 +63,12 @@ class DriverWaveshare(DriverServos):
             self.logger.error(f"Failed to open port: {e}")
             return None
 
-    def loop_sync_commands_read(self):
-        interval = 1.0
-
-        while self.running:
-            start = time.time()
-            self.sync_commands_read()
-            elapsed = time.time() - start
-            time.sleep(max(0, interval - elapsed))
-
-    def loop_sync_commands_write(self, frequency=10):
+    def loop_sync_commands(self, callback_func, frequency=1.0):
         interval = 1.0 / frequency
 
         while self.running:
             start = time.time()
-            self.sync_commands_write()
+            callback_func()  # call the passed-in function
             elapsed = time.time() - start
             time.sleep(max(0, interval - elapsed))
 
