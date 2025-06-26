@@ -24,10 +24,8 @@ class TeleoperationVuerNode(Node):
             self.get_parameter("camera_enabled").get_parameter_value().bool_value
         )
 
-        self.declare_parameter("frecuency", 30)
-        self.frecuency = (
-            self.get_parameter("frecuency").get_parameter_value().integer_value
-        )
+        self.declare_parameter("frequency", 30)
+        frequency = self.get_parameter("frequency").get_parameter_value().integer_value
 
         self.declare_parameter("ngrok_enabled", False)
         ngrok_enabled = (
@@ -51,15 +49,13 @@ class TeleoperationVuerNode(Node):
         )
 
         # Timers
-        self.timer = self.create_timer(1.0 / self.frecuency, self.callback_timer)
+        self.timer = self.create_timer(1.0 / frequency, self.callback_timer)
 
         # Variables
-        self.image_left = None
-        self.image_right = None
-
         self.cv_bridge = CvBridge()
 
         self.vuer_app = VuerApp(camera_enabled, stereo_enabled, ngrok_enabled)
+
         self.tracking_transformer = TrackingTransformer()
         self.tracking_filter_left = TrackingFilter()
         self.tracking_filter_right = TrackingFilter()
