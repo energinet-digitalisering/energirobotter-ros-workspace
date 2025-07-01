@@ -3,5 +3,23 @@
         "name": "hand_right",
         "synchronise_speed": false
     },
-    "servos": {}
+    "servos": {
+        "hand_right_pinky": {
+            "servo_id": 25,
+            "dir": -1,
+            "gear_ratio": 1,
+            "pwm_min": 0,
+            "pwm_max": 4094,
+            "angle_min": 0,
+            "angle_max": 360,
+            "angle_software_min": 135,
+            "angle_software_max": 225,
+            "angle_speed_max": 200,
+            "default_position": 145,
+            "feedback_enabled": false,
+            "gain_P": 1.0,
+            "gain_I": 0.0,
+            "gain_D": 0.0
+        }
+    }
 }
