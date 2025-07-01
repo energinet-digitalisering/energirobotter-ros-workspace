@@ -62,7 +62,7 @@ The camera can only be served in the headset over a secure connection, for this 
 
 #### Enable Servo Serial Forwarding
 
-1. On your phone, connect to the `ESP32_DEV` Wi-Fi network
+1. On your phone, connect to the `ESP32_DEV` Wi-Fi network (password is `12345678`)
 2. In browser, go to `192.168.4.1`
 3. Click button `Start Serial Forwarding` - OBS! Make sure nothing is sending commands to the robot yet
 4. Click botton `Stop Serial Forwarding` but don't click `OK`, it's now ready as a stop button if needed
