@@ -30,8 +30,10 @@ class VuerApp(VRInterfaceApp):
 
         # URIs
         if camera_enabled:
-            self.offer_route = "/offer"
-            self.webrtc_server_uri = "http://localhost:8080" + self.offer_route
+            self.offer_route = "/signal"
+            self.webrtc_server_uri = (
+                "https://teleop.energirobotter.org" + self.offer_route
+            )
 
         # Establish ngrok connectivity
         if ngrok_enabled:
@@ -65,9 +67,9 @@ class VuerApp(VRInterfaceApp):
         self.app_vuer.add_handler("HAND_MOVE")(self.on_hand_move)
         self.app_vuer.spawn(start=False)(self.session_manager)
 
-        # Add WebRTC offer proxy route
-        if camera_enabled:
-            self.app_vuer._route("/offer", self.proxy_offer, method="POST")
+        # # Add WebRTC offer proxy route
+        # if camera_enabled:
+        #     self.app_vuer._route("/offer", self.proxy_offer, method="POST")
 
         # Start the Vuer app in a separate process
         self.process = Process(target=self.run)
