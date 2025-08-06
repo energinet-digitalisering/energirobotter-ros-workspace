@@ -77,6 +77,15 @@ class VuerApp(VRInterfaceApp):
                 self.queue_image_right = Queue(maxsize=2)
                 self.log_localhost_instructions()
 
+            case CameraSource.SERVER:
+                offer_route = "/signal"
+                domain = "https://teleop.energirobotter"
+                self.webrtc_server_uri = domain + offer_route
+
+                self.logger.info("----------------------------------------")
+                self.logger.info(f"Connect to URL in headset: {domain}")
+                self.logger.info("----------------------------------------")
+
             case CameraSource.NGROK:
                 # Establish ngrok connectivity
                 self.ngrok_listener = ngrok.forward(
@@ -85,11 +94,9 @@ class VuerApp(VRInterfaceApp):
                     authtoken_from_env=True,
                 )
 
-                self.offer_route = "/offer"
-                self.webrtc_server_uri_local = (
-                    "http://localhost:8080" + self.offer_route
-                )
-                self.webrtc_server_uri = self.ngrok_listener.url() + self.offer_route
+                offer_route = "/offer"
+                self.webrtc_server_uri_local = "http://localhost:8080" + offer_route
+                self.webrtc_server_uri = self.ngrok_listener.url() + offer_route
 
                 # Add WebRTC offer proxy route
                 self.app_vuer._route("/offer", self.proxy_offer, method="POST")
