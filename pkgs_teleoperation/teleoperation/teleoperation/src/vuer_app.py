@@ -7,55 +7,57 @@ import aiohttp
 from aiohttp.web_response import Response
 import asyncio
 from cgi import parse_header
-from multiprocessing import Process
+from enum import Enum
+from multiprocessing import Process, Queue
 import ngrok
 import numpy as np
 import traceback
 from vuer import Vuer, VuerSession
-from vuer.schemas import DefaultScene, Hands, WebRTCVideoPlane, WebRTCStereoVideoPlane
+from vuer.schemas import (
+    DefaultScene,
+    Hands,
+    ImageBackground,
+    WebRTCVideoPlane,
+    WebRTCStereoVideoPlane,
+)
 
 from teleoperation.src.vr_interface_app import VRInterfaceApp
 
 
+class CameraSource(Enum):
+    NONE = None
+    ROS = "ros"
+    SERVER = "server"
+    NGROK = "ngrok"
+
+    @classmethod
+    def from_input(cls, value, logger=None):
+        if isinstance(value, cls):
+            return value
+        if isinstance(value, str):
+            try:
+                return cls(value)
+            except ValueError:
+                if logger:
+                    logger.warning(
+                        f"Camera source `{value}` not valid, starting without camera"
+                    )
+        return cls.NONE
+
+
 class VuerApp(VRInterfaceApp):
-    def __init__(self, camera_enabled=False, stereo_enabled=False, ngrok_enabled=False):
+    def __init__(self, camera_source=None, stereo_enabled=False):
         VRInterfaceApp.__init__(self)
 
-        self.camera_enabled = camera_enabled
+        self.camera_source = CameraSource.from_input(camera_source, self.logger)
         self.stereo_enabled = stereo_enabled
-        self.ngrok_enabled = ngrok_enabled
-
-        vuer_host = "0.0.0.0"
-        vuer_port = 8012
-
-        # URIs
-        if camera_enabled:
-            self.offer_route = "/signal"
-            self.webrtc_server_uri = (
-                "https://teleop.energirobotter.org" + self.offer_route
-            )
-
-        # Establish ngrok connectivity
-        if ngrok_enabled:
-            self.ngrok_listener = ngrok.forward(
-                vuer_port,
-                domain="gladly-destined-lacewing.ngrok-free.app",
-                authtoken_from_env=True,
-            )
-            self.logger.info("----------------------------------------")
-            self.logger.info(f"Connect to URL in headset: {self.ngrok_listener.url()}")
-            self.logger.info("----------------------------------------")
-        else:
-            self.logger.info("----------------------------------------")
-            self.logger.info(
-                f"Connect to URL in headset: http://localhost:{vuer_port} (wired setup, remember to run `adb reverse tcp:{vuer_port} tcp:{vuer_port}` on connected computer)"
-            )
-            self.logger.info("----------------------------------------")
+        self.vuer_host = "0.0.0.0"
+        self.vuer_port = 8012
 
         # Initialize the Vuer app
         self.app_vuer = Vuer(
-            host=vuer_host,
-            port=vuer_port,
+            host=self.vuer_host,
+            port=self.vuer_port,
             free_port=True,
             static_root=".",
             queries=dict(
@@ -63,27 +65,55 @@ class VuerApp(VRInterfaceApp):
                 collapseMenu=True,
             ),
         )
+
         self.app_vuer.add_handler("CAMERA_MOVE")(self.on_camera_move)
         self.app_vuer.add_handler("HAND_MOVE")(self.on_hand_move)
         self.app_vuer.spawn(start=False)(self.session_manager)
 
-        # # Add WebRTC offer proxy route
-        # if camera_enabled:
-        #     self.app_vuer._route("/offer", self.proxy_offer, method="POST")
+        # Camera setup, server configs, and URIs
+        match self.camera_source:
+            case CameraSource.ROS:
+                self.queue_image_left = Queue(maxsize=2)
+                self.queue_image_right = Queue(maxsize=2)
+                self.log_localhost_instructions()
+
+            case CameraSource.NGROK:
+                # Establish ngrok connectivity
+                self.ngrok_listener = ngrok.forward(
+                    self.vuer_port,
+                    domain="gladly-destined-lacewing.ngrok-free.app",
+                    authtoken_from_env=True,
+                )
+
+                self.offer_route = "/offer"
+                self.webrtc_server_uri_local = (
+                    "http://localhost:8080" + self.offer_route
+                )
+                self.webrtc_server_uri = self.ngrok_listener.url() + self.offer_route
+
+                # Add WebRTC offer proxy route
+                self.app_vuer._route("/offer", self.proxy_offer, method="POST")
+
+                self.logger.info("----------------------------------------")
+                self.logger.info(
+                    f"Connect to URL in headset: {self.ngrok_listener.url()}"
+                )
+                self.logger.info("----------------------------------------")
+
+            case _:
+                self.log_localhost_instructions()
 
         # Start the Vuer app in a separate process
         self.process = Process(target=self.run)
         self.process.start()
 
-    def run(self):
-        """Run the Vuer app"""
-        try:
-            asyncio.get_running_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-
-        self.app_vuer.run()
+    def log_localhost_instructions(self):
+        self.logger.info("----------------------------------------")
+        self.logger.info(
+            f"Connect to URL in headset: http://localhost:{self.vuer_port} "
+            "(wired setup, remember to run `adb reverse tcp:{vuer_port} tcp:{vuer_port}` on connected computer)"
+        )
+        self.logger.info("----------------------------------------")
 
     async def proxy_offer(self, request):
         try:
@@ -114,6 +144,30 @@ class VuerApp(VRInterfaceApp):
         except Exception as e:
             traceback.print_exc()
             return aiohttp.web.Response(status=500, text=f"Proxy error: {e}")
+
+    def run(self):
+        """Run the Vuer app"""
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+        self.app_vuer.run()
+
+    def update_frames(self, left, right):
+        """Update the image queues with new frames."""
+
+        if self.camera_source != CameraSource.ROS:
+            return
+
+        if self.queue_image_left.full():
+            self.queue_image_left.get()
+        self.queue_image_left.put(left)
+
+        if self.queue_image_right.full():
+            self.queue_image_right.get()
+        self.queue_image_right.put(right)
 
     async def on_camera_move(self, event, session: VuerSession):
         """Handle head tracking data"""
@@ -155,13 +209,7 @@ class VuerApp(VRInterfaceApp):
         session.set @ DefaultScene(frameloop="always")
 
         # Setup camera stream plane
-        if self.camera_enabled:
-
-            # Choose source
-            if self.ngrok_enabled:
-                stream_src = self.ngrok_listener.url() + self.offer_route
-            else:
-                stream_src = self.webrtc_server_uri
+        if self.camera_source in [CameraSource.SERVER, CameraSource.NGROK]:
 
             # Create camera stream plane
             VideoPlaneClass = (
@@ -169,7 +217,7 @@ class VuerApp(VRInterfaceApp):
             )
 
             session.upsert @ VideoPlaneClass(
-                src=stream_src,
+                src=self.webrtc_server_uri,
                 key="video-quad",
                 height=1.5,
                 aspect=16 / 9,
@@ -185,6 +233,62 @@ class VuerApp(VRInterfaceApp):
 
         # Session loop
         while len(self.app_vuer.ws) > 0:
+
+            if self.camera_source in [CameraSource.ROS]:
+                # Left camera
+                if self.queue_image_left.empty():
+                    self.logger.info("Left image empty, skipping frame update")
+                    continue
+
+                image_left = self.queue_image_left.get(block=True)
+
+                if image_left is None:
+                    self.logger.info("Left image is None, skipping frame update")
+                    continue
+
+                # Right camera
+                if self.stereo_enabled:
+                    if self.queue_image_right.empty():
+                        self.logger.debug("Right image empty, skipping frame update")
+                        continue
+
+                    image_right = self.queue_image_right.get(block=True)
+
+                    if image_right is None:
+                        self.logger.debug("Right image is None, skipping frame update")
+                        continue
+                else:
+                    image_right = image_left
+
+                # Session content
+                session.upsert(
+                    [
+                        ImageBackground(
+                            image_left,
+                            aspect=1.778,
+                            height=1,
+                            distanceToCamera=1,
+                            layers=1,
+                            format="jpeg",
+                            quality=90,
+                            key="background-left",
+                            interpolate=True,
+                        ),
+                        ImageBackground(
+                            image_right,
+                            aspect=1.778,
+                            height=1,
+                            distanceToCamera=1,
+                            layers=2,
+                            format="jpeg",
+                            quality=90,
+                            key="background-right",
+                            interpolate=True,
+                        ),
+                    ],
+                    to="bgChildren",
+                )
+
             # 'jpeg' encoding should give about 30fps with a 16ms wait in-between.
             await asyncio.sleep(0.016 * 2)
 

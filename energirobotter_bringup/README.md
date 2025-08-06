@@ -89,12 +89,12 @@ The camera can only be served in the headset over a secure connection, for this 
    ```
    export NGROK_AUTHTOKEN=$YOUR_AUTHTOKEN
    ```
-4. Run teleoperation on robot with (set appropriate flags):
+4. Run teleoperation on robot with (set appropriate flags, `camera_source` can be one of: `ros`, `server`, `ngrok`, leave it out if no camera is available.):
    ```
    cd energinet/
    shumble
    sw
-   ros2 launch energirobotter_bringup teleoperation_vuer.launch.py camera_enabled:=true stereo_enabled:=false ngrok_enabled:=true ik_enabled:=true rviz:=false
+   ros2 launch energirobotter_bringup teleoperation_vuer.launch.py camera_source:=ros stereo_enabled:=false ik_enabled:=true rviz:=false
    ```
    > Only set `rviz:=true` if a display is connected to the computer. 
 

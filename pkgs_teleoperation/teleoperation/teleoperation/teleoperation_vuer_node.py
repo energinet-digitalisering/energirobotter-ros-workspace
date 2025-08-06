@@ -5,9 +5,9 @@ import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped, Pose, Point, Quaternion
 from std_msgs.msg import Header
-from sensor_msgs.msg import JointState
+from sensor_msgs.msg import CompressedImage, JointState
 
-from teleoperation.src.vuer_app import VuerApp
+from teleoperation.src.vuer_app import CameraSource, VuerApp
 from teleoperation.src.tracking_transformer import TrackingTransformer
 from teleoperation.src.tracking_filter import TrackingFilter
 from teleoperation.src.tracking_collision_avoidance import TrackingCollisionAvoidance
@@ -19,23 +19,29 @@ class TeleoperationVuerNode(Node):
         super().__init__("teleoperation_vuer_node")
 
         # Parameters
-        self.declare_parameter("camera_enabled", False)
-        camera_enabled = (
-            self.get_parameter("camera_enabled").get_parameter_value().bool_value
-        )
+        self.declare_parameter("camera_source", "")
+        self.camera_source = (
+            self.get_parameter("camera_source").get_parameter_value().string_value
+        )  # Choices: "", "ros", "server", "ngrok"
+        self.camera_source = CameraSource.from_input(self.camera_source)
 
         self.declare_parameter("frequency", 30)
         frequency = self.get_parameter("frequency").get_parameter_value().integer_value
-
-        self.declare_parameter("ngrok_enabled", False)
-        ngrok_enabled = (
-            self.get_parameter("ngrok_enabled").get_parameter_value().bool_value
-        )
 
         self.declare_parameter("stereo_enabled", False)
         stereo_enabled = (
             self.get_parameter("stereo_enabled").get_parameter_value().bool_value
         )
+
+        # Subscribers
+        if self.camera_source == CameraSource.ROS:
+            self.subscription_image_left = self.create_subscription(
+                CompressedImage, "/image_left", self.callback_image_left, 1
+            )
+
+            self.subscription_image_right = self.create_subscription(
+                CompressedImage, "/image_right", self.callback_image_right, 1
+            )
 
         # Publishers
         self.pose_left_pub = self.create_publisher(PoseStamped, "/left/target_pose", 1)
@@ -52,14 +58,27 @@ class TeleoperationVuerNode(Node):
         self.timer = self.create_timer(1.0 / frequency, self.callback_timer)
 
         # Variables
+        self.image_left = None
+        self.image_right = None
+
         self.cv_bridge = CvBridge()
 
-        self.vuer_app = VuerApp(camera_enabled, stereo_enabled, ngrok_enabled)
+        self.vuer_app = VuerApp(self.camera_source, stereo_enabled)
 
         self.tracking_transformer = TrackingTransformer()
         self.tracking_filter_left = TrackingFilter()
         self.tracking_filter_right = TrackingFilter()
         self.tracking_collision_avoidance = TrackingCollisionAvoidance()
+
+    def callback_image_left(self, msg):
+        self.image_left = self.cv_bridge.compressed_imgmsg_to_cv2(
+            msg, desired_encoding="rgb8"
+        )
+
+    def callback_image_right(self, msg):
+        self.image_right = self.cv_bridge.compressed_imgmsg_to_cv2(
+            msg, desired_encoding="rgb8"
+        )
 
     def tf_matrix_to_msg(self, tf_matrix):
         position = tf_matrix[0:3, 3]
@@ -92,6 +111,9 @@ class TeleoperationVuerNode(Node):
         return joint_state_msg
 
     def callback_timer(self):
+        if self.camera_source == CameraSource.ROS:
+            self.vuer_app.update_frames(self.image_left, self.image_right)
+
         # Transform tracking to robot frame
         _, left_wrist_mat, right_wrist_mat, hand_angles = (
             self.tracking_transformer.process(
