@@ -124,7 +124,7 @@ class VuerApp(VRInterfaceApp):
 
             async with aiohttp.ClientSession() as session:
                 async with session.post(
-                    self.webrtc_server_uri, data=data, headers=headers
+                    self.webrtc_server_uri_local, data=data, headers=headers
                 ) as resp:
                     response_data = await resp.read()
 
