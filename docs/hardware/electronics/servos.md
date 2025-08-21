@@ -17,6 +17,15 @@ Out-of-the-box the servo driver does not include software that can control the S
 
 The guide on their website explains the process well, under the title “[Compile Arduino IDE](https://www.waveshare.com/wiki/ST3215_Servo#:~:text=ST%20series%20servos.-,Compile%20Arduino%20IDE,-We%20provide%20ST3215)” (Tested with Windows). 
 
+Some settings in the `ServoDriver.ino` file should be changed before flashing the board:
+| Variable name                        | New value                              | Note                                                                                                                 |
+| ------------------------------------ | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `const char* AP_SSID = "ESP32_DEV";` | `const char* AP_SSID = "ESP32_DEV_0";` | Must be unique for each servo driver board                                                                           |
+| `int MAX_ID = 20;`                   | `int MAX_ID = 50;`                     | To ensure all servos can be found.                                                                                   |
+| `bool SERIAL_FORWARDING = false;`    | `bool SERIAL_FORWARDING = true;`       | If this is false you have to use the webapp to turn it on each session the Jetson needs to talk to the servo drvier. |
+| `Serial.begin(115200);`              | `Serial.begin(921600);`                | Faster baudrate increases command bandwidth.                                                                         |
+
+
 Some things to note, not mentioned in the guide: 
 
 - If the COM port is not discovered when the board is connected, try installing this USB driver (CP210x VCP Windows). From this trouble shooting guide. 
@@ -24,14 +33,5 @@ Some things to note, not mentioned in the guide:
 - Don’t update libraries, as it can result in a compile error. If you need to downgrade, follow this guide. 
 
 - If you get a compile error “A fatal error occurred: Failed to connect to ESP32: Wrong boot mode detected (0x13)! The chip needs to be in download mode”, simply hold down the “boot” button on the board while compiling and writing to the board.  
-
-
-Some settings in the `ServoDriver.ino` file should be changed:
-| Variable name     | Default value | New value     | Note                                       |
-| ----------------- | ------------- | ------------- | ------------------------------------------ |
-| AP_SSID           | "ESP32_DEV"   | "ESP32_DEV_0" | Must be unique for each servo driver board |
-| MAX_ID            | 20            | 50            |                                            |
-| SERIAL_FORWARDING | false         | true          |                                            |
-| MAX_ID            | 20            | 50            |                                            |
 
 
