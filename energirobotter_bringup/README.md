@@ -18,7 +18,6 @@ rosdep install --from-paths src -y --ignore-src
       - [Enable Servo Serial Forwarding](#enable-servo-serial-forwarding)
   - [Teleoperation Vuer](#teleoperation-vuer)
     - [Setup Robot](#setup-robot-1)
-      - [Enable Servo Serial Forwarding](#enable-servo-serial-forwarding-1)
     - [Setup Visualisation](#setup-visualisation)
     - [Setup VR Headset](#setup-vr-headset)
       - [Wireless](#wireless)
@@ -89,7 +88,12 @@ The camera can only be served in the headset over a secure connection, for this 
    ```
    export NGROK_AUTHTOKEN=$YOUR_AUTHTOKEN
    ```
-4. Run teleoperation on robot with (set appropriate flags, `camera_source` can be one of: `ros`, `server`, `ngrok`, leave it out if no camera is available.):
+4. Run camera:
+   ```
+   ros2 launch energirobotter_bringup camera.launch.py camera_model:=zed2i rotate:=270
+   ```
+
+5. Run teleoperation on robot with (set appropriate flags, `camera_source` can be one of: `ros`, `server`, `ngrok`, leave it out if no camera is available.):
    ```
    cd energinet/
    shumble
@@ -99,13 +103,6 @@ The camera can only be served in the headset over a secure connection, for this 
    > Only set `rviz:=true` if a display is connected to the computer. 
 
    > You can also run the `teleoperation_vuer.launch.py` from a PC and it will work if the robot and computer are on the same subnet. If not on robot set `camera_enabled:=false`. 
-
-#### Enable Servo Serial Forwarding
-
-1. On your phone (or computer that does not need to communicate to the robot), connect to the `ESP32_DEV` Wi-Fi network (password is `12345678`)
-2. In browser, go to `192.168.4.1`
-3. Click button `Start Serial Forwarding` - OBS! Make sure nothing is sending commands to the robot yet
-4. Click botton `Stop Serial Forwarding` but don't click `OK`, it's now ready as a stop button if needed
 
 
 ### Setup Visualisation
@@ -124,9 +121,9 @@ The camera can only be served in the headset over a secure connection, for this 
 2. In the headset's browser, go to the `ngrok` URL shown in the terminal when launching the teleoperation. 
 
 #### Wired
-> You need to run `teleoperation_vuer.launch.py` (step 4. under "Setup Robot") on the computer the headset is connected to, to be able to acces its localhost address.
-2. Plug USB cable into headset first, then put it on
-3. Plug cable into computer, and accept USB connection in the headset (if you miss it, you can find it under notifications)
+> You need to run `teleoperation_vuer.launch.py` (step 5. under "Setup Robot") on the computer the headset is connected to instead of the robot, to be able to acces its localhost address.
+2. Plug USB cable into headset and computer, then put it on
+3. Accept USB connection in the headset (if you miss it, you can find it under notifications)
 > If the "`USB-C Port Disabled, water and debris`" message pops up, restart the headset and try again. If that does not work, use the other end of the cable and try again.
 4. From terminal on PC, enable reverse port forwarding:
    ```
@@ -137,10 +134,11 @@ The camera can only be served in the headset over a secure connection, for this 
 
 ### Calibrate and Launch
 
-1. In the headset, press "passthrough"
-2. Calibrate the view (hold down Meta button on right controller)
-3. Verify that tracking is working in RViz
-4. Start `servos.launch.py` in a terminal on the robot:
+1. Plug in the ESP32 servo controller boards in a specific order (after the camera has run at least once): left arm + head -> right arm -> hands
+2. In the headset, press "passthrough"
+3. Calibrate the view (hold down Meta button on right controller)
+4. Verify that tracking is working in RViz
+5. Start `servos.launch.py` in a terminal on the robot:
    >Make sure the VR is tracking properly! As soon as the `servos.launch.py` is running, it will start moving!
    ```
    cd energinet/
@@ -149,7 +147,7 @@ The camera can only be served in the headset over a secure connection, for this 
    ros2 launch energirobotter_bringup servos.launch.py
    ```
    
-5. When done with the teleoperation, stop the `servos.launch.py` terminal
+6. When done with the teleoperation, stop the `servos.launch.py` terminal
 
 ---
 

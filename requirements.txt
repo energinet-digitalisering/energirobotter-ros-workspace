@@ -1,3 +1,4 @@
+-r pkgs_control/control_utils/requirements.txt
 -r pkgs_control/servo_control/requirements.txt
 -r pkgs_teleoperation/network_bridge/requirements.txt
 -r pkgs_teleoperation/teleoperation/requirements.txt

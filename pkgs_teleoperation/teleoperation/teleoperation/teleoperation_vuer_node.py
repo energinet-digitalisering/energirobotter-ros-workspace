@@ -45,10 +45,10 @@ class TeleoperationVuerNode(Node):
 
         # Publishers
         self.pose_left_pub = self.create_publisher(PoseStamped, "/left/target_pose", 1)
-
         self.pose_right_pub = self.create_publisher(
             PoseStamped, "/right/target_pose", 1
         )
+        self.pose_head_pub = self.create_publisher(PoseStamped, "/head/target_pose", 1)
 
         self.joint_state_hands_pub = self.create_publisher(
             JointState, "/joint_states_hands", 1
@@ -116,7 +116,7 @@ class TeleoperationVuerNode(Node):
             self.vuer_app.update_frames(self.image_left, self.image_right)
 
         # Transform tracking to robot frame
-        _, left_wrist_mat, right_wrist_mat, hand_angles = (
+        head_matrix, left_wrist_mat, right_wrist_mat, hand_angles = (
             self.tracking_transformer.process(
                 self.vuer_app.head_matrix,
                 self.vuer_app.hand_left,
@@ -133,6 +133,9 @@ class TeleoperationVuerNode(Node):
         left_wrist_mat, right_wrist_mat = self.tracking_collision_avoidance.process(
             left_wrist_mat, right_wrist_mat
         )
+
+        msg_pose_head = self.tf_matrix_to_msg(head_matrix)
+        self.pose_head_pub.publish(msg_pose_head)
 
         msg_pose_left = self.tf_matrix_to_msg(left_wrist_mat)
         self.pose_left_pub.publish(msg_pose_left)

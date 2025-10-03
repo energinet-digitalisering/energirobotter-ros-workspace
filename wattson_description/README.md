@@ -4,7 +4,7 @@ Robot URFD description of Wattson.
 
 ## Generate URDF
 
-The URDF file and meshes are generated/exported from Blender 3.3, using the [Phobos addon](https://github.com/dfki-ric/phobos) (see [video guide](https://www.youtube.com/watch?v=JGPyNxzVlYA&t)). 
+The URDF file and meshes are generated/exported from Blender 3.3, using the [Phobos addon](https://github.com/dfki-ric/phobos) (see [video guide](https://www.youtube.com/watch?v=JGPyNxzVlYA&t), especially [Part 2](https://www.youtube.com/watch?v=CrMvtlZl3LI&ab_channel=FatAl) is relevant). 
 
 Here's a quick rundown:
 
@@ -35,12 +35,13 @@ Here's a quick rundown:
    Assign a name to the robot — this will set the root-link.
 
 6. **Define joints**  
-   Select all links and use the *Define Joints* function. Set the joint type to `Revolute`.
+  Select all links and use the *Define Joints* function. Set the joint type to `Revolute`.  
+   - Create appropriate limits for all joints.
 
-7. **Name joints**  
+1. **Name joints**  
    Name each joint to match the corresponding servo joint names from the servo configuration file.
 
-8. **Export the model**  
+2. **Export the model**  
    Set the export path to `//`. In the export settings, enable:  
    - `Export Textures`  
    - `URDF`  
@@ -51,12 +52,12 @@ Here's a quick rundown:
    - Use **relative file paths**  
    Finally, click **Export Model**.
 
-This package has a `fetch_phobos_urdf.py` script in the `utils/` folder, to fetch the URDF generated from Phobos and change the needed lines. 
-Change the paths in the `source_file` and `destination_file` variables. For example, all relative paths `../` need to be changed with `package://wattson_description/`.
+3. **Finalise URDF**  
+   - This package has a `fetch_phobos_urdf.py` script in the `utils/` folder, to fetch the URDF generated from Phobos and change the needed lines. 
+   Change the paths in the `source_file` and `destination_file` variables, then run the script.
+   -  Manually copy the mesh files from the export folder to the `meshes/stl/` folder in the description package.
 
-Manually copy the mesh files from the export folder to the `meshes/stl/` folder in the description package.
-
-> Should the hand orientations look weird when run with teleoperation, it is because of a transform from the VR controllers to the robot hands. Tune `self.hand2gripper_left` and `self.hand2gripper_right` in the `TrackingTransformer` class, found in `pkgs_teleoperation/teleoperation/teleoperation/src/tracking_transformer.py`.
+   > Should the hand orientations look weird when run with teleoperation, it is because of a transform from the VR controllers to the robot hands. Tune `self.hand2gripper_left` and `self.hand2gripper_right` in the `TrackingTransformer` class, found in `pkgs_teleoperation/teleoperation/teleoperation/src/tracking_transformer.py`.
 
 
 

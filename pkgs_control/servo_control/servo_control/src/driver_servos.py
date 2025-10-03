@@ -308,8 +308,7 @@ class DriverServos(ABC):
             return
 
         servo = self.servos[name]
-        angle_target = command + servo.default_position
-
+        angle_target = servo.logic_to_physical(command)
         pwm_cmd = servo.compute_command(angle_target, speed)
 
         if not self._validate_command(servo, pwm_cmd):

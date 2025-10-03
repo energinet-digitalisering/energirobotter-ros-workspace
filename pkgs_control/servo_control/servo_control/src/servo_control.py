@@ -172,6 +172,13 @@ class ServoControl:
 
         return speed
 
+    def logic_to_physical(self, logical_angle: float) -> float:
+        """
+        Converts logical angle to physical servo angle.
+        """
+        physical = self.default_position + logical_angle
+        return np.clip(physical, self.angle_software_min, self.angle_software_max)
+
     def compute_command(self, angle_target, speed_max=None):
         """
         Computes the PWM command for the servo based on the desired angle.

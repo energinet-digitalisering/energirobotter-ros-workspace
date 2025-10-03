@@ -1,0 +1,3 @@
+[submodule "pkgs_control/pyroki"]
+	path = pkgs_control/pyroki
+	url = https://github.com/chungmin99/pyroki.git

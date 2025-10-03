@@ -1,6 +1,6 @@
-from typing import List
-
+from dataclasses import dataclass, field
 import numpy as np
+from typing import Callable, Dict, List
 
 import rclpy
 from geometry_msgs.msg import PoseStamped
@@ -8,6 +8,7 @@ from rclpy.node import Node
 from rclpy.qos import QoSDurabilityPolicy, QoSProfile
 from sensor_msgs.msg import JointState
 from std_msgs.msg import String
+from scipy.spatial.transform import Rotation as R
 
 from .kdl_kinematics import (
     generate_solver,
@@ -16,134 +17,87 @@ from .kdl_kinematics import (
 )
 
 
+@dataclass
+class EndEffector:
+    name: str
+    callback: Callable
+    locked_joints: Dict[int, float] = field(
+        default_factory=dict
+    )  # {link_id(int), angle(float)}
+    target_pose: np.ndarray = field(
+        default_factory=lambda: np.array(
+            [[1, 0, 0, 0.5], [0, 1, 0, 0.5], [0, 0, 1, 0.5], [0, 0, 0, 1]]
+        )
+    )
+    q_init = {}
+    chain = {}
+    fk_solver = {}
+    ik_solver = {}
+
+
 class ElrikKdlKinematics(Node):
     def __init__(self):
         super().__init__("elrik_kdl_kinematics_node")
 
-        self.urdf = self.retrieve_urdf()
-
-        self.end_effectors = [
-            "link_left_hand",
-            "link_right_hand",
-            # "link_head_roll",
-        ]
-
-        self.chain_names = {
-            self.end_effectors[0]: "left",
-            self.end_effectors[1]: "right",
-            # self.end_effectors[2]: "head",
-        }
-
-        self.locked_joints = {
-            # {link_id(int), angle(float)}
-            self.end_effectors[0]: {},
-            self.end_effectors[1]: {},
-            # self.end_effectors[2]: {},
-        }
-
-        self.end_effector_callback_subs = {
-            self.end_effectors[0]: self.callback_target_pos_left,
-            self.end_effectors[1]: self.callback_target_pos_right,
-            # self.end_effectors[2]: self.callback_target_pos_head,
-        }
-
-        self.target_pose = {
-            self.end_effectors[0]: np.array(
-                [[1, 0, 0, 0.5], [0, 1, 0, 0.5], [0, 0, 1, 0.5], [0, 0, 0, 1]]
-            ),
-            self.end_effectors[1]: np.array(
-                [[1, 0, 0, 0.5], [0, 1, 0, 0.5], [0, 0, 1, 0.5], [0, 0, 0, 1]]
-            ),
-            # self.end_effectors[2]: np.array(
-            #     [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
-            # ),
-        }
-
-        self.q_init = {}
-        self.chain, self.fk_solver, self.ik_solver = {}, {}, {}
-        self.target_sub = {}
-
-        self.timer = self.create_timer(0.1, self.callback_timer_publish_joint_states)
-
+        # Publishers
         self.joint_state_pub = self.create_publisher(JointState, "/joint_states", 10)
 
-        for end_effector in self.end_effectors:
+        # Timers
+        self.timer = self.create_timer(0.1, self.callback_timer_publish_joint_states)
+
+        # Node variables
+        self.urdf = self.retrieve_urdf()
+
+        self.end_effectors = {
+            "left": EndEffector(
+                name="link_left_hand",
+                callback=self.callback_target_pos_left,
+            ),
+            "right": EndEffector(
+                name="link_right_hand",
+                callback=self.callback_target_pos_right,
+            ),
+        }
+
+        self.target_subs = []
+
+        # Subscribe to head pose
+        self.head_pose = None
+        self.create_subscription(
+            PoseStamped, "/head/target_pose", self.callback_head_pose, 5
+        )
+
+        # Init IK and subscriptions for end effectors
+        for key, end_effector in self.end_effectors.items():
 
             chain, fk_solver, ik_solver = generate_solver(
-                self.urdf, "link_torso", end_effector
+                self.urdf, "link_torso", end_effector.name
             )
 
             # We automatically loads the kinematics corresponding to the config
             if chain.getNrOfJoints():
                 self.get_logger().info(
-                    f'Found kinematics chain for "{end_effector}"! Chain length: {chain.getNrOfJoints()}'
+                    f'Found kinematics chain for "{end_effector.name}"! Chain length: {chain.getNrOfJoints()}'
                 )
 
-                self.target_sub[end_effector] = self.create_subscription(
+                target_sub = self.create_subscription(
                     msg_type=PoseStamped,
-                    topic=f"/{self.chain_names[end_effector]}/target_pose",
+                    topic=f"/{key}/target_pose",
                     qos_profile=5,
-                    callback=self.end_effector_callback_subs[end_effector],
+                    callback=end_effector.callback,
                 )
-                self.get_logger().info(
-                    f'Added subscription on "{self.target_sub[end_effector].topic}"'
-                )
+                self.target_subs.append(target_sub)
 
-                self.q_init[end_effector] = [0] * chain.getNrOfJoints()
-                self.chain[end_effector] = chain
-                self.fk_solver[end_effector] = fk_solver
-                self.ik_solver[end_effector] = ik_solver
+                self.get_logger().info(f'Added subscription on "{target_sub.topic}"')
+
+                end_effector.q_init = [0] * chain.getNrOfJoints()
+                end_effector.chain = chain
+                end_effector.fk_solver = fk_solver
+                end_effector.ik_solver = ik_solver
 
         self.get_logger().info(f"Kinematics node ready!")
 
-    def callback_target_pos_left(self, msg: PoseStamped):
-        self.target_pose[self.end_effectors[0]] = ros_pose_to_matrix(msg.pose)
-
-    def callback_target_pos_right(self, msg: PoseStamped):
-        self.target_pose[self.end_effectors[1]] = ros_pose_to_matrix(msg.pose)
-
-    def callback_target_pos_head(self, msg: PoseStamped):
-        self.target_pose[self.end_effectors[2]] = ros_pose_to_matrix(msg.pose)
-
-    def callback_timer_publish_joint_states(self):
-        """
-        Publish the joint states based on the IK solution.
-        """
-        names = []
-        positions = []
-
-        for end_effector in self.end_effectors:
-
-            # if end_effector != self.end_effectors[2]:  # Skip head
-            error, q_solution = inverse_kinematics(
-                self.ik_solver[end_effector],
-                q0=self.q_init[end_effector],
-                target_pose=self.target_pose[end_effector],
-                nb_joints=self.chain[end_effector].getNrOfJoints(),
-                locked_joints=self.locked_joints[end_effector],
-            )
-            # else:
-            #     q_solution = self.q_init[end_effector]
-
-            names.extend(self.get_chain_joints_name(self.chain[end_effector]))
-            positions.extend([float(pos) for pos in q_solution])
-
-        joint_state_msg = JointState()
-        joint_state_msg.header.stamp = self.get_clock().now().to_msg()
-        joint_state_msg.name = names
-        joint_state_msg.position = positions
-
-        # Publish the joint state message
-        self.joint_state_pub.publish(joint_state_msg)
-
-    def get_current_position(self, chain) -> List[float]:
-        joints = self.get_chain_joints_name(chain)
-        return [self._current_pos[j] for j in joints]
-
-    def wait_for_joint_state(self):
-        while not self.joint_state_ready.is_set():
-            self.get_logger().info("Waiting for /joint_states...")
-            rclpy.spin_once(self)
+    ############## Functions ##############
 
     def retrieve_urdf(self, timeout_sec: float = 15):
         self.get_logger().info('Retrieving URDF from "/robot_description"...')
@@ -172,22 +126,66 @@ class ElrikKdlKinematics(Node):
 
         return self.urdf
 
-    def check_position(self, js: JointState, chain) -> List[float]:
-        pos = dict(zip(js.name, js.position))
-        try:
-            joints = [pos[j] for j in self.get_chain_joints_name(chain)]
-            return joints
-        except KeyError:
-            self.get_logger().warning(
-                f"Incorrect joints found ({js.name} vs {self.get_chain_joints_name(chain)})"
-            )
-            raise
-
     def get_chain_joints_name(self, chain):
         return [
             chain.getSegment(i).getJoint().getName()
             for i in range(chain.getNrOfJoints())
         ]
+
+    ############## Callbacks ##############
+
+    def callback_target_pos_left(self, msg: PoseStamped):
+        self.end_effectors["left"].target_pose = ros_pose_to_matrix(msg.pose)
+
+    def callback_target_pos_right(self, msg: PoseStamped):
+        self.end_effectors["right"].target_pose = ros_pose_to_matrix(msg.pose)
+
+    def callback_head_pose(self, msg: PoseStamped):
+        """
+        Extract yaw and pitch from the head pose transformation matrix (in radians).
+        """
+        matrix = ros_pose_to_matrix(msg.pose)
+        # Extract rotation part (3x3)
+        rot_matrix = matrix[:3, :3]
+        # Convert to Euler angles (roll, pitch, yaw)
+        euler = R.from_matrix(rot_matrix).as_euler("zyx", degrees=False)
+        yaw, roll, pitch = euler
+        self.head_pose = {"yaw": yaw, "pitch": pitch}
+
+    def callback_timer_publish_joint_states(self):
+        """
+        Publish the joint states based on the IK solution, including head joints.
+        """
+        names = []
+        positions = []
+
+        for end_effector in self.end_effectors.values():
+
+            error, q_solution = inverse_kinematics(
+                end_effector.ik_solver,
+                q0=end_effector.q_init,
+                target_pose=end_effector.target_pose,
+                nb_joints=end_effector.chain.getNrOfJoints(),
+                locked_joints=end_effector.locked_joints,
+            )
+
+            names.extend(self.get_chain_joints_name(end_effector.chain))
+            positions.extend([float(pos) for pos in q_solution])
+
+        # Add head joints if head pose is available
+        if self.head_pose is not None:
+            names.extend(["joint_head_yaw", "joint_head_pitch"])
+            positions.extend(
+                [float(self.head_pose["yaw"]), float(self.head_pose["pitch"])]
+            )
+
+        joint_state_msg = JointState()
+        joint_state_msg.header.stamp = self.get_clock().now().to_msg()
+        joint_state_msg.name = names
+        joint_state_msg.position = positions
+
+        # Publish the joint state message
+        self.joint_state_pub.publish(joint_state_msg)
 
 
 def main():

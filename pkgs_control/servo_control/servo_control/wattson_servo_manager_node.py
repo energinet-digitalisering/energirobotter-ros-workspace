@@ -64,28 +64,25 @@ class ServoManagerNode(Node):
         # Arms
         json_files_arms_left = [
             f"{config_folder_path}/servo_arm_left_params.json",
+            f"{config_folder_path}/servo_head_params.json",
         ]
-
         self.servo_driver_arms_left = DriverWaveshare(
             json_files_arms_left,
             self.control_frequency,
             port_path="/dev/ttyUSB0",
             baudrate=921600,
         )
-
         self.servo_driver_arms_left.initialize()
 
         json_files_arms_right = [
             f"{config_folder_path}/servo_arm_right_params.json",
         ]
-
         self.servo_driver_arms_right = DriverWaveshare(
             json_files_arms_right,
             self.control_frequency,
             port_path="/dev/ttyUSB1",
             baudrate=921600,
         )
-
         self.servo_driver_arms_right.initialize()
 
         # Hands
@@ -102,7 +99,6 @@ class ServoManagerNode(Node):
         self.servo_driver_hands.initialize()
 
         # Node variables
-        self.servo_commands = {}
         self.servo_commands_arms = {}
         self.servo_commands_hands = {}
 
@@ -127,20 +123,17 @@ class ServoManagerNode(Node):
                 self.servo_commands_hands[servo_name] = angle_mapped
 
     def callback_timer_arms(self):
-        # Combine command dicts into one
-        self.servo_commands = self.servo_commands_arms | self.servo_commands_hands
-
-        if not self.servo_commands:
+        if not self.servo_commands_arms:
             self.get_logger().info(f"No arm commands received yet...", once=True)
         else:
             self.get_logger().info(f"Arm commands received!", once=True)
 
         # Update servos
         self.servo_driver_arms_left.update_feedback()
-        self.servo_driver_arms_left.command_servos(self.servo_commands)
+        self.servo_driver_arms_left.command_servos(self.servo_commands_arms)
 
         self.servo_driver_arms_right.update_feedback()
-        self.servo_driver_arms_right.command_servos(self.servo_commands)
+        self.servo_driver_arms_right.command_servos(self.servo_commands_arms)
 
         # # DEBUG
         # temperatures = self.servo_driver_arms.get_servo_temperatures()
@@ -155,17 +148,14 @@ class ServoManagerNode(Node):
         # # DEBUG END
 
     def callback_timer_hands(self):
-        # Combine command dicts into one
-        self.servo_commands = self.servo_commands_arms | self.servo_commands_hands
-
-        if not self.servo_commands:
+        if not self.servo_commands_hands:
             self.get_logger().info(f"No hand commands received yet...", once=True)
         else:
             self.get_logger().info(f"Hand commands received!", once=True)
 
         # Update servos
         self.servo_driver_hands.update_feedback()
-        self.servo_driver_hands.command_servos(self.servo_commands)
+        self.servo_driver_hands.command_servos(self.servo_commands_hands)
 
 
 def main(args=None):

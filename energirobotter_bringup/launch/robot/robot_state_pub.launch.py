@@ -18,15 +18,11 @@ package_name = "energirobotter_bringup"
 
 def launch_setup(context, *args, **kwargs):
     rviz = LaunchConfiguration("rviz")
-    interactive_marker = LaunchConfiguration("interactive_marker")
     description_package = LaunchConfiguration("description_package")
-    ik_solver = LaunchConfiguration("ik_solver")
 
     urdf_file = PathJoinSubstitution(
         [FindPackageShare(description_package), "urdf", "phobos_generated.urdf"]
     ).perform(context)
-
-    robot_description = Path(urdf_file).read_text()
 
     rviz_config_file = PathJoinSubstitution(
         [
@@ -44,20 +40,6 @@ def launch_setup(context, *args, **kwargs):
         output="screen",
     )
 
-    if ik_solver.perform(context) == "trac_ik":
-        ik_node = Node(
-            package="kinematics_manager",
-            executable="trac_ik_node",
-            parameters=[{"robot_description": robot_description}],
-            output="screen",
-        )
-    else:
-        ik_node = Node(
-            package="elrik_kdl_kinematics",
-            executable="elrik_kdl_kinematics_node",
-            output="screen",
-        )
-
     rviz_node = Node(
         package="rviz2",
         executable="rviz2",
@@ -67,18 +49,9 @@ def launch_setup(context, *args, **kwargs):
         condition=IfCondition(rviz),
     )
 
-    interactive_marker_node = Node(
-        package="control_utils",
-        executable="target_pose_marker",
-        output="screen",
-        condition=IfCondition(interactive_marker),
-    )
-
     return [
         robot_state_pub_node,
-        ik_node,
         rviz_node,
-        interactive_marker_node,
     ]
 
 
@@ -93,22 +66,10 @@ def generate_launch_description():
                 choices=["true", "false"],
             ),
             DeclareLaunchArgument(
-                "interactive_marker",
-                default_value="false",
-                description="Enable interactive marker to control IK target pose in RViz.",
-                choices=["true", "false"],
-            ),
-            DeclareLaunchArgument(
                 "description_package",
                 default_value="wattson_description",
                 description="Package in workspace that contains robot URDF description.",
                 choices=["elrik_description", "wattson_description"],
-            ),
-            DeclareLaunchArgument(
-                "ik_solver",
-                default_value="kdl",
-                description="Choose IK solver to use.",
-                choices=["kdl", "trac_ik"],
             ),
             OpaqueFunction(function=launch_setup),
         ]

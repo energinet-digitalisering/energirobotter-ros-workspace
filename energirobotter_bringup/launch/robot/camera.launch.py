@@ -21,14 +21,6 @@ def launch_setup(context, *args, **kwargs):
     launch_nodes = []
 
     if camera_mode.perform(context) == "camera":
-        zed_camera_params = PathJoinSubstitution(
-            [
-                FindPackageShare(package_name),
-                "config",
-                "zed_camera",
-                "optimised.yaml",
-            ]
-        ).perform(context)
 
         zed_camera_launch = IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
@@ -36,7 +28,6 @@ def launch_setup(context, *args, **kwargs):
             ),
             launch_arguments={
                 "camera_model": camera_model,
-                "config_path": zed_camera_params,
             }.items(),
         )
 

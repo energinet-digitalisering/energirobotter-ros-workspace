@@ -1,18 +1,21 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>image_processing</name>
+  <name>kinematics_manager</name>
   <version>0.0.0</version>
-  <description>Subscribes to image topic and publishes a new processed image topic.</description>
+  <description>ROS2 Humble package for humanoid robot kinematics (URDF, arms FK/IK).</description>
   <maintainer email="xnlth@energinet.dk">Nicoline</maintainer>
   <license>Energinet</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+
   <depend>rclcpp</depend>
-  
+  <depend>trac_ik_lib</depend>
+  <depend>orocos_kdl</depend>
   <depend>sensor_msgs</depend>
-  <depend>cv_bridge</depend>
-  <exec_depend>opencv</exec_depend>
+  
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
