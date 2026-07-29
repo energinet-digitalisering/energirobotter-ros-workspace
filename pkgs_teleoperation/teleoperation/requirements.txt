@@ -1,2 +1,2 @@
 ngrok
-vuer==0.0.35
+vuer==0.1.6
